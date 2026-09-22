@@ -246,7 +246,19 @@ const SFX = {
     this.mech(pistol ? 2800 : 2000, .36, o, dur * .86); this.mech(pistol ? 3300 : 2400, .42, o, dur * .93); },
   shellIn(delay) { if (!this.ctx) return; const o = this.out(null, .4); this.mech(1500, .3, o, delay); this.noise(.05, 600, 300, .4, o, 'lowpass', 1, delay + .02); },
   click(f = 1800, vol = 0.3, delay = 0) { if (!this.ctx) return; const o = this.out(null, vol); this.mech(f, .5, o, delay); },
-  step(pos, vol = 0.25) { if (!this.ctx) return; const o = this.out(pos, vol); this.noise(0.07, 650 + rand(250), 160, 0.9, o); this.tone(95, 50, 0.06, 0.5, o); },
+  step(pos, vol = 0.25, mat = 'concrete') { if (!this.ctx) return; const o = this.out(pos, vol);
+    if (mat === 'metal') { this.noise(.05, 1800, 700, .7, o, 'bandpass', 3); this.noise(.16, 880 + rand(60), 840, .5, o, 'bandpass', 22); this.tone(140, 80, .05, .4, o); }
+    else if (mat === 'wood') { this.noise(.06, 420 + rand(120), 140, 1, o); this.tone(190, 85, .09, .9, o); this.noise(.03, 1500, 700, .25, o, 'bandpass', 2); }
+    else if (mat === 'tile') { this.noise(.035, 2600 + rand(500), 1200, .8, o, 'bandpass', 2.5); this.tone(120, 70, .04, .4, o); }
+    else if (mat === 'stone') { this.noise(.06, 900 + rand(200), 250, .9, o); this.tone(105, 55, .06, .5, o); }
+    else { this.noise(0.07, 650 + rand(250), 160, 0.9, o); this.tone(95, 50, 0.06, 0.5, o); } },
+  tick(pos) { if (!this.ctx) return; const o = this.out(pos, .3); this.mech(2600, .3, o); },
+  plant() { if (!this.ctx) return; const o = this.out(null, .5); this.tone(880, 880, .09, .6, o, 'square'); this.tone(880, 880, .09, .6, o, 'square', .14); this.tone(1320, 1320, .22, .6, o, 'square', .28); },
+  beep(pos, fast) { if (!this.ctx) return; const o = this.out(pos, .55); this.tone(fast ? 2300 : 1900, fast ? 2300 : 1900, .07, .7, o, 'square'); },
+  hiss(pos) { if (!this.ctx) return; const o = this.out(pos, .7); this.noise(.12, 1500, 500, .9, o); this.noise(2.6, 5200, 1800, .45, o, 'bandpass', .6, .05); },
+  bang(pos) { if (!this.ctx) return; const o = this.out(pos, 1.2, .6); this.noise(.04, 9000, 3000, 1.2, o, 'highpass', .7); this.noise(.22, 3000, 400, 1, o, 'bandpass', .6); this.tone(180, 50, .2, .9, o); },
+  ring(dur) { if (!this.ctx) return; const o = this.out(null, .22); this.tone(3300, 3250, Math.max(.6, dur * 1.1), .8, o, 'sine'); this.tone(4700, 4650, Math.max(.4, dur * .8), .3, o, 'sine'); },
+  streak(n) { if (!this.ctx) return; const o = this.out(null, .42), base = [0, 0, 523, 587, 659, 784][n] || 784; for (let i = 0; i < n; i++) this.tone(base * Math.pow(1.122, i), base * Math.pow(1.122, i), .16, .55, o, 'triangle', i * .075); this.tone(base * 2, base * 2, .4, .35, o, 'sine', n * .075); },
   land(pos) { if (!this.ctx) return; const o = this.out(pos, 0.5); this.noise(0.14, 500, 100, 1, o); this.tone(80, 35, 0.14, 0.9, o); },
   hit() { if (!this.ctx) return; const o = this.out(null, 0.4); this.noise(0.05, 2400, 900, 0.9, o, 'bandpass', 1.5); this.tone(520, 300, 0.05, 0.4, o, 'triangle'); },
   head() { if (!this.ctx) return; const o = this.out(null, 0.5); this.tone(1900, 1750, 0.22, 0.6, o, 'sine'); this.tone(2850, 2600, 0.16, 0.3, o, 'sine'); this.noise(0.04, 6000, 3000, 0.5, o, 'highpass'); },

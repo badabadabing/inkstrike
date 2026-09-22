@@ -151,6 +151,16 @@ function buildMap(scene) {
       if (dir === '+x') solid(x1 + i * d, z1, x1 + (i + 1) * d, z2, y0, top, { shadow: false }); else if (dir === '-x') solid(x2 - (i + 1) * d, z1, x2 - i * d, z2, y0, top, { shadow: false });
       else if (dir === '+z') solid(x1, z1 + i * d, x2, z1 + (i + 1) * d, y0, top, { shadow: false }); else solid(x1, z2 - (i + 1) * d, x2, z2 - i * d, y0, top, { shadow: false }); }
   }
+  MAP.ladders = [];
+  function ladder(x, z, y0, y1, ax, side) {   // climbable volume sits on `side` of the rails
+    const a = [], top = y1 + 1.0; for (const o of [-.28, .28]) a.push(x + o, y0, z, x + o, top, z); for (let y = y0 + .3; y < top - .1; y += .33) a.push(x - .28, y, z, x + .28, y, z); sk.line(a);
+    for (const o of [-.28, .28]) sk.cyl(.03, .03, top - y0, 6, x + o, (y0 + top) / 2, z, { ea: 60 });
+    MAP.ladders.push(side < 0 ? { x1: x - .7, x2: x + .7, z1: z - .75, z2: z + .12, y1: y0, y2: y1 } : { x1: x - .7, x2: x + .7, z1: z - .12, z2: z + .75, y1: y0, y2: y1 });
+  }
+  function targetSign(x, y, z, ry, size) { const c = document.createElement('canvas'); c.width = c.height = 512; const g = c.getContext('2d'); g.fillStyle = '#f5f2ea'; g.fillRect(0, 0, 512, 512); g.strokeStyle = '#16161c'; g.lineWidth = 3;
+    for (let i = 1; i <= 8; i++) { g.beginPath(); g.arc(256, 256, i * 30, 0, 6.2832); g.stroke(); } g.beginPath(); g.moveTo(0, 256); g.lineTo(512, 256); g.moveTo(256, 0); g.lineTo(256, 512); g.stroke(); g.fillStyle = '#d42a2a'; g.beginPath(); g.arc(256, 256, 9, 0, 6.2832); g.fill(); g.strokeRect(2, 2, 508, 508);
+    g.fillStyle = '#16161c'; g.font = 'bold 22px monospace'; g.fillText('SPRAY CHECK · 12m', 14, 32); const t = new THREE.CanvasTexture(c); t.anisotropy = 8;
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(size, size), new THREE.MeshBasicMaterial({ map: t, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })); m.position.set(x, y, z); m.rotation.y = ry; scene.add(m); }
   function sign(text, x, y, z, ry, w, h, o = {}) {
     const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: textTex(text, o), transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
     m.position.set(x, y, z); if (o.flat) { m.rotation.x = -Math.PI / 2; m.rotation.z = ry; } else m.rotation.y = ry; scene.add(m);
@@ -164,7 +174,8 @@ function buildMap(scene) {
   building(-64, 38, -60, 52, 8); building(60, 38, 64, 52, 7); building(-64, -52, -60, -38, 7); building(60, -52, 64, -38, 8);
   // WS block: sniper nest + west tunnel
   solid(-42, 20, -37, 38, 0, 3); BLD.push({ x1: -42, z1: 20, x2: -37, z2: 38, h: 3, o: { bare: true } });
-  solid(-42, 20, -41.7, 28, 3, 3.95); solid(-42, 31, -41.7, 38, 3, 3.95); solid(-42, 20, -37, 20.3, 3, 3.95); solid(-42, 37.7, -37, 38, 3, 3.95);
+  solid(-42, 20, -41.7, 28, 3, 3.95); solid(-42, 31, -41.7, 38, 3, 3.95); solid(-42, 20, -40.3, 20.3, 3, 3.95); solid(-38.7, 20, -37, 20.3, 3, 3.95); solid(-42, 37.7, -37, 38, 3, 3.95);
+  ladder(-39.5, 19.9, 0, 3.0, 'z', -1); ladder(-35, -21.5, 0, 4.9, 'z', 1);
   stairs(-44, 31, -42, 37, '-z', 12); solid(-44, 28, -42, 31, 0, 3);
   sk.line([-44, 1.0, 37, -44, 4.0, 31, -44, 4.0, 31, -44, 4.0, 28, -44, 0, 37, -44, 1.0, 37, -44, 3, 31, -44, 4, 31, -44, 3, 28, -44, 4, 28, -44, 2.5, 34, -44, 1.5, 34]);
   building(-37, 20, -26, 38, 7.5); building(-22, 20, -7, 38, 6.5); solid(-26, 20, -22, 38, 3.4, 7); archLines(-26, -22, 38, 3.4); archLines(-26, -22, 20, 3.4);
@@ -215,6 +226,7 @@ function buildMap(scene) {
   sign('A', 28.06, 3.6, -29, Math.PI / 2, 2.6, 2.6, { w: 256, h: 256, color: '#e9a520', stencil: 40 }); sign('B', -30.06, 2.9, -29, -Math.PI / 2, 2.4, 2.4, { w: 256, h: 256, color: '#e9a520', stencil: 40 });
   sign('A', 45, 1.03, -30, 0, 5, 5, { w: 256, h: 256, color: '#e9a520', flat: true, stencil: 40 }); sign('B', -37, .03, -26, 0, 5, 5, { w: 256, h: 256, color: '#e9a520', flat: true, stencil: 40 });
   sign('市集 MARKET', -6.94, 4.3, 0, Math.PI / 2, 5.2, 1.0, { border: 6, bg: '#f5f2ea' }); sign('← A', 6.94, 2.6, -22, -Math.PI / 2, 1.6, .6, { w: 256, h: 96, color: '#e9a520' });
+  targetSign(0, 2.3, 51.94, Math.PI, 4.2);
   sign('PAPER TOWN', 0, 3.6, -25.44, 0, 3.6, .7, { border: 6, bg: '#f5f2ea' }); sign('B →', -6.94, 2.6, -22, Math.PI / 2, 1.6, .6, { w: 256, h: 96, color: '#e9a520' });
   { const a = []; for (let x = -58; x < 58; x += 5) { a.push(x, .015, 45, x + 2, .015, 45, x, .015, -45, x + 2, .015, -45); } for (const [cx, cz, y, r] of [[45, -30, 1.016, 3.4], [-37, -26, .016, 3.4]]) for (let i = 0; i < 24; i++) { const p = i / 24 * 6.2832, q = (i + .6) / 24 * 6.2832; a.push(cx + Math.cos(p) * r, y, cz + Math.sin(p) * r, cx + Math.cos(q) * r, y, cz + Math.sin(q) * r); }
     for (let i = 0; i < 700; i++) { const x = rr(-60, 60), z = rr(-52, 52); if (inSolid(x, .2, z)) continue; const an = rr(0, 6.28), l = rr(.06, .3); a.push(x, .015, z, x + Math.cos(an) * l, .015, z + Math.sin(an) * l); if (R() < .15) a.push(x, .015, z, x + rr(-.8, .8), .015, z + rr(-.8, .8)); } sk.line(a); }

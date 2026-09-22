@@ -73,7 +73,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--paper);color:v
 #buyIn{padding:20px 24px;width:min(880px,94vw)}
 #buyIn h3{display:flex;justify-content:space-between;align-items:baseline;font-size:24px;letter-spacing:6px;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:14px}
 #buyMoney{color:#3d7a2e;font-family:"IBM Plex Mono",monospace;letter-spacing:0}
-#buyGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+#buyGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
 .card{border:1.5px solid var(--ink);padding:8px 10px 9px;position:relative;background:var(--paper)}
 .card b{position:absolute;top:6px;left:8px;width:22px;height:22px;line-height:20px;text-align:center;border:1.5px solid var(--ink);background:var(--ink);color:var(--paper);font-size:13px}
 .card .ico{display:block;width:100%;height:68px;object-fit:contain;margin:4px 0 2px}
@@ -106,12 +106,41 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--paper);color:v
 .keys kbd{font:inherit;border:1.5px solid var(--ink);padding:0 5px;margin-right:2px;background:var(--paper)}
 .sl{display:flex;align-items:center;gap:10px;font-size:12px;margin:9px 0} .sl span{width:74px} .sl input{flex:1;accent-color:var(--ink)} .sl em{width:36px;text-align:right;font-style:normal}
 #pause,#end{background:rgba(245,242,234,.8)}
+#pause .box{max-height:94vh;overflow:auto}
 .box{padding:26px 32px;width:min(420px,90vw);text-align:center}
 .box h2{font-size:38px;letter-spacing:12px;margin-bottom:12px}
 #endSub{font-size:14px;margin-bottom:16px}
 #loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:var(--paper);z-index:9;font-size:14px;letter-spacing:6px}
 #loading b{font-size:40px;letter-spacing:6px}
 
+/* objective / utility / progress */
+#obj{position:absolute;top:74px;left:50%;transform:translateX(-50%);font-size:13px;letter-spacing:2px;background:var(--amber);color:var(--ink);padding:2px 12px;border:1.5px solid var(--ink);white-space:nowrap}
+#obj:empty{display:none}
+#prog{position:absolute;left:50%;top:60%;transform:translateX(-50%);width:240px;display:none;text-align:center;font-size:13px;letter-spacing:3px}
+#prog .bar{height:12px;margin-top:6px} #progBar{display:block;height:100%;background:var(--amber)}
+#flashOv,#smokeOv{position:fixed;inset:0;pointer-events:none;opacity:0;z-index:2}
+#flashOv{background:#fffef8}
+#smokeOv{background:#d9d5ca repeating-linear-gradient(45deg,rgba(22,22,28,.35) 0 1.5px,transparent 1.5px 9px)}
+#report{position:fixed;right:14px;top:36%;display:none;z-index:4;pointer-events:none}
+#report.on{display:block}
+#reportIn{padding:10px 14px;font-size:12px;min-width:270px}
+#reportIn h4{font-size:12px;letter-spacing:4px;border-bottom:1.5px solid var(--ink);padding-bottom:5px;margin-bottom:6px}
+#reportIn div{display:flex;gap:10px;padding:2px 0} #reportIn span{width:56px;font-weight:700} #reportIn .red{color:var(--red)} #reportIn .blue{color:var(--blue)}
+#reportIn em{font-style:normal;flex:1} #reportIn em.i{color:var(--red);text-align:right}
+#armory{background:rgba(245,242,234,.9)}
+#armoryIn{padding:20px 24px;width:min(900px,94vw);max-height:92vh;overflow:auto}
+#armoryIn h3{display:flex;justify-content:space-between;align-items:center;font-size:24px;letter-spacing:6px;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:14px}
+#armoryIn h3 small{font-size:12px;letter-spacing:2px;font-family:"IBM Plex Mono",monospace}
+#armoryGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px} #armoryGrid .card{cursor:pointer} #armoryGrid .bar{height:7px}
+.sk{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap} .sk span{font-size:10px;padding:1px 5px;border:1.5px solid var(--c);color:var(--c)} .sk span.cur{background:var(--c);color:var(--paper)} .sk span.lock{opacity:.25}
+#armoryClose{font:inherit;font-size:13px;border:2px solid var(--ink);background:var(--ink);color:var(--paper);padding:4px 14px;cursor:pointer}
+#layoutBar{position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:9;display:none;gap:8px;align-items:center;background:var(--paper);border:2px solid var(--ink);padding:6px 10px;font-size:12px}
+#layoutBar.on{display:flex} #layoutBar button{font:inherit;font-size:12px;border:2px solid var(--ink);background:var(--ink);color:var(--paper);padding:3px 10px}
+body.layoutEdit #touch{display:block!important} body.layoutEdit #tUse{display:flex!important} body.layoutEdit #touch .tb{outline:2px dashed var(--red);outline-offset:3px;background:rgba(233,165,32,.35)!important} body.layoutEdit #hud>*:not(#touch){opacity:.35}
+body.touch #layoutBtn{display:block!important}
+.sl .seg button{padding:5px 2px;font-size:12px}
+#tUse{right:calc(232px + env(safe-area-inset-right));bottom:112px;display:none;border-color:var(--amber);background:rgba(233,165,32,.3)}
+body.touch #obj{top:56px;font-size:11px} body.touch #report{transform:scale(.7);transform-origin:top right;top:30%} body.touch #armoryGrid{grid-template-columns:repeat(3,1fr)}
 /* touch */
 html,body{touch-action:none;overscroll-behavior:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 #touch{position:fixed;inset:0;display:none;z-index:3}
@@ -148,13 +177,14 @@ body.touch #buyClose{display:inline-block}
 #menu{overflow:auto}
 #rotate{position:fixed;inset:0;z-index:20;background:var(--paper);display:none;align-items:center;justify-content:center;text-align:center;font-size:20px;letter-spacing:6px;line-height:2}
 #rotate.on{display:flex}
-@media (max-height:560px){#menuIn{margin:10px 0 10px 5vw;width:min(520px,60vw)}#menuIn h1{font-size:40px}#menuIn h1 br{display:none}#menuIn h2{font-size:15px;letter-spacing:9px;margin:2px 0}#menuIn .tag{display:none}.opt{margin-bottom:7px}.opt label{margin-bottom:3px}.seg button{padding:5px 3px;font-size:12px}.go{font-size:18px;padding:8px;margin-top:4px}.box{padding:14px 22px;transform:scale(.85)}.box h2{font-size:26px;margin-bottom:6px}}
+@media (max-height:560px){.sl{margin:3px 0;font-size:11px}#pause .box{padding:8px 18px;transform:none;max-height:97vh}#pause .box h2{font-size:20px;margin-bottom:2px}#pause .go{padding:6px;font-size:15px;margin-top:4px}#menuIn{margin:10px 0 10px 5vw;width:min(520px,60vw)}#menuIn h1{font-size:40px}#menuIn h1 br{display:none}#menuIn h2{font-size:15px;letter-spacing:9px;margin:2px 0}#menuIn .tag{display:none}.opt{margin-bottom:7px}.opt label{margin-bottom:3px}.seg button{padding:5px 3px;font-size:12px}.go{font-size:18px;padding:8px;margin-top:4px}.box{padding:14px 22px;transform:scale(.85)}.box h2{font-size:26px;margin-bottom:6px}}
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
 <div class="vig"></div>
 <canvas id="fx"></canvas>
+<div id="smokeOv"></div><div id="flashOv"></div>
 <div id="scope"></div>
 
 <div id="hud">
@@ -164,6 +194,8 @@ body.touch #buyClose{display:inline-block}
     <div class="mid"><div id="timer">0:00</div><div id="phase"></div></div>
     <div class="tm r"><b id="sR">0</b><small id="aR"></small></div>
   </div>
+  <div id="obj"></div>
+  <div id="prog"><span id="progLab"></span><div class="bar"><i id="progBar"></i></div></div>
   <div id="feed"></div>
   <div id="banner"><div id="bannerT" class="hand"></div><br><div id="bannerS"></div></div>
   <div id="hpBox">
@@ -171,7 +203,7 @@ body.touch #buyClose{display:inline-block}
     <div class="stat"><div class="row"><span class="big" id="ar" style="font-size:30px">0</span><span class="lab">护甲 AP</span></div><div class="bar"><i id="arBar" class="hatch" style="width:0"></i></div></div>
   </div>
   <div id="ammoBox"><div id="money"></div><div><span id="mag">12</span><span id="res">48</span></div><div id="wname" class="hand"></div><div id="wen"></div><div id="slots"></div></div>
-  <div class="help">WASD 移动 · SHIFT 静步 · C 蹲 · 空格 跳 · R 换弹 · B 采购 · Q 切枪 · F 检视 · TAB 战绩 · ESC 暂停</div>
+  <div class="help">WASD 移动 · SHIFT 静步 · C 蹲 · 空格 跳 · R 换弹 · E 互动 · B 采购 · Q 切枪 · F 检视 · TAB 战绩 · ESC 暂停</div>
 </div>
 <div id="touch">
   <div id="joyBase"><div id="joyKnob"></div></div>
@@ -182,32 +214,42 @@ body.touch #buyClose{display:inline-block}
   <div class="tb" id="tReload" data-b="reload">换弹</div>
   <div class="tb" id="tCrouch" data-b="crouch">蹲</div>
   <div class="tb" id="tSwap" data-b="swap">切枪</div>
+  <div class="tb" id="tUse" data-b="use">互动</div>
   <div id="tTop"><div class="tb" data-b="buy">采购</div><div class="tb" data-b="board">战绩</div><div class="tb" data-b="pause">暂停</div></div>
 </div>
 <div id="dead"><h2 class="hand">阵 亡</h2><div id="deadBy"></div></div>
 
-<div id="buy" class="ov"><div id="buyIn" class="panel"><h3 class="hand"><span>军械铺</span><span><span id="buyMoney">$0</span><button id="buyClose">关闭</button></span></h3><div id="buyGrid"></div><p>按数字键 1–8 购买 · B 关闭 · 同槽位新武器会替换旧武器</p></div></div>
+<div id="buy" class="ov"><div id="buyIn" class="panel"><h3 class="hand"><span>军械铺</span><span><span id="buyMoney">$0</span><button id="buyClose">关闭</button></span></h3><div id="buyGrid"></div><p>按数字键 1–9 / 0 购买 · B 关闭 · 同槽位新武器会替换旧武器</p></div></div>
+<div id="report"><div id="reportIn" class="panel"></div></div>
+<div id="armory" class="ov"><div id="armoryIn" class="panel"><h3 class="hand"><span>武库 · 熟练度</span><span><small id="armoryMvp"></small> <button id="armoryClose">关闭</button></span></h3><div id="armoryGrid"></div><p style="margin-top:12px;font-size:11px;opacity:.7;text-align:center">用某把武器击倒敌人可提升熟练度:10 / 30 / 75 次分别解锁「朱砂」「靛青」「鎏金」笔触 · 点击卡片切换已解锁的笔触</p></div></div>
 <div id="board" class="ov"><div id="boardIn" class="panel"></div></div>
 
 <div id="menu" class="ov">
   <div id="menuIn">
     <h1 class="hand">INK<br><em>STRIKE</em></h1>
     <h2>墨 线 突 击</h2>
-    <div class="tag">一张纸，一支笔，一座小镇。<br>所有线条都是掩体，唯一的颜色是你留下的痕迹。<br>5 v 5 · 击倒换取资金 · 用资金武装下一回合。</div>
-    <div class="opt"><label>模式 MODE</label><div class="seg" id="optMode"><button data-v="comp" class="sel">竞技<small>回合制 · 先取 7 胜</small></button><button data-v="dm">死斗<small>无限重生 · 先取 40 击倒</small></button></div></div>
+    <div class="tag">一张纸，一支笔，一座小镇。<br>所有线条都是掩体，唯一的颜色是你留下的痕迹。<br>5 v 5 · 安放或拆除墨核 · 击倒换取资金,武装下一回合。</div>
+    <div class="opt"><label>模式 MODE</label><div class="seg" id="optMode"><button data-v="comp" class="sel">竞技<small>安放 / 拆除墨核 · 先取 7 胜</small></button><button data-v="dm">死斗<small>无限重生 · 先取 40 击倒</small></button><button data-v="range">靶场<small>固定弹道 · 自由练枪</small></button></div></div>
     <div class="opt"><label>阵营 SIDE</label><div class="seg" id="optTeam"><button data-v="blue" class="sel">靛青 · 蓝方<small>北侧出生</small></button><button data-v="red">朱砂 · 红方<small>南侧出生</small></button></div></div>
     <div class="opt"><label>对手 BOTS</label><div class="seg" id="optDiff"><button data-v="0">新兵</button><button data-v="1" class="sel">老兵</button><button data-v="2">精英</button></div></div>
     <button class="go hand" id="start">落 笔</button>
-    <div class="keys"><kbd>WASD</kbd>移动 <kbd>鼠标</kbd>瞄准/射击 <kbd>右键</kbd>开镜/重刺 <kbd>空格</kbd>跳(可连跳) <kbd>C</kbd>蹲<br><kbd>SHIFT</kbd>静步 <kbd>R</kbd>换弹 <kbd>1-4</kbd>/<kbd>滚轮</kbd>切换 <kbd>Q</kbd>上一把 <kbd>B</kbd>采购 <kbd>F</kbd>检视 <kbd>TAB</kbd>战绩</div>
+    <button class="go alt" id="armoryBtn">武库 · 熟练度与笔触</button>
+    <div class="keys"><kbd>WASD</kbd>移动 <kbd>鼠标</kbd>瞄准/射击 <kbd>右键</kbd>开镜/重刺 <kbd>空格</kbd>跳(可连跳) <kbd>C</kbd>蹲<br><kbd>SHIFT</kbd>静步 <kbd>R</kbd>换弹 <kbd>1-4</kbd>/<kbd>滚轮</kbd>切换 <kbd>Q</kbd>上一把 <kbd>B</kbd>采购 <kbd>E</kbd>安放/拆除 <kbd>F</kbd>检视 <kbd>TAB</kbd>战绩</div>
   </div>
 </div>
 
+<div id="layoutBar">拖动按钮到顺手的位置 <button id="layoutReset">重置</button><button id="layoutDone">完成</button></div>
 <div id="pause" class="ov"><div class="box panel"><h2 class="hand">暂 停</h2>
   <div class="sl touchOnly"><span>触控灵敏度</span><input id="sTs" type="range" min=".3" max="2.5" step=".05"><em id="sTsV"></em></div>
   <div class="sl touchOnly"><span>自动开火</span><input id="sAuto" type="checkbox" style="flex:none;width:22px;height:22px"><em></em></div>
   <div class="sl deskOnly"><span>鼠标灵敏度</span><input id="sSens" type="range" min=".2" max="3" step=".05"><em id="sSensV"></em></div>
   <div class="sl"><span>视野 FOV</span><input id="sFov" type="range" min="60" max="105" step="1"><em id="sFovV"></em></div>
   <div class="sl"><span>音量</span><input id="sVol" type="range" min="0" max="1" step=".05"><em id="sVolV"></em></div>
+  <div class="sl"><span>准星颜色</span><div class="seg" id="sXh" style="flex:1"><button data-v="ink">墨</button><button data-v="red">红</button><button data-v="blue">蓝</button><button data-v="amber">黄</button><button data-v="green">绿</button></div></div>
+  <div class="sl"><span>准星大小</span><input id="sXhSize" type="range" min=".6" max="2" step=".1"><em id="sXhSizeV"></em></div>
+  <div class="sl"><span>静态准星</span><input id="sXhStatic" type="checkbox" style="flex:none;width:22px;height:22px"><em></em></div>
+  <div class="sl touchOnly"><span>按钮大小</span><input id="sBtn" type="range" min=".7" max="1.6" step=".05"><em id="sBtnV"></em></div>
+  <button class="go alt touchOnly" id="layoutBtn" style="display:none">调整按钮布局</button>
   <button class="go hand" id="resume">继 续</button><button class="go alt" id="quit">返回标题</button></div></div>
 <div id="end" class="ov"><div class="box panel"><h2 class="hand" id="endTitle"></h2><div id="endSub"></div><button class="go hand" id="again">再 来</button></div></div>
 
@@ -222,7 +264,7 @@ import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
 import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 Object.assign(window, { THREE, LineSegments2, LineSegmentsGeometry, LineMaterial });
-const files = ['core', 'map', 'weapons', 'actors', 'fx', 'touch', 'game'];
+const files = ['core', 'map', 'weapons', 'actors', 'fx', 'objective', 'progress', 'touch', 'game'];
 for (const f of files) await new Promise((ok, err) => { const s = document.createElement('script'); s.src = `js/${f}.js?v=${Date.now()}`; s.onload = ok; s.onerror = err; document.body.appendChild(s); });
 try { boot(); } catch (e) { document.getElementById('loadTxt').textContent = '启动失败: ' + e.message; console.error(e); }
 </script>

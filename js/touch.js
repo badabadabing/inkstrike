@@ -12,10 +12,11 @@ function initTouch() {
     if (k === 'fire') { G.fire = down; if (down) G.fireEdge = true; }
     else if (k === 'alt') { G.alt = down; if (down) G.altEdge = true; }
     else if (k === 'jump') G.keys.Space = down;
+    else if (k === 'use') G.keys.KeyE = down;
     else if (!down) return;
     else if (k === 'crouch') { TOUCH.crouch = !TOUCH.crouch; G.keys.KeyC = TOUCH.crouch; b.classList.toggle('dn', TOUCH.crouch); }
     else if (k === 'reload') onKey('KeyR');
-    else if (k === 'swap') { const pl = G.player; if (pl && pl.alive) { const order = [pl.inv[1], pl.inv[2], 'knife', pl.nadeN > 0 ? 'he' : null].filter(Boolean); switchTo(order[(order.indexOf(pl.cur) + 1) % order.length]); } }
+    else if (k === 'swap') { const pl = G.player; if (pl && pl.alive) { const order = weaponOrder(pl); switchTo(order[(order.indexOf(pl.cur) + 1) % order.length]); } }
     else if (k === 'buy') toggleBuy();
     else if (k === 'pause') setPause(true);
     else if (k === 'board') { const on = !$('board').classList.contains('on'); if (on) drawBoard(); $('board').classList.toggle('on', on); }
@@ -37,6 +38,8 @@ function initTouch() {
   $('buyGrid').addEventListener('click', e => { const c = e.target.closest('.card'); if (c) buy(c.dataset.k); }); $('buyClose').onclick = () => closeBuy(); $('board').onclick = () => $('board').classList.remove('on');
   const af = $('sAuto'); af.checked = G.set.autoFire; af.onchange = () => { G.set.autoFire = af.checked; localStorage.setItem('inkstrike', JSON.stringify(G.set)); };
   const ts = $('sTs'), tl = $('sTsV'); ts.value = G.set.tsens; tl.textContent = G.set.tsens; ts.oninput = () => { G.set.tsens = +ts.value; tl.textContent = ts.value; localStorage.setItem('inkstrike', JSON.stringify(G.set)); };
+  layoutApply(); $('layoutBtn').onclick = () => layoutEdit(true); $('layoutDone').onclick = () => layoutEdit(false); $('layoutReset').onclick = () => { delete G.set.layout; G.set.btnScale = 1; localStorage.setItem('inkstrike', JSON.stringify(G.set)); layoutApply(); };
+  const bs = $('sBtn'), bl = $('sBtnV'); bs.value = G.set.btnScale || 1; bl.textContent = bs.value; bs.oninput = () => { G.set.btnScale = +bs.value; bl.textContent = bs.value; localStorage.setItem('inkstrike', JSON.stringify(G.set)); layoutApply(); };
   const rot = () => $('rotate').classList.toggle('on', innerHeight > innerWidth * 1.05); addEventListener('resize', rot); rot();
   document.addEventListener('visibilitychange', () => { if (document.hidden && G.state !== 'menu' && G.state !== 'matchEnd') setPause(true); });
 }
@@ -53,5 +56,23 @@ function updateTouch(dt) {
   const w = WEAPONS[pl.cur], manual = [...TOUCH.btns.values()].some(b => b.dataset.b === 'fire');
   if (G.set.autoFire && !manual && !w.nade) { const ok = TOUCH.aimT > (w.scope ? .25 : .1) && (!w.scope || pl.scoped > 0) && (!w.melee || false) && G.state === 'live';
     if (ok) { G.fire = true; if (G.now >= pl.nextFire) G.fireEdge = true; } else G.fire = false; }
-  $('tFire').classList.toggle('lock', TOUCH.aimOn);
+  $('tFire').classList.toggle('lock', TOUCH.aimOn); $('tUse').style.display = (canPlant(pl) || canDefuse(pl)) ? 'flex' : 'none';
 }
+
+/* ---------------- movable button layout ---------------- */
+function layoutApply() {
+  const L = G.set.layout || {}, sc = G.set.btnScale || 1;
+  document.querySelectorAll('#touch .tb[id]').forEach(b => { const p = L[b.id]; b.style.transform = `scale(${sc})`; if (p) { b.style.left = p[0] * 100 + '%'; b.style.top = p[1] * 100 + '%'; b.style.right = b.style.bottom = 'auto'; } else { b.style.left = b.style.top = b.style.right = b.style.bottom = ''; } });
+}
+function layoutEdit(on) {
+  TOUCH.edit = on; document.body.classList.toggle('layoutEdit', on); $('layoutBar').classList.toggle('on', on);
+  if (on) { setPause(false); G.paused = true; $('pause').classList.remove('on'); $('hud').classList.add('on'); }
+  else { $('pause').classList.add('on'); }
+}
+(() => {
+  let drag = null;
+  document.addEventListener('touchstart', e => { if (!TOUCH.edit) return; const b = e.target.closest && e.target.closest('#touch .tb[id]'); if (!b) return; e.preventDefault(); e.stopPropagation(); const r = b.getBoundingClientRect(), t = e.changedTouches[0]; drag = { b, id: t.identifier, dx: t.clientX - (r.left + r.width / 2), dy: t.clientY - (r.top + r.height / 2) }; }, { capture: true, passive: false });
+  document.addEventListener('touchmove', e => { if (!drag) return; e.preventDefault(); e.stopPropagation(); for (const t of e.changedTouches) if (t.identifier === drag.id) { const r = drag.b.getBoundingClientRect(), x = clamp((t.clientX - drag.dx - r.width / 2) / innerWidth, 0, 1 - r.width / innerWidth), y = clamp((t.clientY - drag.dy - r.height / 2) / innerHeight, 0, 1 - r.height / innerHeight); drag.b.style.left = x * 100 + '%'; drag.b.style.top = y * 100 + '%'; drag.b.style.right = drag.b.style.bottom = 'auto'; (G.set.layout = G.set.layout || {})[drag.b.id] = [x, y]; } }, { capture: true, passive: false });
+  const end = e => { if (!drag) return; e.preventDefault(); e.stopPropagation(); drag = null; localStorage.setItem('inkstrike', JSON.stringify(G.set)); };
+  document.addEventListener('touchend', end, { capture: true, passive: false }); document.addEventListener('touchcancel', end, { capture: true, passive: false });
+})();

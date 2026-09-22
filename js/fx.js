@@ -33,6 +33,7 @@ const FX = {
     this.burst(x, y + .3, z, 0, 1, 0, 70, INK, 9, .06); this.burst(x, y + .3, z, 0, 1, 0, 20, AMBER, 7, .05); this.flash(x, y + .6, z, 2.2);
     this.decal(x, MAP.floorAt(x, z) + .0, z, 0, 1, 0, 4.5, INK); for (let i = 0; i < 6; i++) { const a = rand(6.28), r = rand(1.5, 3.5); this.decal(x + Math.cos(a) * r, MAP.floorAt(x + Math.cos(a) * r, z + Math.sin(a) * r), z + Math.sin(a) * r, 0, 1, 0, rand(.6, 1.6), INK); }
   },
+  clearDecals() { const z = new THREE.Matrix4().makeScale(0, 0, 0); for (const m of this.decals) { for (let i = 0; i < 110; i++) m.setMatrixAt(i, z); m.instanceMatrix.needsUpdate = true; } this.pools.length = 0; },
   num(pos, val, head) { this.nums.push({ x: pos.x + rand(-.15, .15), y: pos.y, z: pos.z, val, head, t: 0 }); if (this.nums.length > 14) this.nums.shift(); },
   update(dt, cam) {
     for (let i = this.pools.length - 1; i >= 0; i--) { const p = this.pools[i]; p.s = Math.min(p.to, p.s + dt * p.to * .5); this._m.compose(p.p, p.q, this._s.set(p.s, p.s, 1)); p.m.setMatrixAt(p.i, this._m); p.m.instanceMatrix.needsUpdate = true; if (p.s >= p.to) this.pools.splice(i, 1); }

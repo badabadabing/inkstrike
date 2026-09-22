@@ -9,9 +9,15 @@ const WEAPONS = {
   ak:     { name: 'AK 焦墨', en: 'AK CHARCOAL', slot: 1, dmg: 36, arm: .78, rate: .1, auto: true, mag: 30, res: 90, reload: 2.4, spread: .0022, moveSp: .05, sprayInc: .0011, up: .0135, side: .0085, vm: .06, speed: .9, draw: .6, reward: 300, price: 2700, snd: 'rifle', fall: .95 },
   m4:     { name: 'M4 工笔', en: 'M4 FINELINE', slot: 1, dmg: 31, arm: .7, rate: .092, auto: true, mag: 30, res: 90, reload: 2.7, spread: .0018, moveSp: .045, sprayInc: .0009, up: .0105, side: .006, vm: .045, speed: .92, draw: .6, reward: 300, price: 3100, snd: 'm4', fall: .95 },
   awp:    { name: '一笔 狙击枪', en: 'ONE STROKE', slot: 1, dmg: 115, arm: .97, rate: 1.4, auto: false, mag: 5, res: 25, reload: 3.3, spread: .0004, noScope: .07, moveSp: .12, sprayInc: 0, up: .06, side: .01, vm: .2, speed: .82, draw: .9, reward: 100, price: 4750, snd: 'awp', fall: 1, scope: true, bolt: true },
-  he:     { name: '墨爆弹', en: 'INK BOMB', slot: 4, speed: .98, draw: .4, price: 300, reward: 300, nade: true, rate: 1 }
+  he:     { name: '墨爆弹', en: 'INK BOMB', slot: 4, speed: .98, draw: .4, price: 300, reward: 300, nade: true, rate: 1, fuse: 1.7 },
+  flash:  { name: '曝光弹', en: 'OVEREXPOSE', slot: 4, speed: .98, draw: .4, price: 200, reward: 300, nade: true, rate: 1, fuse: 1.45 },
+  smoke:  { name: '烟墨弹', en: 'SMOKE WASH', slot: 4, speed: .98, draw: .4, price: 300, reward: 300, nade: true, rate: 1, fuse: 2.3 }
 };
-const BUY_LIST = ['deagle', 'viper', 'nova', 'ak', 'm4', 'awp', 'armor', 'he'];
+/* fixed, learnable spray patterns: [pitchKick, yawKick] per shot (radians). Same every time — pull the opposite way to control it. */
+function mkPat(up, side, n, dir, q) { const a = []; for (let i = 0; i < n; i++) { let dy, dx; if (i < 8) { dy = up * (i ? 1 : .55); dx = side * .16 * Math.sin(i * 1.3 + q) * dir; } else if (i < 16) { dy = up * .24; dx = -side * (.55 + .4 * Math.sin((i - 8) * .5)) * dir; } else if (i < 24) { dy = up * .12; dx = side * (.75 + .35 * Math.sin((i - 16) * .6)) * dir; } else { dy = up * .08; dx = -side * .7 * dir; } a.push([dy, dx]); } return a; }
+WEAPONS.ak.pat = mkPat(.0142, .0098, 30, 1, .4); WEAPONS.m4.pat = mkPat(.0108, .0068, 30, -1, 1.2); WEAPONS.viper.pat = mkPat(.0088, .0062, 30, -1, 2.1);
+WEAPONS.p9.pat = mkPat(.016, .003, 12, 1, 0); WEAPONS.deagle.pat = mkPat(.05, .008, 7, 1, .7); WEAPONS.nova.pat = mkPat(.07, .01, 8, 1, 0); WEAPONS.awp.pat = mkPat(.06, .004, 5, 1, 0);
+const BUY_LIST = ['deagle', 'viper', 'nova', 'ak', 'm4', 'awp', 'armor', 'he', 'flash', 'smoke'];
 
 /* ---- gun geometry. profile coords are [forward, up]; forward = -Z ---- */
 const GUNS = {
@@ -78,7 +84,10 @@ const GUNS = {
     return { muzzle: [.25, .02], lh: null, grip: [-.055, .018], knife: true }; },
   he(p) { const b = p.body; b.cyl(.036, .036, .07, 8, 0, 0, 0, { tone: .33 }); b.sph(.036, 0, .035, 0, { ws: 8, hs: 4 }); b.sph(.036, 0, -.035, 0, { ws: 8, hs: 4, tone: .66 }); b.cyl(.014, .014, .03, 6, 0, .08, 0); b.box(.012, .07, .006, .03, .04, 0, { tint: AMBER, tone: 0 });
     { const pts = []; for (let i = 0; i < 8; i++) pts.push([-.03 + Math.cos(i / 8 * 6.28) * .016, .09 + Math.sin(i / 8 * 6.28) * .016, 0]); b.poly(pts, true); }
-    return { muzzle: [0, 0], lh: null, grip: [0, -.0], nade: true }; }
+    return { muzzle: [0, 0], lh: null, grip: [0, -.0], nade: true }; },
+  flash(p) { const b = p.body; b.cyl(.03, .03, .1, 8, 0, 0, 0); b.cyl(.033, .033, .012, 8, 0, .056, 0, { tone: 1 }); b.cyl(.033, .033, .012, 8, 0, -.056, 0, { tone: 1 }); b.cyl(.012, .012, .03, 6, 0, .08, 0); b.box(.01, .08, .006, .028, .04, 0, { tint: AMBER, tone: 0 });
+    { const a = []; for (let i = 0; i < 8; i++) { const an = i / 8 * 6.2832; a.push(Math.cos(an) * .031, -.03, Math.sin(an) * .031, Math.cos(an) * .031, .03, Math.sin(an) * .031); } b.line(a); } return { muzzle: [0, 0], lh: null, grip: [0, 0], nade: true }; },
+  smoke(p) { const b = p.body; b.cyl(.034, .034, .13, 8, 0, 0, 0, { tone: .33 }); b.cyl(.036, .036, .025, 8, 0, .02, 0, { tint: GREY, tone: 0 }); b.cyl(.012, .012, .03, 6, 0, .085, 0); b.box(.01, .09, .006, .032, .04, 0, { tint: AMBER, tone: 0 }); return { muzzle: [0, 0], lh: null, grip: [0, 0], nade: true }; }
 };
 
 /* world (third-person / icon) model: everything merged */
@@ -100,7 +109,8 @@ const VM = { off: {},
     const fl = new Sk('none'); const pts = []; for (let i = 0; i < 14; i++) { const a = i / 14 * 6.2832, r = i % 2 ? .35 : 1; pts.push([Math.cos(a) * r, Math.sin(a) * r, 0]); } fl.poly(pts, true);
     this.flash.add(fl.bake(null, lineMat({ width: 1.6, fog: false, depthTest: false }))); this.flash.visible = false; this.flash.traverse(o => { o.frustumCulled = false; o.renderOrder = 5; });
   },
-  build(key) {
+  mats(i) { this._m = this._m || {}; if (!i) return { fm: this.fm, lm: this.lm }; if (!this._m[i]) { const fm = fillMat({ objSpace: true, freq: 75, fog: 0, hatch: .85, hw: .13 }); fm.uniforms.uInk.value.set(SKINS[i].ink); this._m[i] = { fm, lm: lineMat({ width: SKINS[i].w, fog: false, color: SKINS[i].ink }) }; } return this._m[i]; },
+  build(key, skin = 0) {
     const parts = { body: new Sk('under'), mag: new Sk('under'), bolt: new Sk('under'), handR: new Sk('sun'), handL: new Sk('sun') }, meta = GUNS[key](parts);
     const gf = meta.grip[0], gu = meta.grip[1], R = parts.handR, L = parts.handL;
     R.box(.056, .08, .066, .002, gu, -gf + .012, { tone: 1, r: [.25, 0, 0] }); R.box(.07, .03, .05, .0, gu + .035, -gf - .035, { tone: 1 }); R.box(.025, .03, .07, -.036, gu + .04, -gf - .0, { tone: 1 });
@@ -110,23 +120,23 @@ const VM = { off: {},
       else { L.box(.082, .05, .11, 0, u - .022, -f, { tone: 1 }); L.box(.02, .05, .1, .04, u + .01, -f, { tone: 1 }); L.box(.02, .04, .09, -.042, u + .005, -f, { tone: 1 });
         L.limb([-.02, u - .05, -f + .05], [-.3, u - .3, -f + .52], .074, .082, { tone: 0 }); L.limb([-.022, u - .052, -f + .055], [-.055, u - .08, -f + .11], .082, .09, { tone: .33 }); } }
     const g = new THREE.Group(), m = { group: g, meta, parts: {} };
-    for (const k in parts) { const b = parts[k].bake(this.fm, this.lm); b.traverse(o => o.frustumCulled = false); g.add(b); m.parts[k] = b; }
+    const sm = this.mats(skin); for (const k in parts) { const hand = k === 'handR' || k === 'handL', b = parts[k].bake(hand ? this.fm : sm.fm, hand ? this.lm : sm.lm); b.traverse(o => o.frustumCulled = false); g.add(b); m.parts[k] = b; }
     if (key === 'nova') m.parts.mag.visible = false;
     return m;
   },
-  show(key) { if (this.cur) this.root.remove(this.cur.group); this.cur = this.models[key] || (this.models[key] = this.build(key)); this.key = key; this.root.add(this.cur.group);
+  show(key) { if (this.cur) this.root.remove(this.cur.group); const sk = PROG.skin(key), id = key + sk; this.cur = this.models[id] || (this.models[id] = this.build(key, sk)); this.key = key; this.root.add(this.cur.group);
     this.cur.group.add(this.flash); const mz = this.cur.meta.muzzle; this.flash.position.set(0, mz[1], -mz[0] - .03); this.drawT = 0; this.reloadT = -1; this.atk = 1; this.insp = 1; this.cyc = 1; },
   fire(w) { this.kick = Math.min(this.kick + w.vm, .22); this.kickR = Math.min(this.kickR + w.vm * 1.6, .4); this.boltT = 1; this.flashT = .05; this.flash.rotation.z = rand(6.28); this.flash.scale.setScalar(rand(.05, .085) * (w.snd === 'm4' ? .5 : 1)); if (w.bolt || w.pump) this.cyc = 0; this.insp = 1; },
   update(dt, pl, w, mdx, mdy) {
     const c = this.cur; if (!c) return; const meta = c.meta, P = c.parts, r = this.root;
     this.kick = damp(this.kick, 0, 13, dt); this.kickR = damp(this.kickR, 0, 11, dt); this.boltT = damp(this.boltT, 0, 28, dt); this.dip = damp(this.dip, 0, 9, dt);
-    this.swX = damp(this.swX, clamp(-mdx * .0009, -.06, .06), 9, dt); this.swY = damp(this.swY, clamp(mdy * .0009, -.05, .05), 9, dt);
+    this.swX = damp(this.swX, clamp(-mdx * .0004, -.02, .02), 11, dt); this.swY = damp(this.swY, clamp(mdy * .0004, -.018, .018), 11, dt);
     this.drawT = Math.min(1, this.drawT + dt / w.draw); if (this.flashT > 0) this.flashT -= dt; this.flash.visible = this.flashT > 0;
     const sp = Math.hypot(pl.vel.x, pl.vel.z) / 5, a = pl.onGround ? Math.min(sp, 1) : 0, ph = pl.bobPhase, e = 1 - Math.pow(1 - this.drawT, 3);
-    const O = VM.off; let x = O.x ?? .13, y = O.y ?? -.13, z = O.z ?? -.64, rx = 0, ry = .045, rz = 0;
+    const O = VM.off; let x = O.x ?? .13, y = O.y ?? -.13, z = O.z ?? -.64, rx = 0, ry = .012, rz = 0;
     if (meta.pistol) { x = O.x ?? .1; y = O.y ?? -.1; z = O.z ?? -.5; } if (meta.knife) { x = .13; y = -.13; z = -.3; rx = .5; ry = .7; rz = -.4; } if (meta.nade) { x = .13; y = -.12; z = -.3; }
     x += Math.sin(ph) * .0065 * a + this.swX * .5; y += -Math.abs(Math.cos(ph)) * .007 * a + .004 * a - this.swY * .4 - this.dip - pl.crouchAmt * .012 + clamp(pl.vel.y, -6, 6) * -.0035;
-    z += this.kick; rx += this.kickR * .55 + this.swY; ry += this.swX * 1.4; rz += this.swX * -1.2 + Math.sin(ph) * .01 * a;
+    z += this.kick; rx += this.kickR * .55 + this.swY * .6; ry += this.swX * .8; rz += this.swX * -.9 + Math.sin(ph) * .01 * a;
     rx -= (1 - e) * 1.0; y -= (1 - e) * .22;
     // reload choreography
     let magY = 0, magVis = true, lhX = 0, lhY = 0, lhZ = 0;
