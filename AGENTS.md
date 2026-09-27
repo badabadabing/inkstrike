@@ -1,6 +1,7 @@
 # AGENTS.md — INK STRIKE 墨线突击
 
 > 本文件是 Agent 在本项目的行为契约。改动前先读。
+> **架构详解、手感旋钮、扩展方法、已知问题和路线图见 [HANDOFF.md](HANDOFF.md)。**
 
 ## 项目速览
 - 作用:线稿/排线风格的浏览器 FPS(5v5 对 Bot,竞技回合制 + 死斗)。
@@ -8,6 +9,8 @@
 - 启动:`python3 -m http.server 8765`(在本目录),打开 http://localhost:8765
 - 调试:URL 加 `?auto` 跳过指针锁定;控制台可直接调用 `startMatch()`、`frame(1/60)` 步进模拟。
 - 语法检查:`for f in js/*.js; do node --check $f; done`
+- 冒烟测试:`node tools/smoke.js`(无头浏览器快进竞技/死斗/靶场,输出 `SMOKE OK` 才算通过)
+- 部署:先 commit,再 `tools/deploy.sh`(GitHub Pages + Cloudflare Pages)
 
 ## 结构
 - `js/core.js` 调色板 / 排线着色器 fillMat / 线材质 lineMat / Sk 草图构建器 / 合成音效 SFX
@@ -24,7 +27,10 @@
 - 画风:主体只用 PAPER/INK;颜色仅限 RED(血/红方)、AMBER(火光/点位)、BLUE(蓝方)、GLASS、WOOD。
 - 地图结构坐标保持整数(导航网格 1m,门洞 ≥2 格);新增掩体后用 `MAP.reach` 验证所有 `MAP.points` 可达。
 - 所有命名与文案均为原创,不得引用其他游戏的名称/文案。
-- 改完必须:node --check 全过 + 浏览器无控制台报错 + 快进一局(见下)回合能正常结算。
+- 改完必须:node --check 全过 + `node tools/smoke.js` 通过 + 浏览器实际看一眼无报错。
+- 代码保持现有高密度单行风格,用精确字符串替换做小改动,不要整文件重排格式。
+- 新 JS 文件必须加入 `index.html` 的 `files` 数组(按依赖顺序)。
+- 不直接 push/部署,除非用户要求;commit 信息结尾保留协作者署名行。
 
 ## 玩法约定
 - 竞技模式 = 红方(进攻)带墨核到 A/B 安放(3.2s),40s 引爆;蓝方拆除 6s。回合结束原因通过 `endRound(win, reason)` 传给横幅。
