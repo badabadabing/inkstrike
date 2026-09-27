@@ -46,7 +46,7 @@ function fillMat(o = {}) {
         if(vTone>0.9) a=1.0;
         else if(vTone>0.15){ a=hl(dot(vP,vec3(0.577))*uFreq,uHw);
           if(vTone>0.5) a=max(a,hl(dot(vP,vec3(0.62,-0.62,0.2))*uFreq,uHw)); a*=uHatch; }
-        vec3 base=mix(vTint,uInk,vTone>0.15&&vTone<0.9?min(vTone*0.19,0.13):0.0); vec3 c=mix(base,uInk,a);
+        float wash=vTone<0.0?clamp(-vTone,0.0,0.5):(vTone>0.15&&vTone<0.9?min(vTone*0.19,0.13):0.0); vec3 base=mix(vTint,uInk,wash); vec3 c=mix(base,uInk,a);
         float f=1.0-exp(-vDist*vDist*uFog*uFog); c=mix(c,uPaper,clamp(f,0.0,1.0));
         c=mix(c,uFlashC,uFlash); gl_FragColor=vec4(c,1.0); }`,
     side: THREE.DoubleSide, polygonOffset: true,

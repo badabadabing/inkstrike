@@ -58,7 +58,7 @@ function updateTouch(dt) {
     const w = bt < 1e9 ? rayWorld(pl.pos.x, ey, pl.pos.z, dx, dy, dz, bt) : null; TOUCH.aimOn = bt < 1e9 && !w && !(G.flashT > .15) && !smokeBlocks(pl.pos.x, ey, pl.pos.z, pl.pos.x + dx * bt, ey + dy * bt, pl.pos.z + dz * bt); }
   TOUCH.aimT = TOUCH.aimOn ? TOUCH.aimT + dt : 0;
   const w = WEAPONS[pl.cur], manual = touchHeld('fire'), wasAuto = TOUCH.auto;
-  TOUCH.auto = !!(G.set.autoFire && !manual && !w.nade && !w.melee && TOUCH.aimT > (w.scope ? .25 : .1) && (!w.scope || pl.scoped > 0) && G.state === 'live');
+  TOUCH.auto = !!(G.set.autoFire && !(G.mode === 'range' && TRAIN.active) && !manual && !w.nade && !w.melee && TOUCH.aimT > (w.scope ? .25 : .1) && (!w.scope || pl.scoped > 0) && G.state === 'live');
   if (TOUCH.auto) { G.fire = true; if (G.now >= pl.nextFire) G.fireEdge = true; } else if (wasAuto && !manual) G.fire = G.fireEdge = false;
   $('tFire').classList.toggle('lock', TOUCH.aimOn); $('tUse').style.display = (canPlant(pl) || canDefuse(pl)) ? 'flex' : 'none';
 }

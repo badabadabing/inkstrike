@@ -26,3 +26,12 @@ Original prompt: 请先了解项目，再参考 CS / Valve 的公开设计方法
 - Published clean f906695 runtime archive to Pages production 3995b107-bb5f-4025-983a-6cf183f7e1b0.
 - Updated only the InkStrike copy and listing in BANMABOX; Worker version d75ea8cd-4f79-48c6-bdbc-e7e823059b78, listing commit2443e1c. Nine assets changed, 423 local asset hashes preserved. No database migrations or GitHub push.
 - Repeated smoke passes. Both public URLs load comp/dm/range, 12v12 has23 bots, range has5 dummies. All9 game scripts match source on both hosts. Desktop/mobile listing and card click verified; stats API and www path pass. Evidence: outputs/revision-02/release/.
+
+Revision 03 — simulated player/expert panel and independent Dream Loop
+- User requested 20 recommendations followed by implementation and independent visual acceptance. REVIEW-R03.md records evidence-based scope and acceptance behavior; reviewers are simulated, not actual professional player or Valve endorsements.
+- Ownership: player_panel actors.js/objective.js (AI and character contact/stance); systems_panel map.js/weapons.js/core.js (world/weapon art and detail tiers); root game.js/index.html/progress.js/touch integration; dream_review tools/visual-review.js and independent screenshots/reports only.
+- Retain prior authorized dual Cloudflare synchronization after verified completion. Working branch codex/revision-03-review-upgrade, baseline936dd5c.
+
+- Revision 03 验收完成：原有56项、新交互37项、AI/资源41项，共134项；三模式SMOKE OK；16773射线等价性通过。独立画面V01–V07关闭，19固定镜头+触屏补验。
+- 12v12 动态三轮各900帧，M5 Max/Metal均衡DPR1.5下P95帧间隔17.5/16.9/17.5ms，0错误。最终低画质静态提交减少33.3%三角形。准备按已授权同步Cloudflare两入口。
+- 工作过程中出现不属于本轮的 tools/build-xhs.js、tools/xhs-* 和其他outputs内容；保持原样，发布仅从本轮提交导出 index.html/js/vendor。

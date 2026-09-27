@@ -112,14 +112,14 @@ function finishGun(key, p) { const meta = GUNS[key](p), b = p.body, w = WEAPONS[
   return meta;
 }
 function viewSleeve(s, a, b, r1, r2, tone) { const A = new V3(...a), B = new V3(...b), d = B.clone().sub(A), q = new THREE.Quaternion().setFromUnitVectors(new V3(0, 1, 0), d.clone().normalize()), m = new THREE.Matrix4().compose(A.add(B).multiplyScalar(.5), q, new V3(1, 1, .86)); s.add(new THREE.CylinderGeometry(r2, r1, d.length(), 7, 1), m, { ...(tone === undefined ? {} : { tone }), ea: 35 }); }
-function viewGlove(s, f, u, support, pistol) { const z = -f, side = support ? -1 : 1, x = support && pistol ? -.032 : 0;
-  inkBlock(s, .055, .069, .057, x, u, z + .012, { tone: .33, r: [.18, 0, support && pistol ? -.15 : 0], bevel: .2 });
-  if (support && !pistol) { inkBlock(s, .08, .042, .086, 0, u - .024, z, { tone: .33, bevel: .24 }); for (let i = 0; i < 4; i++) { const q = z - .032 + i * .021; inkLimb(s, [.038, u - .029, q], [.047, u + .003, q - .003], .018, .018, { tone: 1 }); inkLimb(s, [.047, u + .003, q - .003], [.034, u + .024, q - .007], .015, .016, { tone: .33 }); inkBlock(s, .016, .013, .015, .047, u + .004, q - .003, { tone: 0 }); } inkLimb(s, [-.034, u - .021, z + .019], [-.039, u + .018, z - .008], .023, .024, { tone: .33 });
-  } else { for (let i = 0; i < 3; i++) { const y = u + .008 - i * .021; inkLimb(s, [x + .027, y, z + .004], [x + .023, y - .004, z - .031], .019, .021, { tone: 1 }); inkLimb(s, [x + .023, y - .004, z - .031], [x - .017, y - .008, z - .033], .017, .018, { tone: .33 }); inkBlock(s, .019, .013, .017, x + .023, y - .003, z - .026, { tone: 0 }); } inkLimb(s, [x - .027, u + .014, z + .008], [x - .03, u + .044, z - .019], .023, .023, { tone: .33 }); inkLimb(s, [x + .026, u + .032, z + .014], [x + .028, u + .042, z - .034], .017, .018, { tone: .33 }); }
-  const wrist = [x + side * .013, u - .035, z + .055], elbow = support ? [-.17, u - .205, z + .255] : [.105, u - .22, z + .30], shoulder = support ? [-.235, u - .40, z + .51] : [.22, u - .40, z + .48];
-  viewSleeve(s, elbow, wrist, .068, .037); viewSleeve(s, shoulder, elbow, .09, .069); const cuff = wrist.map((v, i) => v * .75 + elbow[i] * .25); viewSleeve(s, cuff, wrist, .049, .043, .33);
-  inkBlock(s, .077, .084, .063, elbow[0], elbow[1], elbow[2] - .035, { tone: .33, r: [.42, 0, support ? -.35 : .3], bevel: .25 });
-
+function viewGlove(s, f, u, support, pistol) { const z = -f, side = support ? -1 : 1, x = support && pistol ? -.028 : .006;
+  inkBlock(s,.050,.058,.047,x,u-.006,z+.011,{tone:.33,r:[.12,0,support&&pistol?-.12:0],bevel:.24});
+  if(support&&!pistol) { inkBlock(s,.068,.033,.076,0,u-.024,z,{tone:.33,bevel:.24}); for(let i=0;i<4;i++) { const q=z-.028+i*.018; inkLimb(s,[.030,u-.023,q],[.036,u+.001,q-.003],.015,.016,{tone:.33}); inkLimb(s,[.036,u+.001,q-.003],[.022,u+.016,q-.006],.014,.015,{tone:.33}); } inkLimb(s,[-.026,u-.015,z+.016],[-.030,u+.014,z-.011],.021,.019,{tone:.33});
+  } else if(support&&pistol) { for(let i=0;i<3;i++) { const y=u+.004-i*.017; inkLimb(s,[-.045,y,z+.014],[-.042,y-.003,z-.020],.015,.018,{tone:.33}); inkLimb(s,[-.042,y-.003,z-.020],[.005,y-.006,z-.023],.014,.017,{tone:.33}); } inkLimb(s,[-.042,u+.014,z+.014],[-.039,u+.023,z-.022],.018,.019,{tone:.33});
+  } else { for(let i=0;i<3;i++) { const y=u+.004-i*.017; inkLimb(s,[.030,y,z+.006],[.029,y-.004,z-.025],.016,.018,{tone:.33}); inkLimb(s,[.029,y-.004,z-.025],[-.012,y-.008,z-.027],.014,.017,{tone:.33}); } inkLimb(s,[-.021,u+.009,z+.006],[-.024,u+.021,z-.014],.020,.019,{tone:.33}); inkLimb(s,[-.024,u+.021,z-.014],[-.010,u+.018,z-.031],.017,.018,{tone:.33}); inkLimb(s,[.030,u+.021,z+.008],[.028,u+.023,z-.038],.015,.016,{tone:.33}); inkLimb(s,[.028,u+.023,z-.038],[.008,u+.015,z-.045],.014,.015,{tone:.33}); }
+  const wrist=[x+side*.010,u-.028,z+.046],elbow=support?[-.11,u-.17,z+.25]:[.10,u-.19,z+.28],shoulder=support?[-.155,u-.35,z+.48]:[.18,u-.36,z+.47];
+  viewSleeve(s,elbow,wrist,.050,.031,.33); viewSleeve(s,shoulder,elbow,.062,.051,.33); const cuff=wrist.map((v,i)=>v*.77+elbow[i]*.23); viewSleeve(s,cuff,wrist,.038,.035,.66);
+  inkBlock(s,.060,.062,.045,elbow[0],elbow[1],elbow[2]-.026,{tone:.66,r:[.42,0,support?-.25:.22],bevel:.25});
 }
 
 /* world (third-person / icon) model: everything merged */
@@ -159,8 +159,8 @@ const VM = { off: {},
     this.swX = damp(this.swX, clamp(-mdx * .0004, -.02, .02), 11, dt); this.swY = damp(this.swY, clamp(mdy * .0004, -.018, .018), 11, dt);
     this.drawT = Math.min(1, this.drawT + dt / w.draw); if (this.flashT > 0) this.flashT -= dt; this.flash.visible = this.flashT > 0;
     const sp = Math.hypot(pl.vel.x, pl.vel.z) / 5, a = pl.onGround ? Math.min(sp, 1) : 0, ph = pl.bobPhase, e = 1 - Math.pow(1 - this.drawT, 3);
-    const O = VM.off; let x = O.x ?? .20, y = O.y ?? -.17, z = O.z ?? -.78, rx = 0, ry = .09, rz = -.035;
-    if (meta.pistol) { x = O.x ?? .12; y = O.y ?? -.13; z = O.z ?? -.54; ry = .025; rz = -.018; } if (meta.knife) { x = .13; y = -.13; z = -.3; rx = .5; ry = .7; rz = -.4; } if (meta.nade) { x = .13; y = -.12; z = -.3; }
+    const O = VM.off, narrow = this.cam.aspect < 1.4, compact = innerHeight < 500; let x = O.x ?? (narrow ? .12 : .22), y = O.y ?? -.185, z = O.z ?? (compact ? -.86 : -.82), rx = 0, ry = .11, rz = -.025;
+    if (meta.pistol) { x = O.x ?? (narrow ? .07 : .12); y = O.y ?? -.15; z = O.z ?? -.61; ry = .035; rz = -.018; } if (meta.knife) { x = .13; y = -.13; z = -.3; rx = .5; ry = .7; rz = -.4; } if (meta.nade) { x = .13; y = -.12; z = -.3; }
     x += Math.sin(ph) * .0065 * a + this.swX * .5; y += -Math.abs(Math.cos(ph)) * .007 * a + .004 * a - this.swY * .4 - this.dip - pl.crouchAmt * .012 + clamp(pl.vel.y, -6, 6) * -.0035;
     z += this.kick; rx += this.kickR * .55 + this.swY * .6; ry += this.swX * .8; rz += this.swX * -.9 + Math.sin(ph) * .01 * a;
     rx -= (1 - e) * 1.0; y -= (1 - e) * .22;

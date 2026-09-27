@@ -20,7 +20,7 @@ const MAP = {
 };
 
 function buildMap(scene) {
-  const R = rng(20260921), sk = new Sk('sun'), sh = new Sk('none'), far = new Sk('none'), S = MAP.solids, BLD = [];
+  const R = rng(20260921), main = new Sk('sun'), detail = new Sk('sun'), skyline = new Sk('sun'), sh = new Sk('none'), far = new Sk('none'), S = MAP.solids, BLD = []; let sk = main;
   const KX = SUN.x / -SUN.y, KZ = SUN.z / -SUN.y;
   const rr = (a, b) => a + R() * (b - a);
 
@@ -60,7 +60,7 @@ function buildMap(scene) {
     else if (kind === 4) { sk.box(.7, .45, .4, t + w / 2, y - .5, .2, { m: M, tone: .33 }); }
   }
   function doorAt(M, t) {
-    sk.box(1.3, 2.3, .08, t + .65, 1.15, .02, { m: M, tone: .33 }); sk.box(1.7, .16, .22, t + .65, 2.42, .08, { m: M }); sk.box(1.7, .12, .5, t + .65, .06, .25, { m: M });
+    sk.box(1.3, 2.3, .08, t + .65, 1.15, .02, { m: M, tone: .66 }); sk.box(1.7, .16, .22, t + .65, 2.42, .08, { m: M }); sk.box(1.7, .12, .5, t + .65, .06, .25, { m: M }); sk.box(1.42, .13, .10, t + .65, 1.06, .10, { m: M, tint: WOOD, tone: .33 }); sk.box(.18, .24, .06, t + .65, 1.04, .18, { m: M, tone: .66 });
     sk.line([t + .2, .3, .07, t + .2, 2.0, .07, t + .2, 2.0, .07, t + 1.1, 2.0, .07, t + 1.1, 2.0, .07, t + 1.1, .3, .07, t + 1.1, .3, .07, t + .2, .3, .07, t + 1.0, 1.1, .08, t + 1.08, 1.1, .08], M);
   }
   function decorate(b) {
@@ -168,6 +168,12 @@ function buildMap(scene) {
 
   /* ================= LAYOUT ================= */
   sk.quad([-400, 0, -400], [-400, 0, 400], [400, 0, 400], [400, 0, -400], 0, PAPER);
+  // Paper washes distinguish traversable street, interior floor and contact edges without extra texture noise.
+  const wash = (x1, z1, x2, z2, tone, y = .005) => sk.quad([x1, y, z1], [x1, y, z2], [x2, y, z2], [x2, y, z1], -tone);
+  for (const q of [[-6,-38,6,38],[-54,-19,54,-15],[-54,15,54,19],[43,-20,53,38],[-53,-20,-43,38],[-59,42,59,48],[-59,-48,59,-42]]) wash(...q,.055);
+  wash(-41,-13,-8,13,.10); wash(-42,-36,-30,-22,.12); wash(32,-38,54,-22,.045,1.006);
+  for (let z = -36; z <= 36; z += 6) sk.line([-6,.008,z,-4,.008,z,4,.008,z,6,.008,z]);
+  for (const x of [-41,-8]) sk.line([x,.008,-13,x,.008,13]);
   // perimeter
   block(-64, -38, -54, 38, 6, 10); block(54, -38, 64, 2, 6, 10); block(54, 12, 64, 38, 6, 10); building(60, 2, 64, 12, 7);
   block(-64, 52, 64, 56, 6, 9, { bare: true }); block(-64, -56, 64, -52, 6, 9, { bare: true });
@@ -207,6 +213,11 @@ function buildMap(scene) {
   solid(-2, 2, 2, 6, 0, .75, { vis: false }); sk.cyl(2.3, 2.5, .75, 8, 0, .375, 4); sk.cyl(1.9, 1.9, .1, 8, 0, .62, 4, { tint: GLASS, tone: 0 }); sk.cyl(.3, .45, 1.7, 8, 0, .85, 4); sk.cyl(.9, .2, .25, 8, 0, 1.8, 4);
   { const a = []; for (let i = 0; i < 8; i++) { const an = i / 8 * 6.2832; a.push(Math.cos(an) * .8, 1.9, 4 + Math.sin(an) * .8, Math.cos(an) * 1.4, .7, 4 + Math.sin(an) * 1.4); } sk.line(a); }
   crate(-5.6, -9, 1.4); crate(-5.7, -7.6, 1.0); crate(5.8, 22, 1.3); sandbags(1, -15.6, 5.4, -14.8); sandbags(-5.4, 25, -1, 25.8); barrel(6.2, -3, BLUE); barrel(6.3, -3.9);
+  // Four authored press stacks make exposed crossings deliberate; all footprints are on the metre grid.
+  function press(x1, z1, x2, z2) { solid(x1,z1,x2,z2,0,2,{tone:.33}); const cx=(x1+x2)/2,cz=(z1+z2)/2,w=x2-x1,d=z2-z1; sk.box(w+.08,.16,d+.08,cx,.10,cz,{tone:.66}); sk.box(w+.08,.13,d+.08,cx,1.88,cz,{tone:.33});
+    for(const y of [.48,.91,1.34]) sk.line([x1-.012,y,z1-.012,x2+.012,y,z1-.012,x2+.012,y,z1-.012,x2+.012,y,z2+.012,x2+.012,y,z2+.012,x1-.012,y,z2+.012]); for(const x of [x1+.22,x2-.22]) sk.box(.16,1.75,d+.10,x,1.02,cz,{tint:WOOD,tone:.66}); }
+  press(-2,-20,2,-18); press(-2,14,2,16); press(8,-18,10,-16); press(-12,16,-10,18);
+  sign('印务',0,1.18,-17.94,0,1.4,.52,{bg:'#f5f2ea',border:4,font:'bold 64px sans-serif'}); sign('装订',0,1.18,16.06,0,1.4,.52,{bg:'#f5f2ea',border:4,font:'bold 64px sans-serif'});
   // A long (east lane)
   solid(42, 23.5, 46, 24.5, 0, 5); solid(50, 23.5, 54, 24.5, 0, 5); solid(46, 23.5, 50, 24.5, 3.5, 5); archLines(46, 50, 24, 3.5); bus(44.4, 9);
   crate(52.6, -6, 1.6); crate(52.9, -4.4, 1.0); crate(43, -14.5, 1.3); crate(52.8, 30, 1.3); crate(51.5, 30.2, 1.0); barrel(58.8, 3, RED); barrel(59, 10.8); crate(59, 7, 1.4); sandbags(47, -2.4, 50.5, -1.6);
@@ -232,6 +243,11 @@ function buildMap(scene) {
   for (const z of [-35.8, -22.2]) { sk.box(.3, .4, 12.4, -36.2, 4.2, z, { r: [0, Math.PI / 2, 0], tone: .33 }); sk.line([-42, 4.0, z, -39, 4.5, z, -39, 4.5, z, -36, 4, z, -36, 4, z, -33, 4.5, z, -33, 4.5, z, -30, 4, z]); }
   solid(-7, -27, 7, -25, 4.2, 7); sk.box(14.5, .3, 2.5, 0, 7.1, -26); sk.box(1, 4.2, .1, -5.5, 2.1, -25.44); sk.box(1, 4.2, .1, 5.5, 2.1, -25.44);
   sk.poly([[-2, 7.3, -25], [0, 8.4, -25], [0, 7.3, -25], [2, 8.4, -25], [2, 7.3, -25]], false);
+  // A readable front fascia survives the warehouse pillar occlusion from the south approach.
+  sk.box(12.6,.38,.22,-36.2,4.34,-21.40,{tone:.66}); sk.box(8.8,1.20,.13,-36.2,3.86,-21.28,{tone:.33});
+  sign('B · 印运仓',-36.2,3.86,-21.20,0,8.35,1.01,{bg:'#f5f2ea',border:5,color:'#e9a520',font:'bold 68px sans-serif'});
+  for(const x of [-41.5,-30.5]) { sk.box(1.12,.28,1.12,x,.14,-22.5,{tone:.66}); sk.box(.86,.14,.86,x,2.82,-22.5,{tone:.33}); }
+  for(const x of [-39,-33]) { sk.line([x,4.12,-21.37,x,3.2,-21.37]); sk.box(.55,.14,.32,x,3.18,-21.37,{tint:AMBER,tone:0}); }
   // One coherent wayfinding system: large site identity, then route confirmation.
   sign('A · 刻度台', 53.77, 8.5, -32, -Math.PI / 2, 6.6, 1.2, { bg: '#f5f2ea', border: 5, color: '#e9a520', font: 'bold 68px sans-serif' });
   sign('B · 印运仓', -30.15, 7.8, -29, -Math.PI / 2, 7, 1.3, { bg: '#f5f2ea', border: 5, color: '#e9a520', font: 'bold 68px sans-serif' });
@@ -247,7 +263,9 @@ function buildMap(scene) {
   sign('折页门', 0, 5.65, -24.94, 0, 4.8, 1.1, { border: 6, bg: '#f5f2ea' }); sign('PAPER TOWN', 0, 5.65, -27.06, Math.PI, 5.5, 1.0, { border: 6, bg: '#f5f2ea', font: 'bold 60px sans-serif' }); sign('B →', -6.94, 2.6, -22, Math.PI / 2, 1.6, .6, { w: 256, h: 96, color: '#e9a520' });
   { const a = []; for (let x = -58; x < 58; x += 5) { a.push(x, .015, 45, x + 2, .015, 45, x, .015, -45, x + 2, .015, -45); } for (const [cx, cz, y, r] of [[45, -30, 1.016, 3.4], [-37, -26, .016, 3.4]]) for (let i = 0; i < 24; i++) { const p = i / 24 * 6.2832, q = (i + .6) / 24 * 6.2832; a.push(cx + Math.cos(p) * r, y, cz + Math.sin(p) * r, cx + Math.cos(q) * r, y, cz + Math.sin(q) * r); }
     for (let i = 0; i < 280; i++) { const x = rr(-60, 60), z = rr(-52, 52); if (inSolid(x, .2, z)) continue; const an = rr(0, 6.28), l = rr(.06, .3); a.push(x, .015, z, x + Math.cos(an) * l, .015, z + Math.sin(an) * l); if (R() < .15) a.push(x, .015, z, x + rr(-.8, .8), .015, z + rr(-.8, .8)); } sk.line(a); }
-  BLD.forEach(decorate);
+  // Contact strips are rendered at every quality; no quality setting changes collision or cover.
+  for(const q of BLD) { wash(q.x1-.13,q.z1-.13,q.x2+.13,q.z1,.13,.009); wash(q.x1-.13,q.z2,q.x2+.13,q.z2+.13,.13,.009); wash(q.x1-.13,q.z1,q.x1,q.z2,.13,.009); wash(q.x2,q.z1,q.x2+.13,q.z2,.13,.009); }
+  sk = detail; BLD.forEach(decorate); sk = skyline;
   // skyline beyond the walls
   for (let i = 0; i < 40; i++) { const a = i / 40 * 6.2832 + rr(0, .1), r = rr(82, 135), w = rr(8, 16), h = rr(9, 24), x = Math.cos(a) * r * 1.1, z = Math.sin(a) * r; sk.box(w, h, w, x, h / 2, z);
     const wl = []; for (let y = 3; y < h - 1; y += 3) for (let k = -w / 2 + 1; k < w / 2 - 1; k += 2.2) { const s = Math.abs(x) > Math.abs(z); const fx = s ? x - Math.sign(x) * (w / 2 + .05) : x + k, fz = s ? z + k : z - Math.sign(z) * (w / 2 + .05); wl.push(fx, y, fz, fx, y + 1.2, fz); } sk.line(wl); }
@@ -260,9 +278,10 @@ function buildMap(scene) {
     for (let k = 0; k <= 5; k++) for (let j = 0; j <= 6; j++) { const u = (k + j / 6) / 5.0 - .5; pts.push([cx + tx * u * w, y + Math.sin(j / 6 * Math.PI) * w * .07 * (1 + (k % 2) * .6), cz + tz * u * w]); } pts.push([cx - tx * w * .5, y, cz - tz * w * .5]); far.poly(pts); }
   { const c = SUN.clone().multiplyScalar(-600), M = new THREE.Matrix4().lookAt(c, new V3(), new V3(0, 1, 0)).setPosition(c), pts = [], a = []; for (let i = 0; i < 32; i++) { const an = i / 32 * 6.2832; pts.push([Math.cos(an) * 38, Math.sin(an) * 38, 0]); if (i % 2 === 0) a.push(Math.cos(an) * 48, Math.sin(an) * 48, 0, Math.cos(an) * (i % 4 ? 60 : 74), Math.sin(an) * (i % 4 ? 60 : 74), 0); } far.poly(pts, true, M); far.line(a, M); }
 
-  scene.add(sk.bake(fillMat(), lineMat({ width: 1.45 })));
+  const world = main.bake(fillMat(),lineMat({width:1.45})), trim = detail.bake(fillMat(),lineMat({width:1.05})), sky = skyline.bake(fillMat(),lineMat({color:GREY,width:1.05})); scene.add(world,trim,sky);
   scene.add(sh.bake(fillMat({ offset: 0 }), lineMat()));
   const fg = far.bake(null, lineMat({ color: GREY, width: 1.1, fog: false })); fg.traverse(o => o.frustumCulled = false); scene.add(fg);
+  MAP.renderLayers = { world, trim, sky, far: fg }; MAP.setDetail = quality => { trim.ink.visible = quality !== 'low'; sky.visible = quality !== 'low'; fg.visible = quality !== 'low'; };
 
   buildBuckets(); buildNav(); drawMini();
 }

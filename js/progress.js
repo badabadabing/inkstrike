@@ -13,9 +13,9 @@ const PROG = {
   onKill(e, by, wkey) {
     if (!by || by === e) return; this.rstat(by).k++; if (!by.isPlayer) return;
     const now = G.now; this.streakN = (G.mode === 'comp' || now - this.streakT < 4.5) ? this.streakN + 1 : 1; this.streakT = now;
-    if (this.streakN >= 2) { const n = Math.min(5, this.streakN); setTimeout(() => { banner(STREAK[n], `连续击倒 ×${this.streakN}`, 'go'); SFX.streak(n); }, 350); }
+    if (this.streakN >= 2) { const n = Math.min(5, this.streakN); setTimeout(() => { combatNotice(STREAK[n], `连续击倒 ×${this.streakN}`, 'go'); SFX.streak(n); }, 350); }
     if (wkey && WEAPONS[wkey] && G.mode !== 'range') { const before = this.tier(wkey); this.data.kills[wkey] = (this.data.kills[wkey] || 0) + 1; const after = this.tier(wkey); this.save();
-      if (after > before) { delete this.data.skin[wkey]; this.save(); setTimeout(() => { banner(`解锁「${SKINS[after].n}」笔触`, `${WEAPONS[wkey].name} · 熟练度 ${this.data.kills[wkey]} 击倒`, 'go'); SFX.bell(true); if (G.player.cur === wkey) { VM.key = null; switchTo(wkey); } }, 1500); } }
+      if (after > before) { delete this.data.skin[wkey]; this.save(); setTimeout(() => { combatNotice(`解锁「${SKINS[after].n}」笔触`, `${WEAPONS[wkey].name} · 熟练度 ${this.data.kills[wkey]} 击倒`, 'go'); SFX.bell(true); if (G.player.cur === wkey) { VM.key = null; switchTo(wkey); } }, 1500); } }
   },
   mvp(win) { let best = null, bs = -1; for (const [e, r] of this.rs) { if (e.team !== win) continue; const s = r.k * 100 + r.dmg + (r.plant + r.defuse) * 160; if (s > bs) { bs = s; best = e; } } if (!best) return ''; best.mvps = (best.mvps || 0) + 1; if (best.isPlayer) { this.data.mvp++; this.save(); } const r = this.rs.get(best); return `MVP · ${best.name}(${r.defuse ? '拆除墨核 · ' : r.plant ? '安放墨核 · ' : ''}${r.k} 击倒 / ${Math.round(r.dmg)} 伤害)`; },
   report(title) {
@@ -30,4 +30,21 @@ const PROG = {
   },
   bind() { $('armoryGrid').addEventListener('click', e => { const c = e.target.closest('.card'); if (!c) return; const k = c.dataset.k, t = this.tier(k); this.data.skin[k] = (this.skin(k) + 1) % (t + 1); this.save(); this.drawArmory(); SFX.init(); SFX.ui(); });
     $('armoryBtn').onclick = () => { this.drawArmory(); $('armory').classList.add('on'); }; $('armoryClose').onclick = () => $('armory').classList.remove('on'); }
+};
+
+/* ---------------- measured range drills ---------------- */
+const TRAIN = {
+  moving: false, active: false, left: 30, shots: 0, hits: 0, heads: 0, kills: 0, damage: 0, hitShot: false, headShot: false, completed: false,
+  reset(start) { if (G.mode !== 'range' || !G.player || G.state !== 'live') return false; this.active = !!start; this.completed = false; this.left = 30; this.shots = this.hits = this.heads = this.kills = this.damage = 0; this.hitShot = this.headShot = false; this.started = G.now; for (const b of G.bots) if (b.dummy) spawnEnt(b); const p = G.player, a = p.ammo[p.cur]; if (a) { a.mag = WEAPONS[p.cur].mag; a.res = WEAPONS[p.cur].res; } p.reloadEnd = -1; p.pending = null; clearInput(); if (start) combatNotice('训练开始', TOUCH.on ? '30 秒 · 自动开火暂停，请手动射击' : '30 秒 · 先稳住准星，再加快节奏'); },
+  setMoving(on) { if (G.mode !== 'range' || !G.player || G.state !== 'live') return false; this.moving = !!on; if (G.mode === 'range') this.reset(false); $('trainMotion').textContent = this.moving ? '横移靶：开' : '横移靶：关'; combatNotice(this.moving ? '横移训练' : '静止训练', '按 T 或地图内按钮开始计时'); },
+  onShot() { if (G.mode !== 'range' || !this.active) return; this.shots++; this.hitShot = this.headShot = false; },
+  onHit(damage, head, weapon) { if (G.mode !== 'range' || !this.active || !WEAPONS[weapon] || WEAPONS[weapon].melee || WEAPONS[weapon].nade) return; if (!this.hitShot) { this.hits++; this.hitShot = true; } if (head && !this.headShot) { this.heads++; this.headShot = true; } this.damage += damage; },
+  onKill(weapon) { if (G.mode === 'range' && this.active && WEAPONS[weapon] && !WEAPONS[weapon].melee && !WEAPONS[weapon].nade) this.kills++; },
+  update(dt) { if (G.mode !== 'range' || G.mapOpen || G.buyOpen) return; if (this.active) { this.left = Math.max(0, this.left - dt); if (!this.left) { this.active = false; this.completed = true; combatNotice('训练完成', `${this.kills} 击倒 · 命中率 ${this.accuracy()}% · 爆头 ${this.heads}`); } } if (this.moving) for (const b of G.bots) { if (!b.alive || !b.dummy) continue; const p = RANGE_SPOTS[b.rangeI], x = p.x + Math.sin((G.now - (this.started || 0)) * 1.5 + b.rangeI) * 1.8; if (navLine(p.x, p.z, x, p.z)) { b.pos.x = x; b.pos.z = p.z; b.pos.y = MAP.floorAt(x, p.z); } } },
+  accuracy() { return this.shots ? Math.min(100, Math.round(this.hits / this.shots * 100)) : 0; },
+  snapshot() { return { active: this.active, completed: this.completed, moving: this.moving, seconds: +this.left.toFixed(1), shots: this.shots, hits: this.hits, headshots: this.heads, kills: this.kills, damage: Math.round(this.damage), accuracy: this.accuracy() }; },
+  label() { if (TOUCH.on) return `${this.moving ? '横移' : '静止'} · ${this.active ? this.left.toFixed(1) + 's' : this.completed ? '完成' : '待开始'} · ${this.hits}/${this.shots} 中\n命中 ${this.accuracy()}% · 爆头 ${this.heads} · 击倒 ${this.kills}`; return `${this.moving ? '横移' : '静止'}训练 · ${this.active ? this.left.toFixed(1) + 's' : this.completed ? '已完成' : '待开始'}
+${this.shots} 发 / ${this.hits} 中 · ${this.accuracy()}% · 爆头 ${this.heads}
+击倒 ${this.kills} · 伤害 ${Math.round(this.damage)}
+${TOUCH.on ? '地图 → 训练设置' : 'T 开始 / 重来 · Y 切换横移'}`; }
 };

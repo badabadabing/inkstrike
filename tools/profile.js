@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* Local real-RAF profile. Start python3 -m http.server 8765 first. PROFILE_FRAMES defaults to 360. */
-const fs = require('fs');
+const fs = require('fs'), path = require('path');
 let pw; for (const p of [process.env.PLAYWRIGHT, 'playwright', 'playwright-core', '/Users/bing/Developer/codex-tools/npm-global/lib/node_modules/@playwright/cli/node_modules/playwright-core'].filter(Boolean)) { try { pw = require(p); break; } catch (e) { } }
 if (!pw) throw Error('Set PLAYWRIGHT to an installed Playwright package.');
 (async () => {
@@ -23,6 +23,6 @@ if (!pw) throw Error('Set PLAYWRIGHT to an installed Playwright package.');
       }), frames);
       result.errors = errors; results.push(result); console.log(JSON.stringify({ run: run + 1, ...result })); await page.close();
     }
-    fs.mkdirSync('outputs/revision-02', { recursive: true }); fs.writeFileSync('outputs/revision-02/performance.json', JSON.stringify({ viewport: [1440, 900], requestedDPR: 2, conditions: 'Headless Chromium, Metal, balanced, 12v12 DM, moving/shooting invulnerable player; 120 warmup frames, three independent pages. CPU means JS submission time, frame intervals include rendering. Local machine only.', runs: results }, null, 2));
+    const output = process.env.PROFILE_OUT || 'outputs/revision-02/performance.json'; fs.mkdirSync(path.dirname(output), { recursive: true }); fs.writeFileSync(output, JSON.stringify({ viewport: [1440, 900], requestedDPR: 2, conditions: 'Headless Chromium, Metal, balanced, 12v12 DM, moving/shooting invulnerable player; 120 warmup frames, three independent pages. CPU means JS submission time, frame intervals include rendering. Local machine only.', runs: results }, null, 2));
   } finally { await browser.close(); }
 })().catch(e => { console.error(e); process.exitCode = 1; });

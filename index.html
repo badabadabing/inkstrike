@@ -214,6 +214,16 @@ body.touch #tTop .tb{width:40px;font-size:10px}body.touch #hpBox,body.touch #amm
 @media(prefers-reduced-motion:reduce){*{transition:none!important}.grain{display:none}}
 #sizeHint{font-size:9px;opacity:.6;margin-top:5px;letter-spacing:.4px}@media(max-height:560px){#sizeHint{font-size:8px;margin-top:3px}.opt{margin-bottom:6px}#menuIn h2{margin-bottom:8px}#menuIn .edition{margin-bottom:6px}}
 #menu,#pause .box,#buyIn,#armoryIn,#tactical .panel{touch-action:pan-y}
+/* Revision 03: readable combat feedback, drills and squad tools */
+#combatNotice{position:absolute;top:100px;left:50%;transform:translateX(-50%);max-width:65vw;background:rgba(245,242,234,.94);border-left:3px solid var(--ink);font-size:11px;line-height:1.5;padding:6px 12px;opacity:0;transition:opacity .12s;white-space:normal;text-align:center}#combatNotice.on{opacity:1}
+#orderState{position:absolute;top:125px;left:50%;transform:translateX(-50%);font-size:9px;letter-spacing:1px;background:rgba(245,242,234,.86)}#orderState:empty{display:none}
+#training{position:absolute;left:22px;top:232px;white-space:pre-line;padding:10px 12px;background:rgba(245,242,234,.94);border-left:3px solid var(--blue);font-size:10px;line-height:1.8;font-variant-numeric:tabular-nums}
+#precisionTrack{position:absolute;bottom:23px;left:50%;transform:translateX(-50%);width:100px;height:3px;background:rgba(22,22,28,.12)}#precisionBar{display:block;height:100%;background:var(--ink)}
+.buy-tools{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:-3px 0 12px}.buy-tools p{font-size:10px;line-height:1.7}.buy-tools button,#squadControls button,#rangeControls button{border:1px solid var(--ink);background:var(--paper);padding:8px 10px;font:inherit;font-size:11px;cursor:pointer}.buy-tools button:disabled{opacity:.45;cursor:default}.buy-tools button:not(:disabled):hover,#squadControls button:hover,#rangeControls button:hover{background:var(--ink);color:var(--paper)}
+#squadControls,#rangeControls{display:flex;gap:7px;flex-wrap:wrap;align-items:center;padding:12px 0;border-top:1px solid var(--ink)}#squadControls[hidden],#rangeControls[hidden],#training[hidden]{display:none}#squadControls span,#rangeControls span{font-size:10px;margin-right:7px}#rangeControls small{font-size:9px;opacity:.6}
+#pause .box{max-height:94vh;overflow-y:auto}#boardIn{max-height:88vh;overflow-y:auto}
+body.touch #training{left:calc(10px + env(safe-area-inset-left));right:auto;top:136px;max-width:215px;font-size:10px;line-height:1.5;padding:4px 7px;opacity:.95}body.touch #combatNotice{top:55px;max-width:56vw;font-size:9px;padding:4px 8px}body.touch #orderState{top:81px;font-size:8px}body.touch #precisionTrack{display:none}body.touch .buy-tools{align-items:flex-start}body.touch .buy-tools p{font-size:8px}body.touch .buy-tools button{font-size:9px;min-width:90px;padding:7px}body.touch #squadControls button,body.touch #rangeControls button{min-height:38px;font-size:10px}body.touch #squadControls,body.touch #rangeControls{padding:8px 0}
+@media(max-height:560px){.tactical-grid{grid-template-columns:1fr;gap:0}.map-notes{display:none}.tactical-head{padding-bottom:6px}#tacticalMap{max-height:46vh}.map-foot{padding-top:6px;font-size:9px}#squadControls button,#rangeControls button{padding:6px 8px}.buy-tools{margin-bottom:8px}#tacticalMap{max-height:48vh}#training{top:205px}.sl{margin-bottom:7px}}
 </style>
 </head>
 <body>
@@ -238,7 +248,7 @@ body.touch #tTop .tb{width:40px;font-size:10px}body.touch #hpBox,body.touch #amm
     <div class="stat"><div class="row"><span class="big" id="hp">100</span><span class="lab">生命 HP</span></div><div class="bar"><i id="hpBar" class="hatch" style="width:100%"></i></div></div>
     <div class="stat"><div class="row"><span class="big" id="ar" style="font-size:30px">0</span><span class="lab">护甲 AP</span></div><div class="bar"><i id="arBar" class="hatch" style="width:0"></i></div></div>
   </div>
-  <div id="ammoBox"><div id="money"></div><div><span id="mag">12</span><span id="res">48</span></div><div id="wname" class="hand"></div><div id="wen"></div><div id="slots"></div><div id="weaponState"></div></div><div id="moveState"></div>
+  <div id="ammoBox"><div id="money"></div><div><span id="mag">12</span><span id="res">48</span></div><div id="wname" class="hand"></div><div id="wen"></div><div id="slots"></div><div id="weaponState"></div></div><div id="moveState"></div><div id="precisionTrack"><i id="precisionBar"></i></div><div id="training" hidden></div><div id="combatNotice"></div><div id="orderState"></div>
   <div class="help">WASD 移动 · SHIFT 静步 · C 蹲 · 空格 跳 · R 换弹 · E 互动 · B 采购 · Q 切枪 · F 检视 · M 地图 · TAB 战绩 · ESC 暂停</div>
 </div>
 <div id="touch">
@@ -255,14 +265,14 @@ body.touch #tTop .tb{width:40px;font-size:10px}body.touch #hpBox,body.touch #amm
 </div>
 <div id="dead"><h2 class="hand">阵 亡</h2><div id="deadBy"></div></div>
 
-<div id="buy" class="ov"><div id="buyIn" class="panel"><h3 class="hand"><span>军械铺</span><span><span id="buyMoney">$0</span><button id="buyClose">关闭</button></span></h3><div id="buyGrid"></div><p>按数字键 1–9 / 0 购买 · B 关闭 · 同槽位新武器会替换旧武器</p></div></div>
+<div id="buy" class="ov"><div id="buyIn" class="panel"><h3 class="hand"><span>军械铺</span><span><span id="buyMoney">$0</span><button id="buyClose">关闭</button></span></h3><div class="buy-tools"><p id="buyBudget"></p><button id="rebuy">复购上次配置</button></div><div id="buyGrid"></div><p>按数字键 1–9 / 0 购买 · B 关闭 · 同槽位新武器会替换旧武器</p></div></div>
 <div id="report"><div id="reportIn" class="panel"></div></div>
 <div id="armory" class="ov"><div id="armoryIn" class="panel"><h3 class="hand"><span>武库 · 熟练度</span><span><small id="armoryMvp"></small> <button id="armoryClose">关闭</button></span></h3><div id="armoryGrid"></div><p style="margin-top:12px;font-size:11px;opacity:.7;text-align:center">用某把武器击倒敌人可提升熟练度:10 / 30 / 75 次分别解锁「朱砂」「靛青」「鎏金」笔触 · 点击卡片切换已解锁的笔触</p></div></div>
 <div id="board" class="ov"><div id="boardIn" class="panel"></div></div>
 
 <div id="menu" class="ov">
   <div id="menuIn">
-    <div class="edition">PAPER TOWN / REVISION 02</div>
+    <div class="edition">PAPER TOWN / REVISION 03</div>
     <h1>INK<br><em>STRIKE</em></h1>
     <h2>墨 线 突 击</h2>
     <div class="tag">纸上有街巷，落笔即交锋。<br>穿过折页门，守住刻度台。下一道墨迹，由你留下。</div>
@@ -272,13 +282,13 @@ body.touch #tTop .tb{width:40px;font-size:10px}body.touch #hpBox,body.touch #amm
     <div class="opt"><label>对手 BOTS</label><div class="seg" id="optDiff"><button data-v="0">新兵</button><button data-v="1" class="sel">老兵</button><button data-v="2">精英</button></div></div>
     <button class="go hand" id="start">开始行动</button>
     <button class="go alt" id="armoryBtn">武库 · 熟练度与笔触</button>
-    <div class="keys"><kbd>WASD</kbd>移动 <kbd>鼠标</kbd>瞄准/射击 <kbd>右键</kbd>开镜/重刺 <kbd>空格</kbd>跳(可连跳) <kbd>C</kbd>蹲<br><kbd>SHIFT</kbd>静步 <kbd>R</kbd>换弹 <kbd>1-4</kbd>/<kbd>滚轮</kbd>切换 <kbd>Q</kbd>上一把 <kbd>B</kbd>采购 <kbd>E</kbd>安放/拆除 <kbd>F</kbd>检视 <kbd>M</kbd>地图 <kbd>TAB</kbd>战绩</div>
+    <div class="keys"><kbd>WASD</kbd>移动 <kbd>鼠标</kbd>瞄准/射击 <kbd>右键</kbd>开镜/重刺 <kbd>空格</kbd>跳跃 <kbd>C</kbd>蹲<br><kbd>SHIFT</kbd>静步 <kbd>R</kbd>换弹 <kbd>1-4</kbd>/<kbd>滚轮</kbd>切换 <kbd>Q</kbd>上一把 <kbd>B</kbd>采购 <kbd>E</kbd>安放/拆除 <kbd>G</kbd>交接墨核 <kbd>F</kbd>检视 <kbd>M</kbd>地图 <kbd>TAB</kbd>战绩</div>
   </div>
   <div id="menuStamp">OFFLINE / UP TO 24 / INK ON PAPER</div>
   <aside id="fieldCard"><div class="field-meta"><span>作战区域 01</span><span>128 × 112 m</span></div><h3>纸镇</h3><div class="field-en">PAPER TOWN</div><img id="briefMap" alt="纸镇地图概览"><div id="briefTitle"></div><p id="briefText"></p><button id="mapPreview">查看战术地图 ↗</button></aside>
 </div>
 
-<div id="tactical" class="ov"><div class="panel tactical-in"><div class="tactical-head"><h2>纸镇 / 战术地图</h2><button id="mapClose">关闭 · M</button></div><div class="tactical-grid"><canvas id="tacticalMap" width="640" height="560"></canvas><div class="map-notes"><h4>A / 刻度台</h4><p>东侧长街与近道相连。借掩体逐段推进，留意高处平台。</p><h4>B / 印运仓</h4><p>西侧巷道通向货仓。利用烟墨封住长线，进入后检查两侧。</p><h4>中路 / 折页门</h4><p>连接左右两翼。控制中路，可以缩短转点距离。</p><strong>▲ 你　● 队友</strong><p>敌人仅在被己方发现后短暂显示。地图打开时战斗继续。</p></div></div><div class="map-foot">北 ↑　·　蓝方防守 / 红方进攻　·　地图为俯视示意</div></div></div>
+<div id="tactical" class="ov"><div class="panel tactical-in"><div class="tactical-head"><h2>纸镇 / 战术地图</h2><button id="mapClose">关闭 · M</button></div><div class="tactical-grid"><canvas id="tacticalMap" width="640" height="560"></canvas><div class="map-notes"><h4>A / 刻度台</h4><p>东侧长街与近道相连。借掩体逐段推进，留意高处平台。</p><h4>B / 印运仓</h4><p>西侧巷道通向货仓。利用烟墨封住长线，进入后检查两侧。</p><h4>中路 / 折页门</h4><p>连接左右两翼。控制中路，可以缩短转点距离。</p><strong>▲ 你　● 队友</strong><p>敌人显示己方最后目击位置，短暂保留后消失。地图打开时战斗继续。</p></div></div><div id="squadControls"><span>小队指令</span><button data-order="A">前往 A</button><button data-order="B">前往 B</button><button data-order="rally">向我集合</button><button data-order="auto">自主战术</button><button id="corePass">交接墨核 · G</button></div><div id="rangeControls" hidden><span>训练设置</span><button id="trainStart">开始 30 秒训练</button><button id="trainMotion">横移靶：关</button><small>计时训练须手动开火；地图与采购暂停计时</small></div><div class="map-foot">北 ↑　·　蓝方防守 / 红方进攻　·　地图为俯视示意</div></div></div>
 
 <div id="layoutBar">拖动按钮到顺手的位置 <button id="layoutReset">重置</button><button id="layoutDone">完成</button></div>
 <div id="pause" class="ov"><div class="box panel"><h2 class="hand">暂 停</h2>
@@ -289,6 +299,7 @@ body.touch #tTop .tb{width:40px;font-size:10px}body.touch #hpBox,body.touch #amm
   <div class="sl"><span>视野 FOV</span><input id="sFov" type="range" min="60" max="105" step="1"><em id="sFovV"></em></div>
   <div class="sl"><span>画面精度</span><select id="sQuality"><option value="low">流畅 · 较低分辨率</option><option value="balanced">均衡</option><option value="high">精细 · 较高分辨率</option></select></div>
   <div class="sl"><span>镜头晃动</span><input id="sMotion" type="range" min="0" max="1" step=".05"><em id="sMotionV"></em></div>
+  <div class="sl"><span>屏幕墨迹</span><input id="sInkFx" type="range" min="0" max="1" step=".05"><em id="sInkFxV"></em></div>
   <div class="sl"><span>音量</span><input id="sVol" type="range" min="0" max="1" step=".05"><em id="sVolV"></em></div>
   <div class="sl"><span>准星颜色</span><div class="seg" id="sXh" style="flex:1"><button data-v="ink">墨</button><button data-v="red">红</button><button data-v="blue">蓝</button><button data-v="amber">黄</button><button data-v="green">绿</button></div></div>
   <div class="sl"><span>准星大小</span><input id="sXhSize" type="range" min=".6" max="2" step=".1"><em id="sXhSizeV"></em></div>
@@ -310,7 +321,7 @@ import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 Object.assign(window, { THREE, LineSegments2, LineSegmentsGeometry, LineMaterial });
 const files = ['core', 'map', 'weapons', 'actors', 'fx', 'objective', 'progress', 'touch', 'game'];
-for (const f of files) await new Promise((ok, err) => { const s = document.createElement('script'); s.src = `js/${f}.js?v=revision-02`; s.onload = ok; s.onerror = err; document.body.appendChild(s); });
+for (const f of files) await new Promise((ok, err) => { const s = document.createElement('script'); s.src = `js/${f}.js?v=revision-03`; s.onload = ok; s.onerror = err; document.body.appendChild(s); });
 try { boot(); } catch (e) { document.getElementById('loadTxt').textContent = '启动失败: ' + e.message; console.error(e); }
 </script>
 </body>

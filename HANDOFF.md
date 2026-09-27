@@ -10,11 +10,11 @@
 |---|---|
 | 竞技 `comp` | 红方进攻:把「墨核」带到 A/B 点安放(3.2s),40s 后引爆;蓝方防守:拆除(6s)。回合经济买枪,先取 7 胜 |
 | 死斗 `dm` | 无限重生,先取 40 击倒或 8 分钟 |
-| 靶场 `range` | 5 个固定距离假人 + 12m 弹道墙,免费取枪,练压枪 |
+| 靶场 `range` | 5 个距离假人、12m 弹道墙；静止/横移靶、30 秒训练与实际命中统计，免费取枪 |
 
 - 画风:纸白底 + 墨线描边 + 排线阴影;颜色只用在血(红)、红/蓝阵营、火光/点位(琥珀)、玻璃、木纹。
 - 平台:桌面键鼠(Pointer Lock)+ 手机触控(浮动摇杆、可拖动按钮布局、辅助减速、自动开火)。
-- **线上**:https://inkstrike.pages.dev (Cloudflare Pages) · https://badabadabing.github.io/inkstrike/ (GitHub Pages)
+- **当前同步目标**:https://inkstrike.pages.dev (Cloudflare Pages) · https://banmabox.com/inkstrike/ (Cloudflare Worker 静态副本)。GitHub Pages 为原有镜像，本轮未推送，不能当作最新版本。
 - **仓库**:https://github.com/badabadabing/inkstrike(public,main 分支)
 
 ## 2. 技术栈与运行
@@ -121,10 +121,10 @@
 
 ## 7. 已知问题与技术债
 
-- 竞技模式约 40% 概率玩家自己携带墨核;玩家不下包时 Bot 只会去点位守着。可考虑:携带者 20s 不动时提示 / Bot 请求传包(按 G 丢包)。
+- 竞技模式可能由玩家携带墨核；Revision 03 支持 G 或地图按钮交给 5m 内可见活队友，玩家仍需主动安放或交接。
 - Revision 02 已修复 PIT 和蓝方到 NEST 的导航问题；全部目标均须通过冒烟检查，不再豁免。
-- `hurt()` 开头有一个恒假的死条件 `&& false`;`G.huntAll` 已不再被置为 true,`actors.js` 里依赖它的分支是死代码,可清理。
-- 脚本缓存标识改为 `revision-02`；后续发布改 JS 必须同步更新 `index.html` 的版本标识。
+- `G.huntAll` 已不再被置为 true，`actors.js` 里相关等待倍率可后续清理。
+- 当前脚本缓存标识为 `revision-03`；后续发布改 JS 必须同步更新 `index.html` 的版本标识。
 - `rayWorld` 使用现有 buckets 的 XZ DDA；轴向射线保留线性语义。修改地图网格边界后须运行 `tools/raycheck.js`。
 - 每个音效实时创建 Web Audio 节点;极端混战下低端手机可能卡顿,可加并发上限。
 - 内嵌预览面板(IDE 内浏览器)不支持 Pointer Lock,会自动降级;真实浏览器正常。
@@ -165,3 +165,19 @@
 - Pages 生产部署：`3995b107-bb5f-4025-983a-6cf183f7e1b0`；Worker 版本：`d75ea8cd-4f79-48c6-bdbc-e7e823059b78`。
 - 发布前再次 `SMOKE OK`；线上两入口三模式启动正常，竞技/死斗 12v12（23 Bot）、靶场 5 假人；全部 9 个 JS 与本地提交哈希一致。合集桌面/手机尺寸无横向溢出，点击可进入游戏，无页面错误；统计 API 正常，www 路径通过。
 - 合集增量变更 9 个文件，其余 423 个本地资产哈希不变；未执行 GitHub push。发布证据在 `outputs/revision-02/release/`（Git 忽略）。
+
+
+## 11. Revision 03 — 模拟评测与独立视觉验收
+
+- 完整 20 项建议与结果见 `REVIEW-R03.md`，独立画面记录见 `DREAM-LOOP-R03.md`。模拟评测不代表真实职业选手或 Valve 参与；Dream Loop 是独立审查流程，未假称调用同名第三方服务。
+- `markSpotted(e, observerTeam, now)` 写本队最后目击快照。雷达与战术图读取 `spottedBy[team]` 的冻结坐标，1.5s 过期；声音不写视觉情报。
+- Bot 丢视野改瞄 `lastSeen/lastAimY`，重新看见重置反应时间。`botHear(..., kind)` 对遮挡声衰减并加位置误差，玩家/机器人脚步均使用 `step`。`resetBotAwareness` 断开上一条命的感知、道具、姿态缓存。
+- `botUtilityPlan` 区分烟墨封线、曝光安全投掷、墨爆清理；`botNadeLanding` 用相同重力和反弹估算 fuse 时位置，每 .45s 缓存一次，检查预测落点友军风险。此估算非精确战术求解器，真实变帧率轨迹存在差异。
+- `issueOrder(A/B/rally/auto)` 只指挥最近最多 3 名合适队友，12s 有效，墨核关键任务优先；`passCore()` 限当前持有人、5m 内视线可达的活队友。键盘 G 或地图按钮操作。
+- DM `spawnSafety` 在 18 个候选中按距离、敌方视线、拥挤评分；1.25s 保护在开枪/近战/投掷后立即取消。竞技结算后冻结攻击伤害与装备变更；死亡清空护甲和保枪标志。
+- `TRAIN` 位于 progress.js：T 开始/重来、Y 切静止/横移，手机在地图内操作；30s 记录实际扳机发数、命中发数、爆头、击倒、有效伤害，霰弹一发多弹丸仍只算一发命中。地图/采购/暂停不走训练时钟，训练不增加熟练度。计时训练临时禁用触屏自动开火，保留用户的辅助设置。
+- `rebuyBill/rebuy` 根据上一套主副武器、护甲、道具补齐，预算不足不部分购买；采购页显示总额、余款和下一败局收入。`clearCombatFeedback` 与 `clearInput` 在重生/重开清理视觉和输入残留。
+- `MAP.setDetail` 裁剪 low 的非战术装饰批次；新增四处整数网格印务掩体切断中路连续长线。纸面地坪分区、门板横闩和 B 门楣强化可读性，所有挡路实体继续通过 solid 注册。
+- 人物上/下腿分段弯曲保持靴底接地，`ACTOR_SHADOW` 是共享实例化接触暗部；离地淡出，不是真实世界阴影。22m 以外过滤短内部线段；近远几何共享缓存，资源测试要先预热所有武器。
+- 仍是 9 个运行时 JS，无外网资源、无构建。新增验证命令：`node tools/revision-check.js`、`node tools/ai-check.js`、`node tools/visual-review.js`。性能输出可指定 `PROFILE_FRAMES=900 PROFILE_OUT=outputs/revision-03/performance.json node tools/profile.js`。
+- 设备边界：浏览器触屏模拟和本机 Chromium Metal 已测；真实手机触感、热量、长时间帧率和真人竞技平衡尚未验证。保持该边界，不能把独立视觉通过外推成完整商业品质认证。
