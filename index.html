@@ -178,6 +178,42 @@ body.touch #buyClose{display:inline-block}
 #rotate{position:fixed;inset:0;z-index:20;background:var(--paper);display:none;align-items:center;justify-content:center;text-align:center;font-size:20px;letter-spacing:6px;line-height:2}
 #rotate.on{display:flex}
 @media (max-height:560px){.sl{margin:3px 0;font-size:11px}#pause .box{padding:8px 18px;transform:none;max-height:97vh}#pause .box h2{font-size:20px;margin-bottom:2px}#pause .go{padding:6px;font-size:15px;margin-top:4px}#menuIn{margin:10px 0 10px 5vw;width:min(520px,60vw)}#menuIn h1{font-size:40px}#menuIn h1 br{display:none}#menuIn h2{font-size:15px;letter-spacing:9px;margin:2px 0}#menuIn .tag{display:none}.opt{margin-bottom:7px}.opt label{margin-bottom:3px}.seg button{padding:5px 3px;font-size:12px}.go{font-size:18px;padding:8px;margin-top:4px}.box{padding:14px 22px;transform:scale(.85)}.box h2{font-size:26px;margin-bottom:6px}}
+
+/* Revision 02 · field notebook */
+.grain{opacity:.035}.vig{background:radial-gradient(ellipse at center,transparent 70%,rgba(22,22,28,.10) 100%)}
+button:focus-visible{outline:3px solid var(--blue);outline-offset:4px}button:disabled{cursor:not-allowed}
+#menu{background:linear-gradient(90deg,rgba(245,242,234,.99),rgba(245,242,234,.93) 33%,rgba(245,242,234,.06) 68%);align-items:center}
+#menuIn{margin:54px 0 48px 6vw;width:min(446px,43vw);position:relative;z-index:1}
+.edition{font-size:10px;letter-spacing:3px;display:flex;align-items:center;gap:10px;margin-bottom:22px}.edition:before{content:"";width:24px;height:3px;background:var(--red)}
+#menuIn h1{font-family:"IBM Plex Mono",monospace;font-size:92px;font-weight:700;letter-spacing:-7px;line-height:.87}#menuIn h1 em{font-style:normal}
+#menuIn h2{font-size:19px;letter-spacing:14px;margin-top:17px}#menuIn .tag{border:0;padding:0;font-size:12px;margin:18px 0 25px;line-height:1.9;max-width:370px}
+.opt label{letter-spacing:2px;font-size:10px;display:flex;gap:10px;align-items:center}.opt label:after{content:"";height:1px;flex:1;background:rgba(22,22,28,.22)}
+.seg button{border-width:1px;padding:10px 4px;font-size:12px;margin-right:-1px}.seg button small{font-size:9px;line-height:1.55}.seg button:hover:not(.sel){background:#e7e3d9}
+#optTeam button[data-v=blue].sel{background:var(--blue);border-color:var(--blue)}#optTeam button[data-v=red].sel{background:var(--red);border-color:var(--red)}
+#start{text-align:left;letter-spacing:5px;font-size:20px;padding:16px 22px;position:relative;box-shadow:3px 3px 0 var(--ink)}#start:after{content:"↗";position:absolute;right:18px;font-family:monospace;font-size:28px;top:8px}
+#armoryBtn{box-shadow:none;border-width:1px;font-size:11px;letter-spacing:3px;padding:10px;margin-top:12px}.keys{font-size:9px;line-height:2;margin-top:15px;opacity:.65}.keys kbd{border:0;border-bottom:1px solid var(--ink);padding:1px 2px}
+#fieldCard{position:absolute;right:4vw;bottom:6vh;width:300px;background:rgba(245,242,234,.94);border-top:4px solid var(--ink);padding:18px 20px;box-shadow:5px 5px 0 rgba(22,22,28,.15)}
+.field-meta{font-size:9px;letter-spacing:2px;display:flex;justify-content:space-between;opacity:.65}#fieldCard h3{font-size:24px;letter-spacing:4px;margin:12px 0 4px}#fieldCard .field-en{font-size:10px;letter-spacing:2px}
+#briefMap{width:100%;height:130px;object-fit:contain;margin:12px 0;display:block;background:rgba(22,22,28,.035)}#briefTitle{font-size:13px;font-weight:700}#briefText{font-size:11px;line-height:1.8;opacity:.75;margin:6px 0 12px}#mapPreview{border:0;border-bottom:1px solid var(--ink);background:none;font:inherit;font-size:10px;letter-spacing:2px;padding:4px 0;cursor:pointer}
+#menuStamp{position:absolute;right:4vw;top:28px;font-size:10px;letter-spacing:3px;border-top:1px solid var(--ink);padding-top:8px;opacity:.7}
+#top{top:18px}#top .tm{min-width:70px;border-width:1px;padding:7px 12px}#top .mid{border-width:1px;min-width:106px}#top .tm.b{border-top:3px solid var(--blue)}#top .tm.r{border-top:3px solid var(--red)}#top .mid{border-top:3px solid var(--ink)}#timer{font-size:22px;font-variant-numeric:tabular-nums}
+#radarBox{top:18px;left:22px}#radar{box-shadow:none;border:1px solid var(--ink)}#zone{background:var(--paper);display:table;margin:6px auto 0;padding:3px 9px;font-size:11px}
+#hpBox,#ammoBox{padding:12px 16px;background:rgba(245,242,234,.9);border-bottom:3px solid var(--ink)}#hpBox{gap:18px;bottom:25px;left:22px}.stat{min-width:100px}.stat .big{font-size:38px}.stat .lab{font-size:9px;letter-spacing:1px}.bar{height:5px;border-width:1px}
+#ammoBox{bottom:25px;right:22px}#mag{font-size:43px}#res{font-size:18px}#wname{font-size:14px}#wen{font-size:8px;letter-spacing:2px}#money,#buyMoney,.card .pr{color:var(--ink)}#slots span{border-width:1px;font-size:9px}#slots span.cur{border-color:var(--ink)}
+#bannerT{font-size:30px;letter-spacing:6px;padding:5px 20px}#bannerS{font-size:11px;letter-spacing:1px}#banner,#banner.on{transform:translate(-50%,0)}.help{font-size:9px;bottom:6px;letter-spacing:0;max-width:70vw;overflow:hidden;opacity:.6}
+#obj{top:85px;font-size:11px;border-width:1px;padding:4px 12px}#feed{top:110px;font-size:11px}#feed div{border-width:1px}
+#weaponState{font-size:10px;letter-spacing:2px;color:var(--red);height:17px;padding-top:4px}#moveState{font-size:9px;letter-spacing:2px;background:var(--paper);padding:4px 8px;position:absolute;bottom:27px;left:50%;transform:translateX(-50%);border-bottom:1px solid var(--ink)}
+#buy{pointer-events:auto;background:rgba(245,242,234,.82)}#buyIn{max-height:92vh;overflow:auto}#buyClose{display:inline-block;cursor:pointer}.card{border-width:1px;cursor:pointer;text-align:left;color:var(--ink);font:inherit}.card:hover{background:#e8e4da}.card.poor{opacity:.48}.card .spec{font-size:9px;margin-top:6px;opacity:.7;line-height:1.6}.card .pr{font-size:12px}.card b{border-width:1px}.card.own .pr{color:var(--blue)}
+#tactical{background:rgba(22,22,28,.65);z-index:7}.tactical-in{width:min(840px,94vw);max-height:94vh;padding:20px;overflow:auto}.tactical-head{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--ink);padding-bottom:10px}.tactical-head h2{font-size:21px;letter-spacing:3px}.tactical-head button{font:inherit;background:var(--ink);color:var(--paper);border:0;padding:8px 12px;cursor:pointer}.tactical-grid{display:grid;grid-template-columns:1fr 190px;gap:22px;align-items:center}#tacticalMap{width:100%;height:auto;display:block}.map-notes{font-size:11px;line-height:1.85}.map-notes h4{font-size:14px;margin-bottom:4px}.map-notes p{margin-bottom:14px}.map-notes strong{color:var(--blue)}.map-foot{font-size:10px;letter-spacing:1px;border-top:1px solid var(--ink);padding-top:10px;opacity:.7}
+#pause .box{width:min(460px,92vw)}.sl select{flex:1;background:var(--paper);border:1px solid var(--ink);font:inherit;padding:6px}.sl span{width:100px}.sl em{font-size:10px}.sl input{min-width:0}
+body.touch #tTop .tb{width:40px;font-size:10px}body.touch #hpBox,body.touch #ammoBox{padding:7px 10px}body.touch #moveState{display:none}body.touch #buyIn{transform:none;max-height:96vh}body.touch #buyGrid{gap:6px}body.touch .card{padding:6px}body.touch .card .ico{height:48px}body.touch .card .en{display:none}body.touch #bannerT{font-size:30px}body.touch #obj{max-width:64vw;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:1000px){#menuIn{width:440px;max-width:54vw;margin-left:4vw}#menuIn h1{font-size:76px}#fieldCard{width:250px;right:3vw;padding:14px}#menuStamp{right:3vw}#buyGrid{grid-template-columns:repeat(5,1fr)}}
+@media(max-height:760px){#menuIn{margin-top:24px;margin-bottom:24px}.edition{margin-bottom:13px}#menuIn h1{font-size:68px}#menuIn h2{font-size:16px;margin-top:10px}#menuIn .tag{margin:12px 0 15px;font-size:11px}.opt{margin-bottom:10px}.seg button{padding:8px 3px}#start{padding:12px 20px}.keys{margin-top:11px}#fieldCard{bottom:5vh}}
+@media(max-height:560px){#menu{align-items:flex-start}#menuIn{width:410px;max-width:56vw;margin:18px 0 18px 4vw}.edition{font-size:8px;margin-bottom:8px}#menuIn h1{font-size:43px;letter-spacing:-3px}#menuIn h1 br{display:none}#menuIn h1 em{margin-left:8px}#menuIn h2{font-size:12px;letter-spacing:8px;margin:7px 0 12px}#menuIn .tag,.keys{display:none}.opt{margin-bottom:8px}.opt label{font-size:8px;letter-spacing:1px;margin-bottom:3px}.seg button{padding:5px 3px;font-size:11px}.seg button small{font-size:8px}#start{font-size:16px;padding:9px 16px;margin-top:5px}#start:after{font-size:22px;top:3px}#armoryBtn{padding:7px;font-size:10px;margin-top:9px}#fieldCard{width:28vw;bottom:5vh;padding:10px 14px}#fieldCard h3{font-size:18px;margin:8px 0 2px}#briefMap{height:75px;margin:8px 0}#briefText{font-size:9px;line-height:1.6;margin:4px 0 6px}#briefTitle{font-size:11px}.field-meta,#fieldCard .field-en,#mapPreview{font-size:8px}#menuStamp{font-size:8px;top:16px}.tactical-in{padding:12px}.tactical-grid{grid-template-columns:minmax(0,1fr) 165px;gap:16px}#tacticalMap{max-height:63vh;object-fit:contain}.tactical-head h2{font-size:16px}.map-notes{font-size:10px}.map-notes p{margin-bottom:7px}.map-notes h4{font-size:12px}}
+@media(max-width:600px) and (min-height:561px){#menuIn{width:88vw;max-width:none;margin:30px 6vw}#fieldCard,#menuStamp{display:none}#menuIn h1{font-size:76px}.tactical-grid{grid-template-columns:1fr}.map-notes{display:none}#buyGrid{grid-template-columns:repeat(2,1fr)}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}.grain{display:none}}
+#sizeHint{font-size:9px;opacity:.6;margin-top:5px;letter-spacing:.4px}@media(max-height:560px){#sizeHint{font-size:8px;margin-top:3px}.opt{margin-bottom:6px}#menuIn h2{margin-bottom:8px}#menuIn .edition{margin-bottom:6px}}
+#menu,#pause .box,#buyIn,#armoryIn,#tactical .panel{touch-action:pan-y}
 </style>
 </head>
 <body>
@@ -202,8 +238,8 @@ body.touch #buyClose{display:inline-block}
     <div class="stat"><div class="row"><span class="big" id="hp">100</span><span class="lab">生命 HP</span></div><div class="bar"><i id="hpBar" class="hatch" style="width:100%"></i></div></div>
     <div class="stat"><div class="row"><span class="big" id="ar" style="font-size:30px">0</span><span class="lab">护甲 AP</span></div><div class="bar"><i id="arBar" class="hatch" style="width:0"></i></div></div>
   </div>
-  <div id="ammoBox"><div id="money"></div><div><span id="mag">12</span><span id="res">48</span></div><div id="wname" class="hand"></div><div id="wen"></div><div id="slots"></div></div>
-  <div class="help">WASD 移动 · SHIFT 静步 · C 蹲 · 空格 跳 · R 换弹 · E 互动 · B 采购 · Q 切枪 · F 检视 · TAB 战绩 · ESC 暂停</div>
+  <div id="ammoBox"><div id="money"></div><div><span id="mag">12</span><span id="res">48</span></div><div id="wname" class="hand"></div><div id="wen"></div><div id="slots"></div><div id="weaponState"></div></div><div id="moveState"></div>
+  <div class="help">WASD 移动 · SHIFT 静步 · C 蹲 · 空格 跳 · R 换弹 · E 互动 · B 采购 · Q 切枪 · F 检视 · M 地图 · TAB 战绩 · ESC 暂停</div>
 </div>
 <div id="touch">
   <div id="joyBase"><div id="joyKnob"></div></div>
@@ -215,7 +251,7 @@ body.touch #buyClose{display:inline-block}
   <div class="tb" id="tCrouch" data-b="crouch">蹲</div>
   <div class="tb" id="tSwap" data-b="swap">切枪</div>
   <div class="tb" id="tUse" data-b="use">互动</div>
-  <div id="tTop"><div class="tb" data-b="buy">采购</div><div class="tb" data-b="board">战绩</div><div class="tb" data-b="pause">暂停</div></div>
+  <div id="tTop"><div class="tb" data-b="map">地图</div><div class="tb" data-b="buy">采购</div><div class="tb" data-b="board">战绩</div><div class="tb" data-b="pause">暂停</div></div>
 </div>
 <div id="dead"><h2 class="hand">阵 亡</h2><div id="deadBy"></div></div>
 
@@ -226,24 +262,33 @@ body.touch #buyClose{display:inline-block}
 
 <div id="menu" class="ov">
   <div id="menuIn">
-    <h1 class="hand">INK<br><em>STRIKE</em></h1>
+    <div class="edition">PAPER TOWN / REVISION 02</div>
+    <h1>INK<br><em>STRIKE</em></h1>
     <h2>墨 线 突 击</h2>
-    <div class="tag">一张纸，一支笔，一座小镇。<br>所有线条都是掩体，唯一的颜色是你留下的痕迹。<br>5 v 5 · 安放或拆除墨核 · 击倒换取资金,武装下一回合。</div>
+    <div class="tag">纸上有街巷，落笔即交锋。<br>穿过折页门，守住刻度台。下一道墨迹，由你留下。</div>
     <div class="opt"><label>模式 MODE</label><div class="seg" id="optMode"><button data-v="comp" class="sel">竞技<small>安放 / 拆除墨核 · 先取 7 胜</small></button><button data-v="dm">死斗<small>无限重生 · 先取 40 击倒</small></button><button data-v="range">靶场<small>固定弹道 · 自由练枪</small></button></div></div>
-    <div class="opt"><label>阵营 SIDE</label><div class="seg" id="optTeam"><button data-v="blue" class="sel">靛青 · 蓝方<small>北侧出生</small></button><button data-v="red">朱砂 · 红方<small>南侧出生</small></button></div></div>
+    <div class="opt"><label>阵营 SIDE</label><div class="seg" id="optTeam"><button data-v="blue" class="sel">靛青 · 蓝方<small>防守 · 守点 / 拆除</small></button><button data-v="red">朱砂 · 红方<small>进攻 · 护送 / 安放</small></button></div></div>
+    <div class="opt"><label>规模 SQUAD SIZE</label><div class="seg" id="optSize"><button data-v="auto" class="sel">自动</button><button data-v="5">5 v 5</button><button data-v="8">8 v 8</button><button data-v="12">12 v 12</button></div><div id="sizeHint"></div></div>
     <div class="opt"><label>对手 BOTS</label><div class="seg" id="optDiff"><button data-v="0">新兵</button><button data-v="1" class="sel">老兵</button><button data-v="2">精英</button></div></div>
-    <button class="go hand" id="start">落 笔</button>
+    <button class="go hand" id="start">开始行动</button>
     <button class="go alt" id="armoryBtn">武库 · 熟练度与笔触</button>
-    <div class="keys"><kbd>WASD</kbd>移动 <kbd>鼠标</kbd>瞄准/射击 <kbd>右键</kbd>开镜/重刺 <kbd>空格</kbd>跳(可连跳) <kbd>C</kbd>蹲<br><kbd>SHIFT</kbd>静步 <kbd>R</kbd>换弹 <kbd>1-4</kbd>/<kbd>滚轮</kbd>切换 <kbd>Q</kbd>上一把 <kbd>B</kbd>采购 <kbd>E</kbd>安放/拆除 <kbd>F</kbd>检视 <kbd>TAB</kbd>战绩</div>
+    <div class="keys"><kbd>WASD</kbd>移动 <kbd>鼠标</kbd>瞄准/射击 <kbd>右键</kbd>开镜/重刺 <kbd>空格</kbd>跳(可连跳) <kbd>C</kbd>蹲<br><kbd>SHIFT</kbd>静步 <kbd>R</kbd>换弹 <kbd>1-4</kbd>/<kbd>滚轮</kbd>切换 <kbd>Q</kbd>上一把 <kbd>B</kbd>采购 <kbd>E</kbd>安放/拆除 <kbd>F</kbd>检视 <kbd>M</kbd>地图 <kbd>TAB</kbd>战绩</div>
   </div>
+  <div id="menuStamp">OFFLINE / UP TO 24 / INK ON PAPER</div>
+  <aside id="fieldCard"><div class="field-meta"><span>作战区域 01</span><span>128 × 112 m</span></div><h3>纸镇</h3><div class="field-en">PAPER TOWN</div><img id="briefMap" alt="纸镇地图概览"><div id="briefTitle"></div><p id="briefText"></p><button id="mapPreview">查看战术地图 ↗</button></aside>
 </div>
+
+<div id="tactical" class="ov"><div class="panel tactical-in"><div class="tactical-head"><h2>纸镇 / 战术地图</h2><button id="mapClose">关闭 · M</button></div><div class="tactical-grid"><canvas id="tacticalMap" width="640" height="560"></canvas><div class="map-notes"><h4>A / 刻度台</h4><p>东侧长街与近道相连。借掩体逐段推进，留意高处平台。</p><h4>B / 印运仓</h4><p>西侧巷道通向货仓。利用烟墨封住长线，进入后检查两侧。</p><h4>中路 / 折页门</h4><p>连接左右两翼。控制中路，可以缩短转点距离。</p><strong>▲ 你　● 队友</strong><p>敌人仅在被己方发现后短暂显示。地图打开时战斗继续。</p></div></div><div class="map-foot">北 ↑　·　蓝方防守 / 红方进攻　·　地图为俯视示意</div></div></div>
 
 <div id="layoutBar">拖动按钮到顺手的位置 <button id="layoutReset">重置</button><button id="layoutDone">完成</button></div>
 <div id="pause" class="ov"><div class="box panel"><h2 class="hand">暂 停</h2>
   <div class="sl touchOnly"><span>触控灵敏度</span><input id="sTs" type="range" min=".3" max="2.5" step=".05"><em id="sTsV"></em></div>
+  <div class="sl touchOnly"><span>滑动加速</span><input id="sAccel" type="checkbox" style="flex:none;width:22px;height:22px"><em>可选</em></div>
   <div class="sl touchOnly"><span>自动开火</span><input id="sAuto" type="checkbox" style="flex:none;width:22px;height:22px"><em></em></div>
   <div class="sl deskOnly"><span>鼠标灵敏度</span><input id="sSens" type="range" min=".2" max="3" step=".05"><em id="sSensV"></em></div>
   <div class="sl"><span>视野 FOV</span><input id="sFov" type="range" min="60" max="105" step="1"><em id="sFovV"></em></div>
+  <div class="sl"><span>画面精度</span><select id="sQuality"><option value="low">流畅 · 较低分辨率</option><option value="balanced">均衡</option><option value="high">精细 · 较高分辨率</option></select></div>
+  <div class="sl"><span>镜头晃动</span><input id="sMotion" type="range" min="0" max="1" step=".05"><em id="sMotionV"></em></div>
   <div class="sl"><span>音量</span><input id="sVol" type="range" min="0" max="1" step=".05"><em id="sVolV"></em></div>
   <div class="sl"><span>准星颜色</span><div class="seg" id="sXh" style="flex:1"><button data-v="ink">墨</button><button data-v="red">红</button><button data-v="blue">蓝</button><button data-v="amber">黄</button><button data-v="green">绿</button></div></div>
   <div class="sl"><span>准星大小</span><input id="sXhSize" type="range" min=".6" max="2" step=".1"><em id="sXhSizeV"></em></div>
@@ -265,7 +310,7 @@ import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 Object.assign(window, { THREE, LineSegments2, LineSegmentsGeometry, LineMaterial });
 const files = ['core', 'map', 'weapons', 'actors', 'fx', 'objective', 'progress', 'touch', 'game'];
-for (const f of files) await new Promise((ok, err) => { const s = document.createElement('script'); s.src = `js/${f}.js?v=${Date.now()}`; s.onload = ok; s.onerror = err; document.body.appendChild(s); });
+for (const f of files) await new Promise((ok, err) => { const s = document.createElement('script'); s.src = `js/${f}.js?v=revision-02`; s.onload = ok; s.onerror = err; document.body.appendChild(s); });
 try { boot(); } catch (e) { document.getElementById('loadTxt').textContent = '启动失败: ' + e.message; console.error(e); }
 </script>
 </body>

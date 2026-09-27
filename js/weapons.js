@@ -19,6 +19,10 @@ WEAPONS.ak.pat = mkPat(.0142, .0098, 30, 1, .4); WEAPONS.m4.pat = mkPat(.0108, .
 WEAPONS.p9.pat = mkPat(.016, .003, 12, 1, 0); WEAPONS.deagle.pat = mkPat(.05, .008, 7, 1, .7); WEAPONS.nova.pat = mkPat(.07, .01, 8, 1, 0); WEAPONS.awp.pat = mkPat(.06, .004, 5, 1, 0);
 const BUY_LIST = ['deagle', 'viper', 'nova', 'ak', 'm4', 'awp', 'armor', 'he', 'flash', 'smoke'];
 
+/* Chamfered kit geometry, merged by Sk; reused by equipment and soldier silhouettes. */
+function inkBlock(s, w, h, d, x, y, z, o = {}) { const v = Math.min(w, h, d) * (o.bevel ?? .16), sh = new THREE.Shape(), a = w / 2 - v, b = h / 2 - v; sh.moveTo(-a, -b); sh.lineTo(a, -b); sh.lineTo(a, b); sh.lineTo(-a, b); sh.closePath(); const g = new THREE.ExtrudeGeometry(sh, { depth: Math.max(.001, d - v * 2), bevelEnabled: true, bevelSize: v, bevelThickness: v, bevelSegments: 1, steps: 1 }); g.translate(0, 0, -d / 2 + v); if (o.taper) { const a = g.attributes.position; for (let i = 0; i < a.count; i++) { const k = 1 - o.taper * (a.getY(i) / h + .5); a.setX(i, a.getX(i) * k); a.setZ(i, a.getZ(i) * k); } g.computeVertexNormals(); } return s.add(g, s._m(x, y, z, o.r, o.m), o); }
+function inkLimb(s, a, b, w, d, o = {}) { const A = new V3(...a), B = new V3(...b), v = B.clone().sub(A), len = v.length(), q = new THREE.Quaternion().setFromUnitVectors(new V3(0, 1, 0), v.normalize()), m = new THREE.Matrix4().compose(A.add(B).multiplyScalar(.5), q, new V3(1, 1, 1)); return inkBlock(s, w, len, d, 0, 0, 0, { taper: .18, ...o, m: o.m ? o.m.clone().multiply(m) : m }); }
+
 /* ---- gun geometry. profile coords are [forward, up]; forward = -Z ---- */
 const GUNS = {
   ak(p) { const b = p.body;
@@ -90,10 +94,38 @@ const GUNS = {
   smoke(p) { const b = p.body; b.cyl(.034, .034, .13, 8, 0, 0, 0, { tone: .33 }); b.cyl(.036, .036, .025, 8, 0, .02, 0, { tint: GREY, tone: 0 }); b.cyl(.012, .012, .03, 6, 0, .085, 0); b.box(.01, .09, .006, .032, .04, 0, { tint: AMBER, tone: 0 }); return { muzzle: [0, 0], lh: null, grip: [0, 0], nade: true }; }
 };
 
+/* Functional layers remain in each moving part, so slides, magazines and pumps keep their choreography. */
+function finishGun(key, p) { const meta = GUNS[key](p), b = p.body, w = WEAPONS[key];
+  if (w.melee) { b.line([.012, .0, -.09, .012, .006, -.20, -.012, .0, -.09, -.012, .006, -.20]); return meta; }
+  if (w.nade) { b.cyl(.023, .023, .015, 8, 0, -.035, 0, { tone: 1 }); inkBlock(b, .027, .04, .008, 0, .005, -.035, { tone: 0 }); b.line([-.008, .0, -.04, .008, .0, -.04, -.008, .009, -.04, .008, .009, -.04]); return meta; }
+  const mz = meta.muzzle; b.cyl(meta.pistol ? .0044 : .0055, meta.pistol ? .0044 : .0055, .0015, 10, 0, mz[1], -mz[0] - .001, { ax: 'z', tone: 1, edges: false });
+  if (meta.pistol) { const x = key === 'p9' ? .015 : .018, z = key === 'p9' ? -.019 : -.035; inkBlock(p.bolt, .004, .017, .037, x + .001, .016, z, { tone: 1 }); inkBlock(p.bolt, .004, .012, .026, x + .003, .016, z + .002, { tone: .33 });
+    for (const q of [-1, 1]) { inkBlock(b, .004, .064, .035, q * (x + .001), -.064, .07, { tone: .33 }); b.line([q * (x + .004), -.041, .063, q * (x + .004), -.080, .079, q * (x + .004), -.043, .076, q * (x + .004), -.072, .087]); } b.box(.004, .009, .024, x + .002, -.004, .041, { tone: 1 });
+  } else { const z = key === 'viper' ? -.055 : -.04; inkBlock(b, .004, .022, .073, .0255, .02, z, { tone: 1 }); inkBlock(b, .007, .011, .077, .029, .009, z, { tone: .33 }); b.cyl(.009, .009, .008, 8, -.026, -.004, .012, { ax: 'x', tone: .33 }); b.line([-.031, -.004, .012, -.031, -.021, -.001]);
+    if (key === 'm4' || key === 'viper') { const z0 = key === 'm4' ? -.145 : -.083, n = key === 'm4' ? 7 : 4; for (let i = 0; i < n; i++) { const z = z0 - i * .031; b.box(.054, .009, .012, 0, key === 'm4' ? .051 : .055, z, { tone: .33 }); if (key === 'm4') for (const x of [-.026, .026]) inkBlock(b, .003, .014, .018, x, .012, z, { tone: 1 }); } }
+    if (key === 'm4') { inkBlock(b, .047, .121, .024, 0, -.012, .339, { tone: .66 }); b.box(.022, .012, .06, 0, -.027, .255, { tone: 1 }); b.line([.02, .015, .22, .02, .015, .305, .02, -.012, .28, .02, -.057, .31]); }
+    if (key === 'ak') { inkBlock(b, .047, .109, .018, 0, -.05, .374, { tone: .66 }); for (const x of [-.025, .025]) { b.line([x, -.017, -.255, x, -.01, -.401, x, .003, -.258, x, .006, -.405]); for (let i = 0; i < 3; i++) inkBlock(b, .003, .009, .026, x, .026, -.269 - i * .045, { tone: 1 }); } b.line([.023, .018, .071, .023, .022, -.141, .023, -.006, -.02, .023, -.012, -.111]); }
+    if (key === 'nova') { for (let i = 0; i < 6; i++) p.bolt.cyl(.026, .026, .006, 8, 0, -.012, -.243 - i * .027, { ax: 'z', tone: .66 }); inkBlock(b, .045, .11, .018, 0, -.05, .39, { tone: .66 }); for (let i = 0; i < 4; i++) b.cyl(.008, .008, .048, 6, -.03, -.005, -.015 + i * .019, { tone: .33 }); }
+    if (key === 'awp') { for (const z of [.13, -.29]) { b.cyl(.028, .028, .008, 12, 0, .082, z, { ax: 'z', tone: .33 }); } inkBlock(b, .054, .15, .018, 0, -.036, .438, { tone: .66 }); b.cyl(.010, .010, .025, 8, .033, .048, .276, { ax: 'x', tone: 1 }); }
+  }
+  if (['ak', 'm4', 'viper'].includes(key)) { const x = key === 'ak' ? .0145 : .0135; for (const q of [-1, 1]) { const a = key === 'ak' ? [[.135, -.066], [.165, -.154], [.217, -.218]] : key === 'm4' ? [[.048, -.076], [.055, -.174]] : [[-.012, -.15], [-.021, -.224]]; for (let i = 0; i < 3; i++) p.mag.poly(a.map(([f, u]) => [q * x, u, -f - i * .011])); } }
+  return meta;
+}
+function viewSleeve(s, a, b, r1, r2, tone) { const A = new V3(...a), B = new V3(...b), d = B.clone().sub(A), q = new THREE.Quaternion().setFromUnitVectors(new V3(0, 1, 0), d.clone().normalize()), m = new THREE.Matrix4().compose(A.add(B).multiplyScalar(.5), q, new V3(1, 1, .86)); s.add(new THREE.CylinderGeometry(r2, r1, d.length(), 7, 1), m, { ...(tone === undefined ? {} : { tone }), ea: 35 }); }
+function viewGlove(s, f, u, support, pistol) { const z = -f, side = support ? -1 : 1, x = support && pistol ? -.032 : 0;
+  inkBlock(s, .055, .069, .057, x, u, z + .012, { tone: .33, r: [.18, 0, support && pistol ? -.15 : 0], bevel: .2 });
+  if (support && !pistol) { inkBlock(s, .08, .042, .086, 0, u - .024, z, { tone: .33, bevel: .24 }); for (let i = 0; i < 4; i++) { const q = z - .032 + i * .021; inkLimb(s, [.038, u - .029, q], [.047, u + .003, q - .003], .018, .018, { tone: 1 }); inkLimb(s, [.047, u + .003, q - .003], [.034, u + .024, q - .007], .015, .016, { tone: .33 }); inkBlock(s, .016, .013, .015, .047, u + .004, q - .003, { tone: 0 }); } inkLimb(s, [-.034, u - .021, z + .019], [-.039, u + .018, z - .008], .023, .024, { tone: .33 });
+  } else { for (let i = 0; i < 3; i++) { const y = u + .008 - i * .021; inkLimb(s, [x + .027, y, z + .004], [x + .023, y - .004, z - .031], .019, .021, { tone: 1 }); inkLimb(s, [x + .023, y - .004, z - .031], [x - .017, y - .008, z - .033], .017, .018, { tone: .33 }); inkBlock(s, .019, .013, .017, x + .023, y - .003, z - .026, { tone: 0 }); } inkLimb(s, [x - .027, u + .014, z + .008], [x - .03, u + .044, z - .019], .023, .023, { tone: .33 }); inkLimb(s, [x + .026, u + .032, z + .014], [x + .028, u + .042, z - .034], .017, .018, { tone: .33 }); }
+  const wrist = [x + side * .013, u - .035, z + .055], elbow = support ? [-.17, u - .205, z + .255] : [.105, u - .22, z + .30], shoulder = support ? [-.235, u - .40, z + .51] : [.22, u - .40, z + .48];
+  viewSleeve(s, elbow, wrist, .068, .037); viewSleeve(s, shoulder, elbow, .09, .069); const cuff = wrist.map((v, i) => v * .75 + elbow[i] * .25); viewSleeve(s, cuff, wrist, .049, .043, .33);
+  inkBlock(s, .077, .084, .063, elbow[0], elbow[1], elbow[2] - .035, { tone: .33, r: [.42, 0, support ? -.35 : .3], bevel: .25 });
+
+}
+
 /* world (third-person / icon) model: everything merged */
 const _wgCache = {};
 function worldGun(key, fm, lm) {
-  let c = _wgCache[key]; if (!c) { const s = new Sk('under'); const meta = GUNS[key]({ body: s, mag: s, bolt: s }); c = _wgCache[key] = { src: s.bake(fm, lm), meta }; }
+  let c = _wgCache[key]; if (!c) { const s = new Sk('under'); const meta = finishGun(key, { body: s, mag: s, bolt: s }); c = _wgCache[key] = { src: s.bake(fm, lm), meta }; }
   const g = new THREE.Group(); if (c.src.fill) g.add(new THREE.Mesh(c.src.fill.geometry, fm)); if (c.src.ink) g.add(new LineSegments2(c.src.ink.geometry, lm)); g.userData.meta = c.meta; return g;
 }
 
@@ -111,14 +143,8 @@ const VM = { off: {},
   },
   mats(i) { this._m = this._m || {}; if (!i) return { fm: this.fm, lm: this.lm }; if (!this._m[i]) { const fm = fillMat({ objSpace: true, freq: 75, fog: 0, hatch: .85, hw: .13 }); fm.uniforms.uInk.value.set(SKINS[i].ink); this._m[i] = { fm, lm: lineMat({ width: SKINS[i].w, fog: false, color: SKINS[i].ink }) }; } return this._m[i]; },
   build(key, skin = 0) {
-    const parts = { body: new Sk('under'), mag: new Sk('under'), bolt: new Sk('under'), handR: new Sk('sun'), handL: new Sk('sun') }, meta = GUNS[key](parts);
-    const gf = meta.grip[0], gu = meta.grip[1], R = parts.handR, L = parts.handL;
-    R.box(.056, .08, .066, .002, gu, -gf + .012, { tone: 1, r: [.25, 0, 0] }); R.box(.07, .03, .05, .0, gu + .035, -gf - .035, { tone: 1 }); R.box(.025, .03, .07, -.036, gu + .04, -gf - .0, { tone: 1 });
-    R.limb([.012, gu - .03, -gf + .05], [.13, gu - .24, -gf + .6], .074, .082, { tone: 0 }); R.limb([.014, gu - .034, -gf + .06], [.03, gu - .06, -gf + .13], .082, .09, { tone: .33 });
-    if (meta.lh) { const f = meta.lh[0], u = meta.lh[1];
-      if (meta.pistol) { L.box(.06, .08, .07, -.03, u, -f, { tone: 1, r: [.2, .3, 0] }); L.limb([-.04, u - .03, -f + .04], [-.3, u - .22, -f + .5], .074, .082, { tone: 0 }); L.limb([-.042, u - .032, -f + .045], [-.075, u - .055, -f + .1], .082, .09, { tone: .33 }); }
-      else { L.box(.082, .05, .11, 0, u - .022, -f, { tone: 1 }); L.box(.02, .05, .1, .04, u + .01, -f, { tone: 1 }); L.box(.02, .04, .09, -.042, u + .005, -f, { tone: 1 });
-        L.limb([-.02, u - .05, -f + .05], [-.3, u - .3, -f + .52], .074, .082, { tone: 0 }); L.limb([-.022, u - .052, -f + .055], [-.055, u - .08, -f + .11], .082, .09, { tone: .33 }); } }
+    const parts = { body: new Sk('under'), mag: new Sk('under'), bolt: new Sk('under'), handR: new Sk('sun'), handL: new Sk('sun') }, meta = finishGun(key, parts);
+    viewGlove(parts.handR, meta.grip[0], meta.grip[1], false, meta.pistol); if (meta.lh) viewGlove(parts.handL, meta.lh[0], meta.lh[1], true, meta.pistol);
     const g = new THREE.Group(), m = { group: g, meta, parts: {} };
     const sm = this.mats(skin); for (const k in parts) { const hand = k === 'handR' || k === 'handL', b = parts[k].bake(hand ? this.fm : sm.fm, hand ? this.lm : sm.lm); b.traverse(o => o.frustumCulled = false); g.add(b); m.parts[k] = b; }
     if (key === 'nova') m.parts.mag.visible = false;
@@ -133,8 +159,8 @@ const VM = { off: {},
     this.swX = damp(this.swX, clamp(-mdx * .0004, -.02, .02), 11, dt); this.swY = damp(this.swY, clamp(mdy * .0004, -.018, .018), 11, dt);
     this.drawT = Math.min(1, this.drawT + dt / w.draw); if (this.flashT > 0) this.flashT -= dt; this.flash.visible = this.flashT > 0;
     const sp = Math.hypot(pl.vel.x, pl.vel.z) / 5, a = pl.onGround ? Math.min(sp, 1) : 0, ph = pl.bobPhase, e = 1 - Math.pow(1 - this.drawT, 3);
-    const O = VM.off; let x = O.x ?? .13, y = O.y ?? -.13, z = O.z ?? -.64, rx = 0, ry = .012, rz = 0;
-    if (meta.pistol) { x = O.x ?? .1; y = O.y ?? -.1; z = O.z ?? -.5; } if (meta.knife) { x = .13; y = -.13; z = -.3; rx = .5; ry = .7; rz = -.4; } if (meta.nade) { x = .13; y = -.12; z = -.3; }
+    const O = VM.off; let x = O.x ?? .20, y = O.y ?? -.17, z = O.z ?? -.78, rx = 0, ry = .09, rz = -.035;
+    if (meta.pistol) { x = O.x ?? .12; y = O.y ?? -.13; z = O.z ?? -.54; ry = .025; rz = -.018; } if (meta.knife) { x = .13; y = -.13; z = -.3; rx = .5; ry = .7; rz = -.4; } if (meta.nade) { x = .13; y = -.12; z = -.3; }
     x += Math.sin(ph) * .0065 * a + this.swX * .5; y += -Math.abs(Math.cos(ph)) * .007 * a + .004 * a - this.swY * .4 - this.dip - pl.crouchAmt * .012 + clamp(pl.vel.y, -6, 6) * -.0035;
     z += this.kick; rx += this.kickR * .55 + this.swY * .6; ry += this.swX * .8; rz += this.swX * -.9 + Math.sin(ph) * .01 * a;
     rx -= (1 - e) * 1.0; y -= (1 - e) * .22;

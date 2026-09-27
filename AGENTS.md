@@ -4,7 +4,7 @@
 > **架构详解、手感旋钮、扩展方法、已知问题和路线图见 [HANDOFF.md](HANDOFF.md)。**
 
 ## 项目速览
-- 作用:线稿/排线风格的浏览器 FPS(5v5 对 Bot,竞技回合制 + 死斗)。
+- 作用:线稿/排线风格的浏览器 FPS(5v5 / 8v8 / 12v12 或自动人数对 Bot,竞技回合制 + 死斗)。
 - 技术栈:原生 JS + three.js r160,无构建步骤。**零外部依赖**:three.js 与线条 addons 在 `vendor/`,字体(拉丁子集 woff2)在 `vendor/fonts/`,importmap 指向本地。
 - 启动:`python3 -m http.server 8765`(在本目录),打开 http://localhost:8765
 - 调试:URL 加 `?auto` 跳过指针锁定;控制台可直接调用 `startMatch()`、`frame(1/60)` 步进模拟。

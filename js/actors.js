@@ -12,16 +12,24 @@ const eyeY = e => 1.62 - .47 * e.crouchAmt;
 
 function soldierParts(team) {
   if (_skGeo[team]) return _skGeo[team];
-  const col = team === 'red' ? RED : BLUE, U = new Sk('sun'), Hd = new Sk('sun'), Lg = new Sk('sun');
-  U.box(.36, .18, .22, 0, .05, 0, { tone: .33 }); U.box(.4, .44, .24, 0, .36, 0); U.box(.43, .34, .275, 0, .38, 0, { tint: col, tone: 0 });
-  for (let i = 0; i < 3; i++) U.box(.1, .12, .05, -.12 + i * .12, .28, -.16); U.box(.3, .3, .14, 0, .4, .2, { tone: .33 }); U.box(.25, .07, .25, 0, .61, 0, { tint: col, tone: 0 });
-  U.box(.1, .12, .06, -.13, .45, -.16, { tone: .33 }); U.box(.14, .07, .15, .27, .56, 0, { tint: col, tone: 0 }); U.box(.14, .07, .15, -.27, .56, 0, { tint: col, tone: 0 });
-  U.limb([.25, .52, 0], [.3, .28, -.14], .1, .11); U.limb([.3, .28, -.14], [.14, .33, -.38], .09, .095, { tone: .33 }); U.box(.09, .09, .1, .13, .34, -.4, { tone: 1 });
-  U.limb([-.25, .52, 0], [-.27, .27, -.26], .1, .11); U.limb([-.27, .27, -.26], [.08, .37, -.66], .09, .095, { tone: .33 }); U.box(.09, .08, .1, .1, .38, -.68, { tone: 1 });
-  Hd.box(.2, .23, .22, 0, .13, 0, team === 'red' ? { tone: .66 } : {});
-  if (team === 'blue') { Hd.box(.25, .13, .27, 0, .23, .0, { tint: col, tone: 0 }); Hd.box(.26, .025, .3, 0, .17, -.01, { tone: 1 }); Hd.box(.21, .065, .04, 0, .125, -.115, { tint: col, tone: 0 }); Hd.line([.1, .17, .05, .1, .02, .0, -.1, .17, .05, -.1, .02, 0]); }
-  else { Hd.cyl(.15, .135, .06, 8, .02, .27, 0, { tint: col, tone: 0, r: [0, 0, -.18] }); Hd.box(.17, .045, .02, 0, .15, -.112, { tint: PAPER, tone: 0 }); Hd.box(.21, .06, .23, 0, .235, 0, { tint: col, tone: 0 }); Hd.line([.105, .235, .1, .2, .1, .16, .105, .2, .1, .17, .05, .19]); }
-  Lg.box(.17, .44, .2, 0, -.22, 0); Lg.box(.14, .1, .04, 0, -.45, -.11, { tone: 1 }); Lg.box(.15, .42, .17, 0, -.64, 0, { tone: .33 }); Lg.box(.17, .1, .3, 0, -.85, -.04, { tone: 1 }); Lg.box(.1, .14, .06, .09, -.2, 0, { tone: .33 });
+  const col = team === 'red' ? RED : BLUE, U = new Sk('sun'), Hd = new Sk('sun'), Lg = new Sk('sun'), C = { tint: col, tone: 0 };
+  inkBlock(U, .34, .19, .23, 0, .055, 0, { tone: .33 }); inkBlock(U, .42, .43, .25, 0, .35, .015); inkBlock(U, .425, .355, .285, 0, .37, -.005, C);
+  inkBlock(U, .305, .26, .032, 0, .395, -.157, { ...C, bevel: .24 }); inkBlock(U, .36, .06, .25, 0, .11, 0, { tone: 1 }); inkBlock(U, .065, .052, .024, 0, .11, -.14, { tone: .33 });
+  for (const x of [-.155, .155]) { inkLimb(U, [x, .55, -.105], [x, .22, -.15], .04, .02, { tone: .33 }); inkBlock(U, .052, .035, .027, x, .48, -.14, { tone: 1 }); }
+  for (let i = 0; i < 3; i++) { const x = -.11 + i * .11; inkBlock(U, .094, .125, .052, x, .24, -.174, { tone: .33 }); U.line([x - .034, .284, -.203, x + .034, .284, -.203, x - .027, .236, -.203, x + .027, .236, -.203]); }
+  inkBlock(U, .3, .285, .13, 0, .365, .195, { tone: .33 }); inkBlock(U, .19, .18, .025, 0, .365, .27, C); U.line([-.075, .385, .284, .075, .385, .284, -.075, .35, .284, .075, .35, .284]);
+  inkBlock(U, .115, .075, .065, 0, .59, 0, { tone: .33 }); for (const x of [-.245, .245]) { inkBlock(U, .145, .115, .18, x, .535, 0, { ...C, r: [0, 0, x > 0 ? -.18 : .18] }); inkBlock(U, .025, .045, .09, x * 1.21, .527, 0, { tone: 0 }); }
+  inkLimb(U, [.245, .49, 0], [.285, .27, -.13], .13, .13); inkBlock(U, .135, .10, .13, .285, .28, -.14, { tone: .33 }); inkLimb(U, [.285, .27, -.14], [.145, .33, -.37], .105, .11, { tone: .33 }); inkBlock(U, .092, .088, .12, .13, .34, -.4, { tone: 1 });
+  inkLimb(U, [-.245, .49, 0], [-.26, .275, -.24], .13, .13); inkBlock(U, .13, .105, .13, -.26, .275, -.24, { tone: .33 }); inkLimb(U, [-.26, .275, -.24], [.08, .37, -.64], .105, .105, { tone: .33 }); inkBlock(U, .095, .075, .12, .10, .38, -.675, { tone: 1 });
+  inkBlock(U, .07, .10, .033, -.105, .46, -.18, { tone: .33 }); U.line([-.135, .46, -.198, -.085, .46, -.198, -.124, .445, -.198, -.096, .445, -.198]);
+  Hd.add(new THREE.SphereGeometry(.5, 10, 6).scale(.21, .25, .225), new THREE.Matrix4().makeTranslation(0, .13, 0), { tone: team === 'red' ? .33 : 0, ea: 40 });
+  if (team === 'blue') { Hd.add(new THREE.SphereGeometry(.5, 12, 6).scale(.285, .19, .29), new THREE.Matrix4().makeTranslation(0, .225, .005), { ...C, ea: 40 }); inkBlock(Hd, .28, .032, .3, 0, .18, -.012, { tone: 1 }); inkBlock(Hd, .21, .069, .035, 0, .135, -.116, { tint: GLASS, tone: .33 }); inkBlock(Hd, .022, .072, .038, 0, .134, -.118, C); inkBlock(Hd, .145, .075, .055, 0, .067, -.092, { tone: .33 });
+    for (const x of [-.133, .133]) { Hd.cyl(.047, .047, .036, 8, x, .146, .01, { ax: 'x', tone: .33 }); Hd.line([x, .165, .02, x * .6, .035, -.07]); } Hd.poly([[.14, .13, -.015], [.14, .05, -.105], [.085, .05, -.145]]); inkBlock(Hd, .045, .025, .025, .066, .05, -.145, { tone: 1 });
+  } else { Hd.add(new THREE.SphereGeometry(.5, 10, 5).scale(.29, .105, .27), Hd._m(.012, .267, .008, [0, 0, -.15]), { ...C, ea: 40 }); inkBlock(Hd, .224, .035, .238, 0, .226, 0, C); inkBlock(Hd, .174, .035, .021, 0, .155, -.114, { tone: 1 }); for (const x of [-.044, .044]) inkBlock(Hd, .061, .016, .008, x, .157, -.128, { tone: 0 });
+    inkBlock(Hd, .207, .085, .24, 0, .065, .005, { ...C, bevel: .22 }); Hd.line([-.083, .082, -.119, .084, .039, -.119, -.083, .043, -.119, .073, .076, -.119]); inkLimb(Hd, [.09, .04, .08], [.135, -.09, .10], .06, .025, C); inkBlock(Hd, .026, .036, .012, -.048, .253, -.128, { tone: 0 }); }
+  inkLimb(Lg, [0, -.02, .009], [0, -.405, -.015], .185, .21); inkBlock(Lg, .165, .132, .063, 0, -.415, -.101, { tone: .33 }); inkBlock(Lg, .109, .095, .025, 0, -.412, -.137, C); inkLimb(Lg, [0, -.466, -.013], [0, -.806, .016], .158, .172, { tone: .33 });
+  inkBlock(Lg, .105, .155, .065, .089, -.215, .01, { tone: .33 }); Lg.line([.129, -.19, -.017, .129, -.19, .037, .128, -.25, -.017, .128, -.25, .037]); inkBlock(Lg, .172, .105, .275, 0, -.834, -.034, { tone: 1 }); inkBlock(Lg, .179, .034, .286, 0, -.877, -.039, { tone: .33 });
+  for (let i = 0; i < 3; i++) Lg.line([-.045, -.77 - i * .016, -.105 - i * .009, .045, -.77 - i * .016, -.105 - i * .009]);
   return _skGeo[team] = { U, Hd, Lg };
 }
 function buildSoldier(team) {
@@ -36,6 +44,7 @@ function buildSoldier(team) {
   const mark = new THREE.Mesh(new THREE.ConeGeometry(.11, .2, 3), new THREE.MeshBasicMaterial({ color: BLUE, depthTest: false, transparent: true, opacity: .85 })); mark.rotation.x = Math.PI; mark.position.y = 2.2; mark.renderOrder = 4; mark.visible = false; root.add(mark);
   return { root, upper, head, legL, legR, gun, fm, lm, mark, phase: rand(6) };
 }
+function disposeBotModel(b) { if (!b.model) return; const m = b.model; m.root.removeFromParent(); m.fm.dispose(); m.mark.geometry.dispose(); m.mark.material.dispose(); b.model = null; }
 function setEntWeapon(e, key) { e.weapon = key; const w = WEAPONS[key]; e.mag = w.mag || 0; e.reloadT = 0; if (e.model) { const g = e.model.gun; while (g.children.length) g.remove(g.children[0]); g.add(worldGun(key, e.model.fm, e.model.lm)); } }
 function animSoldier(e, dt) {
   const m = e.model, c = e.crouchAmt; m.root.position.copy(e.pos); m.root.rotation.y = e.yaw;
@@ -71,12 +80,12 @@ function botGoal(b, now) {
   let gx, gz; b.holdGoal = null; const obj = botObjective(b, now);
   if (obj && !(b.state === 'hunt' && now - b.lastSeenT < 4 && BOMB.carrier !== b && BOMB.state !== 'planted')) { gx = obj.x; gz = obj.z; b.holdGoal = obj.hold ? obj : null; b.state = 'roam'; }
   else
-  if (G.huntAll || b.state === 'hunt') { let best = null, bd = 1e9; for (const e of G.ents) if (e.alive && e.team !== b.team) { const d = e.pos.distanceToSquared(b.pos); if (d < bd) { bd = d; best = e; } }
-    if (b.state === 'hunt' && now - b.lastSeenT < 6) { gx = b.lastSeen.x; gz = b.lastSeen.z; } else if (best) { gx = best.pos.x + rand(-3, 3); gz = best.pos.z + rand(-3, 3); } b.state = 'roam'; }
+  if (b.state === 'hunt' && now - b.lastSeenT < 6) { gx = b.lastSeen.x; gz = b.lastSeen.z; b.state = 'roam'; b.intent = '搜查最后目击点'; }
   if (gx === undefined) { let tot = 0; for (const p of MAP.points) tot += G.mode === 'dm' ? 1 : p[b.team]; let r = Math.random() * tot, sel = MAP.points[0]; for (const p of MAP.points) { r -= G.mode === 'dm' ? 1 : p[b.team]; if (r <= 0) { sel = p; break; } } gx = sel.x + rand(-3, 3); gz = sel.z + rand(-3, 3); }
-  b.path = navPath(b.pos.x, b.pos.z, gx, gz); b.pi = 1; b.repathT = now + 12; if (!b.path) b.waitT = now + .5;
+  b.path = navPath(b.pos.x, b.pos.z, gx, gz); b.pi = 1; b.repathT = now + 12; if (!b.path) b.waitT = now + .5; if (b.intent === '护送携核') b.repathT = now + 2.5;
 }
 function botSee(b, e) { const ey = b.pos.y + eyeY(b); if (SMOKES.length && smokeBlocks(b.pos.x, ey, b.pos.z, e.pos.x, e.pos.y + 1.3, e.pos.z)) return false; return segClear(b.pos.x, ey, b.pos.z, e.pos.x, e.pos.y + eyeY(e), e.pos.z) || segClear(b.pos.x, ey, b.pos.z, e.pos.x, e.pos.y + .9, e.pos.z); }
+function botLineClear(b, t) { const dx = t.pos.x - b.pos.x, dz = t.pos.z - b.pos.z, l2 = dx * dx + dz * dz; if (l2 < 1) return true; for (const o of G.ents) { if (o === b || !o.alive || o.team !== b.team) continue; const k = ((o.pos.x - b.pos.x) * dx + (o.pos.z - b.pos.z) * dz) / l2; if (k > .015 && k < .98 && Math.abs(o.pos.y - b.pos.y) < 1.3 && Math.hypot(o.pos.x - b.pos.x - dx * k, o.pos.z - b.pos.z - dz * k) < .48) return false; } return true; }
 function botThink(b, now) {
   if (now < (b.blindT || 0)) { b.target = null; b.targetVis = false; return; }
   let best = null, bs = 1e9; const D = DIFFS[G.diff];
@@ -84,7 +93,7 @@ function botThink(b, now) {
     const ang = Math.abs(angDiff(Math.atan2(-dx, -dz), b.yaw)); if (!(d < 3.5 || ang < 1.0 || (now < b.alertT && ang < 1.9) || e === b.target)) continue;
     if (!botSee(b, e)) continue; e.spottedT = now; const s = d * (e === b.target ? .6 : 1); if (s < bs) { bs = s; best = e; } }
   if (best) { if (b.target !== best) { b.target = best; b.reactT = now + D.react * rand(.8, 1.3) * (WEAPONS[b.weapon].scope ? 1.3 : 1); b.aimErr = .075; b.aimHead = Math.random() < D.head; b.burstN = 0; }
-    b.targetVis = true; b.lastSeen.copy(best.pos); b.lastSeenT = now; b.path = null; if (G.intel) G.intel[b.team] = { x: best.pos.x, z: best.pos.z, t: now }; }
+    b.targetVis = true; b.fireClear = botLineClear(b, best); b.lastSeen.copy(best.pos); b.lastSeenT = now; b.path = null; b.intent = b.fireClear ? '压制目视目标' : '让开友军火线'; if (G.intel) G.intel[b.team] = { x: best.pos.x, z: best.pos.z, t: now }; }
   else if (b.target) { b.targetVis = false; if (now - b.lastSeenT > .5 || !b.target.alive) { const alive = b.target.alive; b.target = null; if (alive) { b.state = 'hunt'; botGoal(b, now); } } }
 }
 function botHear(pos, team, radius) { const now = G.now; for (const b of G.bots) { if (!b.alive || b.team === team || b.target) continue; const d = b.pos.distanceTo(pos); if (d > radius) continue;
@@ -101,27 +110,30 @@ function updateBot(b, dt, now) {
   if (now >= b.nextThink) { botThink(b, now); b.nextThink = now + .09 + Math.random() * .06; }
   const w = WEAPONS[b.weapon], D = DIFFS[G.diff], frozen = G.state === 'freeze'; let wx = 0, wz = 0, wantYaw = b.yaw, wantPitch = 0, sp = 4.4 * w.speed, wantCrouch = 0, dist = 0;
   const blind = now < (b.blindT || 0), t = blind ? null : b.target;
+  if (now >= (b.tacticalT || 0)) { b.tacticalT = now + .4; const it = G.intel && G.intel[b.team]; if (!t && G.mode === 'comp' && it && now - it.t < 3 && now - (b.respondedT || -9) > 4 && (b.role === 'rotate' || b.slot % 3 === 0) && Math.hypot(it.x - b.pos.x, it.z - b.pos.z) > 18) { b.path = null; b.waitT = now + (b.slot % 5) * .02; b.respondedT = now; } }
+
   if (G.mode === 'comp' && G.state === 'live') entInteract(b, (canPlant(b) && (!b.targetVis || (b.act && b.act.t > 1.4))) || (canDefuse(b) && (!b.targetVis || BOMB.t < DEFUSE_T + 3 || (b.act && b.act.t > 3.5))), dt);
   if (t && t.alive) {
     const ty = t.pos.y + (b.aimHead ? eyeY(t) : 1.12 * (1 - .27 * t.crouchAmt)), dx = t.pos.x - b.pos.x, dz = t.pos.z - b.pos.z, dy = ty - (b.pos.y + eyeY(b)); dist = Math.hypot(dx, dz);
     wantYaw = Math.atan2(-dx, -dz); wantPitch = Math.atan2(dy, dist); b.aimErr = damp(b.aimErr, .02, 1.5, dt);
-    if (now > b.strafeT) { b.strafeT = now + rand(.35, 1.0); b.strafeDir = dist > 30 && Math.random() < .5 ? 0 : pick([-1, 1]); if (Math.random() < .15 && dist > 12) wantCrouch = 1; b.crouchHold = wantCrouch ? now + rand(.6, 1.4) : 0; }
-    const rx = Math.cos(b.yaw), rz = -Math.sin(b.yaw), fx = -Math.sin(b.yaw), fz = -Math.cos(b.yaw); let f = dist > 38 ? .7 : dist < 5 ? -.6 : 0; if (w.scope) f = dist < 14 ? -.7 : 0;
+    if (now > b.strafeT) { b.strafeT = now + rand(.65, 1.35); b.strafeDir = dist > 30 && Math.random() < .5 ? 0 : pick([-1, 1]); if (Math.random() < .15 && dist > 12) wantCrouch = 1; b.crouchHold = wantCrouch ? now + rand(.6, 1.4) : 0; }
+    const rx = Math.cos(b.yaw), rz = -Math.sin(b.yaw), fx = -Math.sin(b.yaw), fz = -Math.cos(b.yaw); let f = dist > 38 ? .7 : dist < 5 ? -.6 : 0; if (w.scope) f = dist < 14 ? -.7 : 0; if ((b.hp < 35 || b.reloadT > 0) && dist < 18) f = -.7; if (!b.fireClear) b.strafeDir = b.lane >= 0 ? 1 : -1;
     wx = rx * b.strafeDir + fx * f; wz = rz * b.strafeDir + fz * f; if (now < b.burstPause - .05 || b.burstN > 0) { if (dist > 16 || w.scope) { wx *= .15; wz *= .15; } }
     if (now < (b.crouchHold || 0)) wantCrouch = 1;
+    if (Math.abs(b.strafeDir) > 0 && !navLine(b.pos.x, b.pos.z, b.pos.x + rx * b.strafeDir * .9, b.pos.z + rz * b.strafeDir * .9)) { wx -= rx * b.strafeDir; wz -= rz * b.strafeDir; b.strafeDir *= -1; }
     // fire control
-    if (!frozen && !b.act && b.targetVis && now > b.reactT && Math.abs(angDiff(wantYaw, b.yaw)) < .12 && b.reloadT <= 0) {
+    if (!frozen && !b.act && b.targetVis && b.fireClear && now > b.reactT && Math.abs(angDiff(wantYaw, b.yaw)) < .12 && b.reloadT <= 0) {
       if (b.mag <= 0) b.reloadT = w.reload;
       else if (now >= b.nextFire && now >= b.burstPause) {
         const sig = (b.aimErr + dist * .00045 + b.burstN * (w.auto ? .0035 : .002) + Math.hypot(t.vel.x, t.vel.z) * .0028 + Math.hypot(b.vel.x, b.vel.z) * .004) * D.err * (w.scope ? .45 : 1) * (t.isPlayer && t.crouchAmt > .5 ? 1.2 : 1);
         const yw = wantYaw + gauss() * sig, pt = wantPitch + gauss() * sig * .8, cp = Math.cos(pt);
         G.botShoot(b, -Math.sin(yw) * cp, Math.sin(pt), -Math.cos(yw) * cp); b.mag--; b.nextFire = now + w.rate * (w.auto ? 1 : rand(1.4, 2.4)); b.burstN++;
-        if (b.burstN >= b.burstLen) { b.burstN = 0; b.burstLen = w.auto ? (dist < 10 ? 12 : 3 + (Math.random() * 4 | 0)) : 1 + (Math.random() * 2 | 0); b.burstPause = now + rand(.22, .55) * clamp(dist / 22, .5, 1.6); }
+        if (b.burstN >= b.burstLen) { b.burstN = 0; b.burstLen = w.auto ? (dist < 10 ? 10 : dist > 28 ? 2 + (Math.random() * 2 | 0) : 4 + (Math.random() * 3 | 0)) : w.scope ? 1 : 1 + (Math.random() * 2 | 0); b.burstPause = now + rand(.22, .55) * clamp(dist / 22, .5, 1.6); }
       }
     }
   } else if (!frozen) {
     if (!b.path && now > b.waitT) botGoal(b, now);
-    if (b.path) { let n = b.path[b.pi]; if (!n) { b.path = null; b.lookT = 0; if (b.holdGoal) { b.waitT = now + rand(9, 18); b.holdYaw = botHoldYaw(b, b.holdGoal.face); b.holdCrouch = Math.random() < .35; } else { b.waitT = now + rand(.8, 3.5) * (G.huntAll ? .2 : 1); b.holdYaw = null; } }
+    if (b.path) { let n = b.path[b.pi]; if (!n) { b.path = null; b.lookT = 0; if (b.holdGoal) { b.waitT = now + (BOMB.state === 'planted' ? rand(3, 6) : rand(6, 11)); b.holdYaw = botHoldYaw(b, b.holdGoal.face); b.holdCrouch = Math.random() < .35; } else { b.waitT = now + rand(.8, 3.5) * (G.huntAll ? .2 : 1); b.holdYaw = null; } }
       else { const dx = n.x - b.pos.x, dz = n.z - b.pos.z, d = Math.hypot(dx, dz); if (d < .55) b.pi++; else { wx = dx / d; wz = dz / d; wantYaw = Math.atan2(-dx, -dz); } if (now > b.repathT) b.path = null; } }
     else if (now > b.lookT) { b.lookT = now + rand(.7, 1.6); b.lookYaw = b.yaw + rand(-1.6, 1.6); }
     if (!b.path) { wantYaw = b.lookYaw; if (b.holdYaw !== null && b.holdYaw !== undefined) { wantYaw = b.holdYaw + Math.sin(now * .7 + b.rot * 9) * .35; if (b.holdCrouch) wantCrouch = 1; const it = G.intel && G.intel[b.team]; if (it && now - it.t < 1.5 && b.rot < .5 && BOMB.state !== 'planted' && Math.hypot(it.x - b.pos.x, it.z - b.pos.z) > 20) b.waitT = 0; } } if (now < b.alertT && !b.path) wantYaw = b.alertYaw;

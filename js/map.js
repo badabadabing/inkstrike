@@ -12,8 +12,8 @@ const MAP = {
     { n: 'NALLEY', x: 20, z: -17, red: 1, blue: 1 }, { n: 'SALLEY', x: -18, z: 17, red: 1, blue: 1 }
   ],
   zones: [
-    [32, -38, 54, -20, 'A 点 · 高台'], [-54, -38, -30, -20, 'B 点 · 货棚'], [-42, -14, -7, 14, '市集大厅'], [14, -14, 18, 14, '窄巷'],
-    [-7, -38, 7, -26, '中门'], [-7, -26, 7, 38, '中路'], [42, -20, 54, 38, 'A 大道'], [54, 2, 60, 12, '死角'], [-54, -20, -42, 38, 'B 长廊'],
+    [32, -38, 54, -20, 'A 点 · 刻度台'], [-54, -38, -30, -20, 'B 点 · 印运仓'], [-42, -14, -7, 14, '市集大厅'], [14, -14, 18, 14, '窄巷'],
+    [-7, -38, 7, -26, '折页门'], [-7, -26, 7, 38, '中路'], [42, -20, 54, 38, 'A 大道'], [54, 2, 60, 12, '东侧回廊'], [-54, -20, -42, 38, 'B 长廊'],
     [-44, 20, -37, 38, '狙击台'], [-26, 20, -22, 38, '西隧道'], [22, 20, 26, 38, '东隧道'], [-42, 14, 42, 20, '南巷'], [-42, -20, 42, -14, '北巷'],
     [-60, 38, 60, 52, '红方街区'], [-60, -52, 60, -38, '蓝方街区']
   ]
@@ -71,7 +71,7 @@ function buildMap(scene) {
       sk.line([0, .45, .02, L, .45, .02, 0, h - .4, .02, L, h - .4, .02], M);
       if (!b.o.bare) { let t = rr(1, 2.2); while (t < L - 2.4) { const r = R(); if (free(t + .6, 1.5)) { if (r < .2 && !b.o.noDoor) doorAt(M, t); else if (r < .85) windowAt(M, t, 1.15, 1.1, 1.4, r < .4 ? 1 : r < .5 ? 4 : 0); } t += rr(3.2, 5.5); } }
       for (let y = 4.2; y + 1.9 < h; y += 3.1) { let t = rr(.8, 2); while (t < L - 2) { const r = R(); if (free(t + .6, y + .7) && r < .85) windowAt(M, t, y, 1.1, 1.5, r < .25 ? 1 : r < .38 ? 2 : r < .5 ? 3 : 0); t += rr(2.6, 4.2); } }
-      for (let i = 0; i < L / 5; i++) { const t = rr(.5, L - 1.5), y = rr(.7, h - 1), a = []; for (let k = 0; k < 5; k++) { const ox = rr(0, 1.2), oy = k * .16; a.push(t + ox, y + oy, .02, t + ox + rr(.25, .5), y + oy, .02); } sk.line(a, M); }
+      for (let i = 0; i < L / 9; i++) { const t = rr(.5, L - 1.5), y = rr(2.6, Math.max(2.7, h - 1)), a = []; for (let k = 0; k < 3; k++) { const ox = rr(0, 1.2), oy = k * .16; a.push(t + ox, y + oy, .02, t + ox + rr(.25, .5), y + oy, .02); } sk.line(a, M); }
       if (R() < .5) { const t = rr(.4, L - .4); sk.line([t, 0, .08, t, h, .08, t + .1, 0, .08, t + .1, h, .08], M); }
     });
   }
@@ -209,7 +209,7 @@ function buildMap(scene) {
   crate(-5.6, -9, 1.4); crate(-5.7, -7.6, 1.0); crate(5.8, 22, 1.3); sandbags(1, -15.6, 5.4, -14.8); sandbags(-5.4, 25, -1, 25.8); barrel(6.2, -3, BLUE); barrel(6.3, -3.9);
   // A long (east lane)
   solid(42, 23.5, 46, 24.5, 0, 5); solid(50, 23.5, 54, 24.5, 0, 5); solid(46, 23.5, 50, 24.5, 3.5, 5); archLines(46, 50, 24, 3.5); bus(44.4, 9);
-  crate(52.6, -6, 1.6); crate(52.9, -4.4, 1.0); crate(43, -14.5, 1.3); crate(52.8, 30, 1.3); crate(51.5, 30.2, 1.0); barrel(58.8, 3, RED); barrel(59, 10.8); crate(58.6, 7, 1.4); sandbags(47, -2.4, 50.5, -1.6);
+  crate(52.6, -6, 1.6); crate(52.9, -4.4, 1.0); crate(43, -14.5, 1.3); crate(52.8, 30, 1.3); crate(51.5, 30.2, 1.0); barrel(58.8, 3, RED); barrel(59, 10.8); crate(59, 7, 1.4); sandbags(47, -2.4, 50.5, -1.6);
   // B lane (west)
   solid(-54, 7.5, -50, 8.5, 0, 5); solid(-46, 7.5, -42, 8.5, 0, 5); solid(-50, 7.5, -46, 8.5, 3.5, 5); archLines(-50, -46, 8, 3.5);
   crate(-52.9, -3, 1.5); crate(-52.9, -1.5, 1.0); crate(-43, 17, 1.3); solid(-43.6, -12, -42.2, -9.6, 0, 1.3, { tone: .33 }); sk.box(1.5, .08, 2.5, -42.9, 1.36, -10.8, { r: [0, 0, .12] }); sandbags(-53.5, 20, -50, 20.8); crate(-47, -12, 1.2);
@@ -222,14 +222,31 @@ function buildMap(scene) {
   palm(-53, -19); palm(53, 37); palm(6, 37);
   for (const [x, z, dx, dz] of [[-20, 38.4, 0, 1], [20, 38.4, 0, 1], [-20, -38.4, 0, -1], [20, -38.4, 0, -1], [-7.3, 0, 1, 0], [7.3, -20, -1, 0], [41.7, 0, 1, 0], [-41.7, -17, -1, 0], [54.3, -12, -1, 0], [-54.3, 28, 1, 0]]) lamp(x, z, dx, dz);
   bunting(-7, 5.6, 10, 7, 5.2, 10); bunting(-7, 5.2, -10, 7, 5.8, -10); bunting(-20, 5.5, 14, -20, 5.2, 20); bunting(30, 5.5, 14, 30, 5.8, 20); bunting(42, 5.6, 0, 54, 5.4, 0); bunting(-54, 5.4, -4, -42, 5.2, -4); bunting(-10, 5.4, -20, -10, 5.6, -14); bunting(-60, 6, 45, -30, 6.5, 38); bunting(30, 6, -38, 60, 6.5, -45);
+  // District silhouettes sit inside existing wall footprints; combat lanes stay open.
+  solid(54, -36, 62, -28, 0, 15); sk.box(8.5, .35, 8.5, 58, 10, -32); sk.box(8.5, .35, 8.5, 58, 15, -32); sk.cone(5.3, 2.7, 4, 58, 16.5, -32, { r: [0, Math.PI / 4, 0] });
+  for (const z of [-35.5, -28.5]) sk.box(.14, 5, .28, 53.92, 12.5, z, { tone: .33 });
+  sk.cyl(1.75, 1.75, .16, 32, 53.83, 12.4, -32, { ax: 'x', tone: 0 });
+  { const a = []; for (let i = 0; i < 12; i++) { const t = i / 12 * Math.PI * 2, r = i % 3 ? 1.44 : 1.28; a.push(53.73, 12.4 + Math.cos(t) * r, -32 + Math.sin(t) * r, 53.73, 12.4 + Math.cos(t) * 1.6, -32 + Math.sin(t) * 1.6); } a.push(53.72, 12.4, -32, 53.72, 13.38, -32.48, 53.72, 12.4, -32, 53.72, 11.82, -31.12); sk.line(a); }
+  solid(-30, -36, -20, -22, 0, 10); sk.box(.16, .3, 14.5, -30.1, 9.5, -29, { tone: .33 });
+  for (const z of [-36, -29]) { sk.quad([-30, 10, z], [-20, 10, z], [-20, 12, z + 6], [-30, 12, z + 6], .33); sk.quad([-30, 12, z + 6], [-20, 12, z + 6], [-20, 10, z + 6], [-30, 10, z + 6], 0, GLASS); sk.tri([-30, 10, z], [-30, 12, z + 6], [-30, 10, z + 6], .33); sk.tri([-20, 10, z], [-20, 10, z + 6], [-20, 12, z + 6], .33); sk.poly([[-30, 10, z], [-30, 12, z + 6], [-20, 12, z + 6], [-20, 10, z]], true); sk.line([-30, 10, z + 6, -30, 12, z + 6, -20, 10, z + 6, -20, 12, z + 6]); }
+  for (const z of [-35.8, -22.2]) { sk.box(.3, .4, 12.4, -36.2, 4.2, z, { r: [0, Math.PI / 2, 0], tone: .33 }); sk.line([-42, 4.0, z, -39, 4.5, z, -39, 4.5, z, -36, 4, z, -36, 4, z, -33, 4.5, z, -33, 4.5, z, -30, 4, z]); }
+  solid(-7, -27, 7, -25, 4.2, 7); sk.box(14.5, .3, 2.5, 0, 7.1, -26); sk.box(1, 4.2, .1, -5.5, 2.1, -25.44); sk.box(1, 4.2, .1, 5.5, 2.1, -25.44);
+  sk.poly([[-2, 7.3, -25], [0, 8.4, -25], [0, 7.3, -25], [2, 8.4, -25], [2, 7.3, -25]], false);
+  // One coherent wayfinding system: large site identity, then route confirmation.
+  sign('A · 刻度台', 53.77, 8.5, -32, -Math.PI / 2, 6.6, 1.2, { bg: '#f5f2ea', border: 5, color: '#e9a520', font: 'bold 68px sans-serif' });
+  sign('B · 印运仓', -30.15, 7.8, -29, -Math.PI / 2, 7, 1.3, { bg: '#f5f2ea', border: 5, color: '#e9a520', font: 'bold 68px sans-serif' });
+  sign('A →', 15, 3, 38.07, 0, 3.8, 1.2, { bg: '#f5f2ea', border: 5, color: '#e9a520' }); sign('← B', -15, 3, 38.07, 0, 3.8, 1.2, { bg: '#f5f2ea', border: 5, color: '#e9a520' });
+  sign('← A', 14, 3.2, -38.07, Math.PI, 3.8, 1.2, { bg: '#f5f2ea', border: 5, color: '#e9a520' }); sign('B →', -15, 3.2, -38.07, Math.PI, 3.8, 1.2, { bg: '#f5f2ea', border: 5, color: '#e9a520' });
+  sign('A · 刻度台', 48, 4.3, 24.57, 0, 4.6, .9, { bg: '#f5f2ea', border: 5, color: '#e9a520', font: 'bold 66px sans-serif' }); sign('B · 印运仓', -48, 4.3, 8.57, 0, 4.6, .9, { bg: '#f5f2ea', border: 5, color: '#e9a520', font: 'bold 66px sans-serif' });
+  sign('折页市集', -24, 4.7, 14.07, 0, 5.4, 1, { bg: '#f5f2ea', border: 5 });
   // signs & painted marks
   sign('A', 28.06, 3.6, -29, Math.PI / 2, 2.6, 2.6, { w: 256, h: 256, color: '#e9a520', stencil: 40 }); sign('B', -30.06, 2.9, -29, -Math.PI / 2, 2.4, 2.4, { w: 256, h: 256, color: '#e9a520', stencil: 40 });
   sign('A', 45, 1.03, -30, 0, 5, 5, { w: 256, h: 256, color: '#e9a520', flat: true, stencil: 40 }); sign('B', -37, .03, -26, 0, 5, 5, { w: 256, h: 256, color: '#e9a520', flat: true, stencil: 40 });
   sign('市集 MARKET', -6.94, 4.3, 0, Math.PI / 2, 5.2, 1.0, { border: 6, bg: '#f5f2ea' }); sign('← A', 6.94, 2.6, -22, -Math.PI / 2, 1.6, .6, { w: 256, h: 96, color: '#e9a520' });
   targetSign(0, 2.3, 51.94, Math.PI, 4.2);
-  sign('PAPER TOWN', 0, 3.6, -25.44, 0, 3.6, .7, { border: 6, bg: '#f5f2ea' }); sign('B →', -6.94, 2.6, -22, Math.PI / 2, 1.6, .6, { w: 256, h: 96, color: '#e9a520' });
+  sign('折页门', 0, 5.65, -24.94, 0, 4.8, 1.1, { border: 6, bg: '#f5f2ea' }); sign('PAPER TOWN', 0, 5.65, -27.06, Math.PI, 5.5, 1.0, { border: 6, bg: '#f5f2ea', font: 'bold 60px sans-serif' }); sign('B →', -6.94, 2.6, -22, Math.PI / 2, 1.6, .6, { w: 256, h: 96, color: '#e9a520' });
   { const a = []; for (let x = -58; x < 58; x += 5) { a.push(x, .015, 45, x + 2, .015, 45, x, .015, -45, x + 2, .015, -45); } for (const [cx, cz, y, r] of [[45, -30, 1.016, 3.4], [-37, -26, .016, 3.4]]) for (let i = 0; i < 24; i++) { const p = i / 24 * 6.2832, q = (i + .6) / 24 * 6.2832; a.push(cx + Math.cos(p) * r, y, cz + Math.sin(p) * r, cx + Math.cos(q) * r, y, cz + Math.sin(q) * r); }
-    for (let i = 0; i < 700; i++) { const x = rr(-60, 60), z = rr(-52, 52); if (inSolid(x, .2, z)) continue; const an = rr(0, 6.28), l = rr(.06, .3); a.push(x, .015, z, x + Math.cos(an) * l, .015, z + Math.sin(an) * l); if (R() < .15) a.push(x, .015, z, x + rr(-.8, .8), .015, z + rr(-.8, .8)); } sk.line(a); }
+    for (let i = 0; i < 280; i++) { const x = rr(-60, 60), z = rr(-52, 52); if (inSolid(x, .2, z)) continue; const an = rr(0, 6.28), l = rr(.06, .3); a.push(x, .015, z, x + Math.cos(an) * l, .015, z + Math.sin(an) * l); if (R() < .15) a.push(x, .015, z, x + rr(-.8, .8), .015, z + rr(-.8, .8)); } sk.line(a); }
   BLD.forEach(decorate);
   // skyline beyond the walls
   for (let i = 0; i < 40; i++) { const a = i / 40 * 6.2832 + rr(0, .1), r = rr(82, 135), w = rr(8, 16), h = rr(9, 24), x = Math.cos(a) * r * 1.1, z = Math.sin(a) * r; sk.box(w, h, w, x, h / 2, z);
@@ -253,7 +270,7 @@ function buildMap(scene) {
 /* ---------------- collision ---------------- */
 function buildBuckets() {
   const B = MAP.buckets = []; for (let i = 0; i < MAP.BW * MAP.BH; i++) B.push([]);
-  for (const s of MAP.solids) { const i1 = clamp(Math.floor((s.x1 - 1.5 + 72) / 8), 0, MAP.BW - 1), i2 = clamp(Math.floor((s.x2 + 1.5 + 72) / 8), 0, MAP.BW - 1), j1 = clamp(Math.floor((s.z1 - 1.5 + 64) / 8), 0, MAP.BH - 1), j2 = clamp(Math.floor((s.z2 + 1.5 + 64) / 8), 0, MAP.BH - 1);
+  let rid = 0; for (const s of MAP.solids) { s.rayId = rid++; s.rayStamp = 0; const i1 = clamp(Math.floor((s.x1 - 1.5 + 72) / 8), 0, MAP.BW - 1), i2 = clamp(Math.floor((s.x2 + 1.5 + 72) / 8), 0, MAP.BW - 1), j1 = clamp(Math.floor((s.z1 - 1.5 + 64) / 8), 0, MAP.BH - 1), j2 = clamp(Math.floor((s.z2 + 1.5 + 64) / 8), 0, MAP.BH - 1);
     for (let i = i1; i <= i2; i++) for (let j = j1; j <= j2; j++) B[j * MAP.BW + i].push(s); }
 }
 MAP.near = (x, z) => MAP.buckets[clamp(Math.floor((z + 64) / 8), 0, MAP.BH - 1) * MAP.BW + clamp(Math.floor((x + 72) / 8), 0, MAP.BW - 1)];
@@ -283,7 +300,7 @@ function moveEntity(e, dt) {
 }
 /* ray vs world. returns hit record (shared) or null */
 const _hit = { t: 0, tx: 0, nx: 0, ny: 0, nz: 0, s: null };
-function rayWorld(ox, oy, oz, dx, dy, dz, maxT) {
+function rayWorldLinear(ox, oy, oz, dx, dy, dz, maxT) {
   let best = maxT, bs = null, bn = 0, btx = 0; const ix = 1 / dx, iy = 1 / dy, iz = 1 / dz, S = MAP.solids;
   for (let i = 0; i < S.length; i++) { const s = S[i];
     let t1 = (s.x1 - ox) * ix, t2 = (s.x2 - ox) * ix, tn, tf, ax = 0; if (t1 > t2) { const q = t1; t1 = t2; t2 = q; } tn = t1; tf = t2;
@@ -293,6 +310,30 @@ function rayWorld(ox, oy, oz, dx, dy, dz, maxT) {
   if (dy < 0) { const t = -oy / dy; if (t < best) { _hit.t = t; _hit.tx = t + 99; _hit.nx = 0; _hit.ny = 1; _hit.nz = 0; _hit.s = null; return _hit; } }
   if (!bs) return null;
   _hit.t = best; _hit.tx = btx; _hit.s = bs; _hit.nx = bn === 0 ? -Math.sign(dx) : 0; _hit.ny = bn === 1 ? -Math.sign(dy) : 0; _hit.nz = bn === 2 ? -Math.sign(dz) : 0; return _hit;
+}
+let _raySeq = 0;
+function rayWorld(ox, oy, oz, dx, dy, dz, maxT) {
+  // Preserve legacy slab behavior for exactly parallel rays, including face-boundary ties.
+  if (!dx || !dy || !dz) return rayWorldLinear(ox, oy, oz, dx, dy, dz, maxT);
+  let best = maxT, bs = null, bn = 0, btx = 0, bid = Infinity, lo = 0, hi = maxT; const ix = 1 / dx, iy = 1 / dy, iz = 1 / dz, stamp = ++_raySeq;
+  let a = (-72 - ox) * ix, b = (72 - ox) * ix; if (a > b) { const q = a; a = b; b = q; } lo = Math.max(lo, a); hi = Math.min(hi, b);
+  a = (-64 - oz) * iz; b = (64 - oz) * iz; if (a > b) { const q = a; a = b; b = q; } lo = Math.max(lo, a); hi = Math.min(hi, b);
+  if (lo <= hi) {
+    let ci = clamp(Math.floor((ox + dx * lo + 72) / 8), 0, MAP.BW - 1), cj = clamp(Math.floor((oz + dz * lo + 64) / 8), 0, MAP.BH - 1), t = lo;
+    const sx = dx > 0 ? 1 : -1, sz = dz > 0 ? 1 : -1, txd = Math.abs(8 * ix), tzd = Math.abs(8 * iz); let tx = (-72 + (ci + (sx > 0 ? 1 : 0)) * 8 - ox) * ix, tz = (-64 + (cj + (sz > 0 ? 1 : 0)) * 8 - oz) * iz;
+    while (ci >= 0 && cj >= 0 && ci < MAP.BW && cj < MAP.BH && t <= hi && t <= best) {
+      const near = MAP.buckets[cj * MAP.BW + ci];
+      for (let i = 0; i < near.length; i++) { const s = near[i]; if (s.rayStamp === stamp) continue; s.rayStamp = stamp;
+        let t1 = (s.x1 - ox) * ix, t2 = (s.x2 - ox) * ix, tn, tf, ax = 0; if (t1 > t2) { const q = t1; t1 = t2; t2 = q; } tn = t1; tf = t2;
+        t1 = (s.y1 - oy) * iy; t2 = (s.y2 - oy) * iy; if (t1 > t2) { const q = t1; t1 = t2; t2 = q; } if (t1 > tn) { tn = t1; ax = 1; } if (t2 < tf) tf = t2; if (tn > tf) continue;
+        t1 = (s.z1 - oz) * iz; t2 = (s.z2 - oz) * iz; if (t1 > t2) { const q = t1; t1 = t2; t2 = q; } if (t1 > tn) { tn = t1; ax = 2; } if (t2 < tf) tf = t2;
+        if (tn > tf || tn < 0 || tn > best || (tn === best && (!bs || s.rayId >= bid))) continue; best = tn; bs = s; bn = ax; btx = tf; bid = s.rayId;
+      }
+      if (tx < tz) { t = tx; tx += txd; ci += sx; } else if (tz < tx) { t = tz; tz += tzd; cj += sz; } else { t = tx; tx += txd; tz += tzd; ci += sx; cj += sz; }
+    }
+  }
+  if (dy < 0) { const t = -oy / dy; if (t < best) { _hit.t = t; _hit.tx = t + 99; _hit.nx = 0; _hit.ny = 1; _hit.nz = 0; _hit.s = null; return _hit; } }
+  if (!bs) return null; _hit.t = best; _hit.tx = btx; _hit.s = bs; _hit.nx = bn === 0 ? -Math.sign(dx) : 0; _hit.ny = bn === 1 ? -Math.sign(dy) : 0; _hit.nz = bn === 2 ? -Math.sign(dz) : 0; return _hit;
 }
 function segClear(ax, ay, az, bx, by, bz) { const dx = bx - ax, dy = by - ay, dz = bz - az, d = Math.hypot(dx, dy, dz); if (d < .01) return true; return !rayWorld(ax, ay, az, dx / d || 1e-9, dy / d || 1e-9, dz / d || 1e-9, d - .05); }
 
@@ -317,16 +358,16 @@ function navSnap(x, z) { const W = MAP.W; let c = navIdx(x, z); if (MAP.reach[c]
 const navPos = c => ({ x: MAP.ox + (c % MAP.W) + .5, z: MAP.oz + ((c / MAP.W) | 0) + .5, y: MAP.fh[c] });
 function navLine(x0, z0, x1, z1) { const d = Math.hypot(x1 - x0, z1 - z0), n = Math.ceil(d / .4); let ph = MAP.fh[navIdx(x0, z0)];
   for (let i = 1; i <= n; i++) { const c = navIdx(lerp(x0, x1, i / n), lerp(z0, z1, i / n)); if (!MAP.reach[c] || MAP.pen[c] > 1.3 || Math.abs(MAP.fh[c] - ph) > .56) return false; ph = MAP.fh[c]; } return true; }
-const _nav = { g: null, from: null, stamp: null, n: 0 };
+const _nav = { g: null, from: null, stamp: null, closed: null, n: 0 };
 function navPath(x0, z0, x1, z1) {
-  const W = MAP.W, H = MAP.H, N = W * H; if (!_nav.g) { _nav.g = new Float32Array(N); _nav.from = new Int32Array(N); _nav.stamp = new Uint32Array(N); }
-  const g = _nav.g, from = _nav.from, stamp = _nav.stamp, id = ++_nav.n, s = navSnap(x0, z0), t = navSnap(x1, z1), ti = t % W, tj = (t / W) | 0;
+  const W = MAP.W, H = MAP.H, N = W * H; if (!_nav.g) { _nav.g = new Float32Array(N); _nav.from = new Int32Array(N); _nav.stamp = new Uint32Array(N); _nav.closed = new Uint32Array(N); }
+  const g = _nav.g, from = _nav.from, stamp = _nav.stamp, closed = _nav.closed, id = ++_nav.n, s = navSnap(x0, z0), t = navSnap(x1, z1), ti = t % W, tj = (t / W) | 0;
   const heap = [], hk = []; const push = (c, f) => { let i = heap.length; heap.push(c); hk.push(f); while (i > 0) { const p = (i - 1) >> 1; if (hk[p] <= f) break; heap[i] = heap[p]; hk[i] = hk[p]; heap[p] = c; hk[p] = f; i = p; } };
   const pop = () => { const top = heap[0], lc = heap.pop(), lf = hk.pop(); if (heap.length) { let i = 0; heap[0] = lc; hk[0] = lf; for (;;) { let l = 2 * i + 1, r = l + 1, m = i; if (l < heap.length && hk[l] < hk[m]) m = l; if (r < heap.length && hk[r] < hk[m]) m = r; if (m === i) break; const c = heap[i], f = hk[i]; heap[i] = heap[m]; hk[i] = hk[m]; heap[m] = c; hk[m] = f; i = m; } } return top; };
   g[s] = 0; stamp[s] = id; from[s] = -1; push(s, 0); let found = false, iter = 0;
-  while (heap.length && iter++ < 20000) { const c = pop(); if (c === t) { found = true; break; } const ci = c % W, cj = (c / W) | 0;
+  while (heap.length && iter < 20000) { const c = pop(); if (closed[c] === id) continue; closed[c] = id; iter++; if (c === t) { found = true; break; } const ci = c % W, cj = (c / W) | 0;
     for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) { if (!a && !b) continue; const ni = ci + a, nj = cj + b; if (ni < 0 || nj < 0 || ni >= W || nj >= H) continue; const n = nj * W + ni;
-      if (!MAP.reach[n] || Math.abs(MAP.fh[n] - MAP.fh[c]) > .56) continue; if (a && b && (!MAP.reach[cj * W + ni] || !MAP.reach[nj * W + ci] || MAP.fh[cj * W + ni] !== MAP.fh[c] || MAP.fh[nj * W + ci] !== MAP.fh[c])) continue;
+      if (!MAP.reach[n] || closed[n] === id || Math.abs(MAP.fh[n] - MAP.fh[c]) > .56) continue; if (a && b && (!MAP.reach[cj * W + ni] || !MAP.reach[nj * W + ci] || MAP.fh[cj * W + ni] !== MAP.fh[c] || MAP.fh[nj * W + ci] !== MAP.fh[c])) continue;
       const ng = g[c] + (a && b ? 1.414 : 1) + MAP.pen[n]; if (stamp[n] === id && g[n] <= ng) continue; g[n] = ng; stamp[n] = id; from[n] = c; push(n, ng + Math.hypot(ni - ti, nj - tj)); } }
   if (!found) return null; const out = []; for (let c = t; c !== -1; c = from[c]) out.push(navPos(c)); out.reverse();
   // string-pull

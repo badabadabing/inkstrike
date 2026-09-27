@@ -28,7 +28,7 @@ const server = http.createServer((q, r) => { let f = path.join(ROOT, decodeURICo
   if (res.comp.ends.length < 2) fails.push('competitive: fewer than 2 rounds resolved');
   if (res.dm.score.red + res.dm.score.blue < 3) fails.push('deathmatch: almost no kills');
   if (res.range.dummies !== 5) fails.push('range: dummies missing');
-  if (res.unreachable.some(n => n !== 'PIT')) fails.push('nav: unreachable points ' + res.unreachable);
+  if (res.unreachable.length) fails.push('nav: unreachable points ' + res.unreachable);
   console.log(JSON.stringify(res, null, 2));
   if (fails.length) { console.error('\nSMOKE FAIL\n- ' + fails.join('\n- ')); process.exit(1); } console.log('\nSMOKE OK');
 })().catch(e => { console.error(e); server.close(); process.exit(1); });

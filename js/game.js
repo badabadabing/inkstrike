@@ -3,7 +3,7 @@
 const $ = id => document.getElementById(id);
 const G = { state: 'menu', mode: 'comp', diff: 1, team: 'blue', ents: [], bots: [], player: null, now: 0, timescale: 1, score: { red: 0, blue: 0 }, round: 0, timer: 0, huntAll: false, paused: false,
   keys: {}, fire: false, alt: false, altEdge: false, fireEdge: false, mdx: 0, mdy: 0, buyOpen: false, shake: 0, nades: [], feed: [], dmgDirs: [], hitT: 0, hitKill: false, splats: [], lossStreak: { red: 0, blue: 0 },
-  set: Object.assign({ sens: 1, fov: 84, vol: .7, xh: 'ink', xhStatic: 0, xhSize: 1 }, JSON.parse(localStorage.getItem('inkstrike') || '{}')), noLock: location.search.includes('auto') };
+  set: Object.assign({ sens: 1, fov: 84, vol: .7, xh: 'ink', xhStatic: 0, xhSize: 1, quality: 'balanced', motion: .35, battleSize: 'auto', autoTeamSize: null }, JSON.parse(localStorage.getItem('inkstrike') || '{}')), mapOpen: false, teamSize: 8, perf: { samples: [], cpu: [], pending: null, p90: 0, ms: 0, elapsed: 0 }, noLock: location.search.includes('auto') };
 const WIN_ROUNDS = 7, ROUND_TIME = 110, FREEZE = 6, DM_TIME = 480, DM_KILLS = 40;
 let renderer, scene, camera, fxc, fxg, radar, rg;
 
@@ -14,11 +14,12 @@ function boot() {
   scene = new THREE.Scene(); scene.fog = new THREE.FogExp2(PAPER, FOG_D); camera = new THREE.PerspectiveCamera(G.set.fov, 1, .06, 1400); camera.rotation.order = 'YXZ';
   fxc = $('fx'); fxg = fxc.getContext('2d'); radar = $('radar'); rg = radar.getContext('2d');
   buildMap(scene); FX.init(scene); bombInit(scene); VM.init(1); bindInput(); bindUI(); PROG.bind(); if ((('ontouchstart' in window || navigator.maxTouchPoints > 0) && matchMedia('(pointer: coarse)').matches) || location.search.includes('touch')) initTouch();
-  makeIcons(); onResize(); addEventListener('resize', onResize);
+  makeIcons(); applyQuality(); updateBrief(); onResize(); addEventListener('resize', onResize);
   camera.position.set(-20, 26, 62); camera.lookAt(6, 0, -6);
   $('loading').style.display = 'none'; $('menu').classList.add('on');
-  let last = performance.now(); const loop = t => { requestAnimationFrame(loop); const dt = Math.min(.05, (t - last) / 1000); last = t; frame(dt); }; requestAnimationFrame(loop);
+  let last = performance.now(); const loop = t => { requestAnimationFrame(loop); const elapsed = t - last, dt = Math.min(.05, elapsed / 1000); last = t; const at = performance.now(); if (!G.manualStep) frame(dt); samplePerformance(elapsed, performance.now() - at); }; requestAnimationFrame(loop);
 }
+function applyQuality() { renderer.setPixelRatio(Math.min(devicePixelRatio, ({ low: 1, balanced: 1.5, high: 2 })[G.set.quality] || 1.5)); if (camera && VM.cam) onResize(); }
 function onResize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h); camera.aspect = VM.cam.aspect = w / h; camera.updateProjectionMatrix(); VM.cam.updateProjectionMatrix(); fxc.width = w; fxc.height = h; for (const m of LINE_MATS) m.resolution.set(w, h); }
 function makeIcons() {
   const s = new THREE.Scene(), cam = new THREE.OrthographicCamera(-.66, .66, .24, -.24, .1, 20), fm = fillMat({ objSpace: true, freq: 75, fog: 0, hatch: .8, hw: .13 }), lm = lineMat({ width: 1.6, fog: false }); cam.position.set(5, 0, 0); cam.lookAt(0, 0, 0);
@@ -31,21 +32,23 @@ function makeIcons() {
 
 /* ---------------- input ---------------- */
 function bindInput() {
-  addEventListener('keydown', e => { if (e.code === 'Escape' && G.noLock && G.state !== 'menu' && G.state !== 'matchEnd') setPause(!G.paused); if (e.code === 'Tab' || (G.state !== 'menu' && ['Space', 'ControlLeft', 'KeyF', 'KeyE'].includes(e.code))) e.preventDefault(); if (e.repeat) return; G.keys[e.code] = true; onKey(e.code); });
+  addEventListener('keydown', e => { if (e.code === 'Escape') { if (G.mapOpen) return toggleMap(false); if (G.buyOpen) return closeBuy(); if (G.state !== 'menu' && G.state !== 'matchEnd' && (G.noLock || G.paused)) { setPause(!G.paused); return; } } if (['INPUT', 'SELECT'].includes(e.target.tagName)) return; if (e.code === 'Tab' || (G.state !== 'menu' && ['Space', 'ControlLeft', 'KeyF', 'KeyE'].includes(e.code))) e.preventDefault(); if (e.repeat) return; if (G.paused || G.buyOpen || G.mapOpen) { onKey(e.code); return; } G.keys[e.code] = true; onKey(e.code); });
   addEventListener('keyup', e => { G.keys[e.code] = false; if (e.code === 'Tab') $('board').classList.remove('on'); });
   addEventListener('mousemove', e => { if (!locked()) return; const pl = G.player; if (!pl) return; const k = .0021 * G.set.sens * (camera.fov / G.set.fov); pl.yaw -= e.movementX * k; pl.pitch = clamp(pl.pitch - e.movementY * k, -1.54, 1.54); G.mdx += e.movementX; G.mdy += e.movementY; });
   addEventListener('mousedown', e => { if (!locked()) { if (e.target === renderer.domElement && G.state !== 'menu' && !G.paused) lock(); return; } if (e.button === 0) { G.fire = true; G.fireEdge = true; } if (e.button === 2) { G.alt = true; G.altEdge = true; } });
   addEventListener('mouseup', e => { if (e.button === 0) G.fire = false; if (e.button === 2) G.alt = false; });
   addEventListener('contextmenu', e => e.preventDefault());
   addEventListener('wheel', e => { if (!locked() || !G.player || !G.player.alive) return; const pl = G.player, order = weaponOrder(pl), i = order.indexOf(pl.cur); switchTo(order[(i + (e.deltaY > 0 ? 1 : order.length - 1)) % order.length]); }, { passive: true });
-  document.addEventListener('pointerlockchange', () => { if (!document.pointerLockElement && G.state !== 'menu' && G.state !== 'matchEnd' && !G.noLock) setPause(true); });
+  document.addEventListener('pointerlockchange', () => { if (!document.pointerLockElement && G.state !== 'menu' && G.state !== 'matchEnd' && !G.noLock && !G.buyOpen && !G.mapOpen && !G.uiUnlock) setPause(true); });
 }
-const locked = () => G.noLock || document.pointerLockElement === renderer.domElement;
+const locked = () => !G.paused && !G.buyOpen && !G.mapOpen && G.state !== 'menu' && G.state !== 'matchEnd' && (G.noLock || document.pointerLockElement === renderer.domElement);
 function lock() { if (G.noLock) return; const el = renderer.domElement, fail = () => { G.noLock = true; banner('鼠标未锁定', '当前环境不支持指针锁定 · 建议用 Chrome / Safari 直接打开以获得完整操控', 'lose'); };
   try { const p = el.requestPointerLock({ unadjustedMovement: true }); if (p && p.catch) p.catch(() => { try { const q = el.requestPointerLock(); if (q && q.catch) q.catch(fail); } catch (e) { fail(); } }); } catch (e) { fail(); } }
-function setPause(v) { G.paused = v; $('pause').classList.toggle('on', v); if (!v) lock(); G.fire = G.alt = false; G.keys = {}; }
+function clearInput() { G.fire = G.alt = G.fireEdge = G.altEdge = false; G.keys = {}; G.mdx = G.mdy = 0; if (TOUCH.on) touchReset(); }
+function unlockUI() { if (document.pointerLockElement) { G.uiUnlock = true; document.exitPointerLock(); setTimeout(() => G.uiUnlock = false, 100); } clearInput(); }
+function setPause(v) { G.paused = v; $('pause').classList.toggle('on', v); clearInput(); if (v) { G.mapOpen = false; $('tactical').classList.remove('on'); G.buyOpen = false; $('buy').classList.remove('on'); unlockUI(); } else lock(); }
 function onKey(c) {
-  const pl = G.player; if (G.state === 'menu' || !pl || G.paused) return;
+  if (c === 'KeyM' && !G.paused) { toggleMap(); return; } const pl = G.player; if (G.state === 'menu' || !pl || G.paused || G.mapOpen) return;
   if (c === 'Tab') { drawBoard(); $('board').classList.add('on'); return; }
   if (c === 'KeyB') { toggleBuy(); return; }
   if (G.buyOpen) { const n = c === 'Digit0' ? 10 : +c.replace('Digit', ''); if (n >= 1 && n <= BUY_LIST.length) buy(BUY_LIST[n - 1]); return; }
@@ -65,7 +68,7 @@ function updatePlayer(dt) {
   const pl = G.player, now = G.now, k = G.keys, w = WEAPONS[pl.cur], frozen = G.state === 'freeze';
   const wantC = (k.KeyC || k.ControlLeft) ? 1 : 0; let tc = wantC; if (!wantC && pl.crouchAmt > .05) { const h = pl.hgt; pl.hgt = 1.8; if (entOverlap(pl, pl.pos.x, pl.pos.y, pl.pos.z, MAP.near(pl.pos.x, pl.pos.z))) tc = 1; pl.hgt = h; }
   const oh = pl.hgt; pl.crouchAmt = damp(pl.crouchAmt, tc, 13, dt); pl.hgt = 1.8 - .45 * pl.crouchAmt; if (!pl.onGround) pl.pos.y += oh - pl.hgt;   // crouch-jump: tuck the legs up
-  let f = (k.KeyW ? 1 : 0) - (k.KeyS ? 1 : 0), s = (k.KeyD ? 1 : 0) - (k.KeyA ? 1 : 0), an = 1; if (TOUCH.on && (TOUCH.move.x || TOUCH.move.y)) { f = -TOUCH.move.y; s = TOUCH.move.x; an = clamp((Math.hypot(f, s) - .12) / .78, 0, 1); } if (frozen || pl.act) f = s = 0;
+  let f = (k.KeyW ? 1 : 0) - (k.KeyS ? 1 : 0), s = (k.KeyD ? 1 : 0) - (k.KeyA ? 1 : 0), an = 1; if (TOUCH.on && (TOUCH.move.x || TOUCH.move.y)) { f = -TOUCH.move.y; s = TOUCH.move.x; an = clamp((Math.hypot(f, s) - .12) / .78, 0, 1); } if (frozen || pl.act || G.buyOpen || G.mapOpen) f = s = 0;
   let wx = -Math.sin(pl.yaw) * f + Math.cos(pl.yaw) * s, wz = -Math.cos(pl.yaw) * f - Math.sin(pl.yaw) * s; const wl = Math.hypot(wx, wz); if (wl > 0) { wx /= wl; wz /= wl; }
   const walking = k.ShiftLeft || k.ShiftRight || an < .62, sp = 5.1 * an * w.speed * (pl.crouchAmt > .5 ? .45 : (k.ShiftLeft || k.ShiftRight) ? .52 : 1) * (pl.scoped ? .55 : 1) * (pl.landSlow > 0 ? .58 : 1); pl.landSlow -= dt;
   const lad = !frozen && now > (pl.ladCd || 0) && ladderAt(pl.pos), lup = f > .3 ? (pl.pitch > -.4 ? 1 : -1) : f < -.3 ? -1 : 0;
@@ -83,7 +86,7 @@ function updatePlayer(dt) {
   if (now - pl.lastShot > .32) pl.shots = 0;
   if (now - pl.lastShot > .1) { pl.recTP = damp(pl.recTP, 0, 7, dt); pl.recTY = damp(pl.recTY, 0, 7, dt); }
   pl.recP = damp(pl.recP, pl.recTP, 30, dt); pl.recY = damp(pl.recY, pl.recTY, 30, dt); pl.punch = damp(pl.punch, 0, 9, dt); pl.roll = damp(pl.roll, -s * .012, 8, dt);
-  const ready = now >= pl.drawEnd && pl.reloadEnd < 0 && !frozen && !G.buyOpen && !pl.act;
+  const ready = now >= pl.drawEnd && pl.reloadEnd < 0 && !frozen && !G.buyOpen && !G.mapOpen && !pl.act;
   if (pl.pending && now >= pl.pending.t) { pl.pending.fn(); pl.pending = null; }
   if (w.scope && G.altEdge && ready) { pl.scoped = (pl.scoped + 1) % 3; SFX.click(1200, .2); }
   if (ready && now >= pl.nextFire) {
@@ -136,7 +139,7 @@ function fireBullet(sh, ox, oy, oz, dx, dy, dz, w, mx, my, mz, noTracer) {
 function hurt(e, dmg, by, wkey, part, dir, pt) {
   if (!e.alive || G.state === 'roundEnd' && G.mode === 'comp' && false) return; const w = wkey ? WEAPONS[wkey] : null, head = part === 'head';
   if (w && e.armor > 0 && part !== 'legs' && (!head || e.helmet)) { const d2 = dmg * (w.arm || .6); e.armor = Math.max(0, e.armor - (dmg - d2) * .5); dmg = d2; }
-  dmg = Math.max(1, Math.round(dmg)); e.hp -= dmg; PROG.onHurt(e, Math.min(dmg, e.hp + dmg), by); if (e.act && e.act.type === 'defuse' && !e.isPlayer && Math.random() < .5) e.act = null;
+  dmg = Math.max(1, Math.round(dmg)); e.hp -= dmg; PROG.onHurt(e, Math.min(dmg, e.hp + dmg), by); if (e.act && e.act.type === 'defuse' && !e.isPlayer && Math.random() < .5) { e.act = null; if (BOMB.defuser === e) BOMB.defuser = null; }
   if (pt && dir) { FX.burst(pt.x, pt.y, pt.z, dir.x, dir.y, dir.z, 6 + Math.min(16, dmg / 5 | 0), RED, 4.5, .03, true); FX.burst(pt.x, pt.y, pt.z, -dir.x, .3, -dir.z, 3, RED, 2, .025, true); SFX.flesh(e.isPlayer ? null : pt);
     const h = rayWorld(pt.x + dir.x * .4, pt.y + dir.y * .4, pt.z + dir.z * .4, dir.x + rand(-.15, .15) || 1e-9, dir.y - .12, dir.z + rand(-.15, .15) || 1e-9, 4.5); if (h) FX.decal(pt.x + dir.x * (.4 + h.t), pt.y + (dir.y - .12) * (.4 + h.t), pt.z + dir.z * (.4 + h.t), h.nx, h.ny, h.nz, rand(.35, .8) * (head ? 1.4 : 1), RED); }
   if (e.isPlayer) { SFX.hurt(); e.punch += .035 + dmg * .0012; G.shake += .25; if (by) G.dmgDirs.push({ x: by.pos.x, z: by.pos.z, t: 1.2 }); G.splats.push({ x: rand(.1, .9), y: rand(.1, .9), s: rand(60, 160) * (1 + dmg / 60), t: 1.6, r: rand(6) }); if (G.splats.length > 8) G.splats.shift(); }
@@ -161,19 +164,18 @@ G.botShoot = (b, dx, dy, dz) => { const w = WEAPONS[b.weapon], ey = b.pos.y + ey
 
 /* ---------------- match flow ---------------- */
 function startMatch() {
-  for (const b of G.bots) scene.remove(b.model.root); for (const n of G.nades) scene.remove(n.m); G.nades = []; G.ents = []; G.bots = []; G.score = { red: 0, blue: 0 }; G.round = 0; G.lossStreak = { red: 0, blue: 0 }; G.feed = [];
+  for (const b of G.bots) disposeBotModel(b); for (const n of G.nades) scene.remove(n.m); G.nades = []; G.ents = []; G.bots = []; G.score = { red: 0, blue: 0 }; G.round = 0; G.lossStreak = { red: 0, blue: 0 }; G.feed = [];
   const pl = G.player = makePlayer(G.team); pl.money = G.mode === 'dm' ? 16000 : 800; G.ents.push(pl); giveWeapon(pl, 'p9');
-  const names = BOT_NAMES.slice().sort(() => Math.random() - .5); let ni = 0;
+  G.teamSize = G.set.battleSize === 'auto' ? clamp(G.perf.pending || G.set.autoTeamSize || (TOUCH.on ? 5 : 8), 5, 12) : Number(G.set.battleSize); if (![5, 8, 12].includes(G.teamSize)) G.teamSize = 8; G.perf.samples = []; G.perf.cpu = []; G.perf.elapsed = 0; G.perf.pending = null; G.botSerial = 0;
   if (G.mode === 'range') { pl.team = G.team = 'blue'; pl.money = 16000; for (let i = 0; i < RANGE_SPOTS.length; i++) { const b = makeBot('red', `靶 ${RANGE_SPOTS[i].d}m`, scene); b.dummy = true; b.rangeI = i; G.ents.push(b); G.bots.push(b); } }
-  else for (const team of ['blue', 'red']) for (let i = 0; i < (team === G.team ? 4 : 5); i++) { const b = makeBot(team, names[ni++], scene); b.money = 800; G.ents.push(b); G.bots.push(b); }
-  $('menu').classList.remove('on'); $('end').classList.remove('on'); $('hud').classList.add('on'); SFX.init(); SFX.setVol(G.set.vol); if (TOUCH.on) touchStartMatch(); lock(); startRound();
+  else for (const team of ['blue', 'red']) for (let i = 0; i < G.teamSize - (team === G.team ? 1 : 0); i++) addRosterBot(team, 800);
+  G.paused = false; G.mapOpen = G.buyOpen = false; for (const id of ['tactical', 'buy', 'pause']) $(id).classList.remove('on'); $('menu').classList.remove('on'); $('end').classList.remove('on'); $('hud').classList.add('on'); SFX.init(); SFX.setVol(G.set.vol); if (TOUCH.on) touchStartMatch(); lock(); startRound();
 }
 const RANGE_SPOTS = [{ x: 0, z: 49.5, d: 10 }, { x: -13, z: 47, d: 15 }, { x: 22, z: 46, d: 23 }, { x: -34, z: 45, d: 35 }, { x: 52, z: 45, d: 52 }];
 function spawnEnt(e) {
   let p; if (G.mode === 'range') p = e.isPlayer ? { x: 0, y: 0, z: 39.5 } : { x: RANGE_SPOTS[e.rangeI].x, y: 0, z: RANGE_SPOTS[e.rangeI].z };
   else if (G.mode === 'dm' && G.round > 0 && G.state === 'live') { let bd = -1; for (let i = 0; i < 10; i++) { const q = navRandomIn({ x1: -58, x2: 58, z1: -50, z2: 50 }); let md = 1e9; for (const o of G.ents) if (o.alive && o.team !== e.team) md = Math.min(md, Math.hypot(o.pos.x - q.x, o.pos.z - q.z)); if (md > bd) { bd = md; p = q; } } }
-  else p = navRandomIn(MAP.spawn[e.team]);
-  for (const o of G.ents) if (o !== e && o.alive && Math.hypot(o.pos.x - p.x, o.pos.z - p.z) < 1.2) { p.x += rand(-1.5, 1.5); p.z += rand(-1.5, 1.5); }
+  else { let best = -1; for (let i = 0; i < 20; i++) { const q = navRandomIn(MAP.spawn[e.team]); let d = 1e9; for (const o of G.ents) if (o !== e && o.alive) d = Math.min(d, Math.hypot(o.pos.x - q.x, o.pos.z - q.z)); if (d > best) { best = d; p = q; } if (d > 2.5) break; } }
   e.pos.set(p.x, p.y, p.z); e.vel.set(0, 0, 0); e.yaw = e.team === 'red' ? 0 : Math.PI; if (G.mode === 'dm') e.yaw = Math.atan2(p.x, p.z); if (G.mode === 'range') e.yaw = e.isPlayer ? Math.PI : Math.atan2(-(0 - p.x), -(39.5 - p.z)); e.pitch = 0; e.act = null; e.blindT = 0; e.hp = 100; e.alive = true; e.onGround = true; e.crouchAmt = 0; e.hgt = 1.8; e.stepSmooth = 0;
   if (e.isPlayer) { $('dead').classList.remove('on'); G.deathCam = null; e.recP = e.recY = e.recTP = e.recTY = 0; for (const k in e.ammo) { const w = WEAPONS[k]; e.ammo[k] = { mag: w.mag, res: w.res }; } if (G.mode === 'dm') { e.armor = 100; e.helmet = true; } VM.key = null; switchTo(e.inv[1] || e.inv[2]); }
   else { const m = e.model; m.root.visible = true; m.root.rotation.x = 0; m.legL.rotation.x = m.legR.rotation.x = 0; m.mark.visible = e.team === G.team; e.target = null; e.path = null; e.waitT = 0; e.state = 'roam'; e.lookYaw = e.yaw; botBuy(e); }
@@ -188,7 +190,7 @@ function botBuy(b) {
   setEntWeapon(b, k); b.keep = false;
 }
 function startRound() {
-  G.round++; G.state = G.mode === 'comp' ? 'freeze' : 'live'; G.timer = G.mode === 'dm' ? DM_TIME : G.mode === 'range' ? 1e6 : FREEZE; smokeClear(); G.flashT = 0; PROG.resetRound(); G.huntAll = false; G.timescale = 1; for (const n of G.nades) scene.remove(n.m); G.nades = [];
+  clearInput(); if (G.mode === 'comp' && G.round > 0 && G.set.battleSize === 'auto' && G.perf.pending) resizeRoster(G.perf.pending); G.round++; G.state = G.mode === 'comp' ? 'freeze' : 'live'; G.timer = G.mode === 'dm' ? DM_TIME : G.mode === 'range' ? 1e6 : FREEZE; smokeClear(); G.flashT = 0; PROG.resetRound(); G.huntAll = false; G.timescale = 1; for (const n of G.nades) scene.remove(n.m); G.nades = [];
   for (const e of G.ents) { e.alive = false; } for (const e of G.ents) spawnEnt(e); bombReset();
   if (G.mode === 'comp') { const me = BOMB.carrier === G.player, atk = G.team === 'red'; banner(`第 ${G.round} 回合`, me ? '你携带墨核 · 送到 A / B 点按住 E 安放' : atk ? '进攻方 · 掩护队友安放墨核' : '防守方 · 守住 A / B 点,墨核被安放后去拆除'); }
   else if (G.mode === 'range') { const pl = G.player; for (const k of ['ak', 'deagle']) giveWeapon(pl, k); for (const k of NADES) pl.nades[k] = 1; switchTo('ak'); banner('靶场 · 弹道练习', 'B 免费取枪 · X 清除弹孔 · 对墙扫射看固定弹道', 'go'); }
@@ -212,11 +214,11 @@ function updateFlow(dt) {
 
 /* ---------------- buy ---------------- */
 function canBuy() { const pl = G.player; if (!pl || !pl.alive) return false; if (G.mode !== 'comp') return true; const r = MAP.spawn[pl.team]; const inZone = pl.pos.x > r.x1 - 6 && pl.pos.x < r.x2 + 6 && pl.pos.z > r.z1 - 4 && pl.pos.z < r.z2 + 4; return G.state === 'freeze' || (G.state === 'live' && G.timer > ROUND_TIME - 20 && inZone); }
-function toggleBuy() { if (G.buyOpen) return closeBuy(); if (!canBuy()) { banner('无法采购', '仅限准备阶段或开局 20 秒内在出生区', 'lose'); SFX.deny(); return; } G.buyOpen = true; drawBuy(); $('buy').classList.add('on'); SFX.ui(); }
-function closeBuy() { G.buyOpen = false; $('buy').classList.remove('on'); }
-function drawBuy() { const pl = G.player; $('buyMoney').textContent = '$' + pl.money; $('buyGrid').innerHTML = BUY_LIST.map((k, i) => { const armor = k === 'armor', w = armor ? { name: '护甲 + 头盔', en: 'PLATE & HELM', price: 1000 } : WEAPONS[k], own = armor ? pl.armor >= 100 : (WEAPONS[k].nade ? pl.nades[k] > 0 : pl.inv[w.slot] === k), poor = pl.money < w.price;
-    return `<div data-k="${k}" class="card ${own ? 'own' : poor ? 'poor' : ''}"><b>${(i + 1) % 10}</b>${armor ? '<div class="ico armor">⛨</div>' : `<img class="ico" src="${G.icons[k]}">`}<div class="nm">${w.name}</div><div class="en">${w.en}</div><div class="pr">${own ? '已装备' : '$' + w.price}</div></div>`; }).join(''); }
-function buy(k) { const pl = G.player; if (!canBuy()) return closeBuy(); const armor = k === 'armor', price = armor ? 1000 : WEAPONS[k].price; if (armor ? pl.armor >= 100 : (WEAPONS[k].nade ? pl.nades[k] > 0 : pl.inv[WEAPONS[k].slot] === k)) return SFX.deny(); if (pl.money < price) return SFX.deny();
+function toggleBuy() { if (G.buyOpen) return closeBuy(); if (!canBuy()) { banner('无法采购', '仅限准备阶段或开局 20 秒内在出生区', 'lose'); SFX.deny(); return; } G.mapOpen = false; $('tactical').classList.remove('on'); G.buyOpen = true; unlockUI(); drawBuy(); $('buy').classList.add('on'); SFX.ui(); }
+function closeBuy() { const was = G.buyOpen; G.buyOpen = false; $('buy').classList.remove('on'); clearInput(); if (was && !G.paused && G.state !== 'menu' && G.state !== 'matchEnd') lock(); }
+function drawBuy() { const pl = G.player; $('buyMoney').textContent = '$' + pl.money; $('buyGrid').innerHTML = BUY_LIST.map((k, i) => { const armor = k === 'armor', w = armor ? { name: '护甲 + 头盔', en: 'PLATE & HELM', price: 1000 } : WEAPONS[k], own = armor ? pl.armor >= 100 : (WEAPONS[k].nade ? pl.nades[k] > 0 : pl.inv[w.slot] === k), poor = G.mode === 'comp' && pl.money < w.price;
+    return `<button type="button" data-k="${k}" class="card ${own ? 'own' : poor ? 'poor' : ''}"><b>${(i + 1) % 10}</b>${armor ? '<div class="ico armor">⛨</div>' : `<img class="ico" alt="" src="${G.icons[k]}">`}<div class="nm">${w.name}</div><div class="en">${w.en}</div><div class="spec">${armor ? '减伤防护 · 100 护甲' : w.nade ? '战术投掷 · 数量 1' : w.melee ? '近身行动' : `${w.mag} 发 · ${w.auto ? '自动' : '半自动'} · ${Math.round(60 / w.rate)} 发/分`}</div><div class="pr">${own ? '已装备' : G.mode !== 'comp' ? '免费领取' : '$' + w.price}</div></button>`; }).join(''); }
+function buy(k) { const pl = G.player; if (!canBuy()) return closeBuy(); const armor = k === 'armor', price = armor ? 1000 : WEAPONS[k].price; if (armor ? pl.armor >= 100 : (WEAPONS[k].nade ? pl.nades[k] > 0 : pl.inv[WEAPONS[k].slot] === k)) return SFX.deny(); if (G.mode === 'comp' && pl.money < price) return SFX.deny();
   if (G.mode === 'comp') pl.money -= price; if (armor) { pl.armor = 100; pl.helmet = true; } else { giveWeapon(pl, k); if (!WEAPONS[k].nade) switchTo(k); } SFX.buy(); drawBuy(); }
 
 /* ---------------- HUD ---------------- */
@@ -232,12 +234,12 @@ function updateHUD(dt) {
     $('mag').textContent = a ? a.mag : (w.nade ? pl.nades[pl.cur] : '—'); $('res').textContent = a ? a.res : ''; $('wname').textContent = w.name; $('wen').textContent = w.en; $('money').textContent = G.mode === 'comp' ? '$' + pl.money : '';
     const planted = BOMB.state === 'planted' && G.state === 'live', t = Math.max(0, Math.ceil(planted ? BOMB.t : G.timer)); $('timer').textContent = G.mode === 'range' ? '∞' : `${planted ? '◆ ' : ''}${(t / 60) | 0}:${String(t % 60).padStart(2, '0')}`; $('timer').classList.toggle('warn', G.state === 'live' && (t <= 10 || planted));
     $('obj').textContent = G.mode !== 'comp' ? '' : BOMB.carrier === pl ? (canPlant(pl) ? (TOUCH.on ? '◆ 按住「互动」安放墨核' : '◆ 按住 E 安放墨核') : '◆ 你携带墨核 → A / B') : canDefuse(pl) ? (TOUCH.on ? '按住「互动」拆除墨核' : '按住 E 拆除墨核') : planted ? `墨核已安放于 ${SITES[BOMB.site].name}` : BOMB.state === 'dropped' ? '墨核掉落在地' : ''; $('sB').textContent = G.score.blue; $('sR').textContent = G.score.red;
-    $('aB').textContent = G.mode === 'comp' ? '●'.repeat(al.blue) + '○'.repeat(Math.max(0, 5 - al.blue)) : ''; $('aR').textContent = G.mode === 'comp' ? '●'.repeat(al.red) + '○'.repeat(Math.max(0, 5 - al.red)) : ''; $('zone').textContent = MAP.zoneAt(pl.pos.x, pl.pos.z); $('phase').textContent = G.state === 'freeze' ? '准备' : G.mode === 'dm' ? '死斗' : G.mode === 'range' ? '靶场' : `R${G.round}`;
+    $('aB').textContent = G.mode === 'comp' ? `${al.blue} / ${G.teamSize} 存活` : ''; $('aR').textContent = G.mode === 'comp' ? `${al.red} / ${G.teamSize} 存活` : ''; $('zone').textContent = MAP.zoneAt(pl.pos.x, pl.pos.z); $('phase').textContent = G.state === 'freeze' ? '准备' : G.mode === 'dm' ? `死斗 · ${G.teamSize}v${G.teamSize}` : G.mode === 'range' ? '靶场' : `R${G.round} · ${G.teamSize}v${G.teamSize}`;
     $('slots').innerHTML = [[1, pl.inv[1]], [2, pl.inv[2]], [3, 'knife'], ...nadeList(pl).map(k => [4, k])].map(([n, k]) => k ? `<span class="${k === pl.cur ? 'cur' : ''}">${n} ${WEAPONS[k].name.split(' ')[0]}</span>` : '').join('');
     const now = G.now; if (G.feed.length && now - G.feed[0].t > 6) { G.feed.shift(); drawFeed(); } $('scope').classList.toggle('on', pl.scoped > 0 && pl.alive); if (G.buyOpen) $('buyMoney').textContent = '$' + pl.money; }
   const act = pl.act; $('prog').style.display = act ? 'block' : 'none'; if (act) { $('progBar').style.width = clamp(act.t / (act.type === 'plant' ? PLANT_T : DEFUSE_T) * 100, 0, 100) + '%'; $('progLab').textContent = act.type === 'plant' ? '安放中…' : '拆除中…'; }
   if (G.flashT > 0) G.flashT -= dt; $('flashOv').style.opacity = clamp((G.flashT || 0) / .9, 0, 1); $('smokeOv').style.opacity = pl.alive ? inSmoke(camera.position) * .93 : 0;
-  drawFx(dt); drawRadar();
+  const w = WEAPONS[pl.cur], a = pl.ammo[pl.cur]; $('weaponState').textContent = pl.reloadEnd >= 0 ? `换弹中 ${Math.ceil((pl.reloadEnd - G.now) * 10) / 10}s` : a && a.mag <= Math.ceil(w.mag * .2) ? '余弹不足 · R 换弹' : ''; $('moveState').textContent = pl.alive ? pl.crouchAmt > .5 ? '蹲姿 · 精度提升' : Math.hypot(pl.vel.x, pl.vel.z) > 1 ? (G.keys.ShiftLeft || G.keys.ShiftRight ? '静步' : '移动中 · 散布扩大') : '稳态' : ''; if (G.mapOpen) drawTactical(); drawFx(dt); drawRadar();
 }
 function drawFx(dt) {
   const g = fxg, W = fxc.width, H = fxc.height, pl = G.player, cx = W / 2, cy = H / 2; g.clearRect(0, 0, W, H);
@@ -262,17 +264,17 @@ function drawRadar() {
 /* ---------------- UI wiring ---------------- */
 function bindUI() {
   const seg = (id, key, cast) => $(id).querySelectorAll('button').forEach(b => b.onclick = () => { $(id).querySelectorAll('button').forEach(x => x.classList.remove('sel')); b.classList.add('sel'); G[key] = cast(b.dataset.v); SFX.init(); SFX.ui(); });
-  seg('optMode', 'mode', String); seg('optDiff', 'diff', Number); seg('optTeam', 'team', String);
-  $('start').onclick = () => startMatch(); $('resume').onclick = () => setPause(false); $('quit').onclick = $('again').onclick = () => { G.state = 'menu'; G.paused = false; for (const id of ['pause', 'end', 'hud', 'dead', 'buy', 'report']) $(id).classList.remove('on'); $('menu').classList.add('on'); G.buyOpen = false; };
+  seg('optMode', 'mode', String); seg('optDiff', 'diff', Number); seg('optTeam', 'team', String); for (const id of ['optMode', 'optTeam']) $(id).addEventListener('click', updateBrief); $('buyGrid').addEventListener('click', e => { const c = e.target.closest('.card'); if (c) buy(c.dataset.k); }); $('buyClose').onclick = closeBuy; $('mapPreview').onclick = () => toggleMap(true); $('mapClose').onclick = () => toggleMap(false); $('sQuality').value = G.set.quality; $('sQuality').onchange = () => { G.set.quality = $('sQuality').value; localStorage.setItem('inkstrike', JSON.stringify(G.set)); applyQuality(); }; $('optSize').querySelectorAll('button').forEach(b => { b.classList.toggle('sel', b.dataset.v === String(G.set.battleSize)); b.onclick = () => { G.set.battleSize = b.dataset.v; $('optSize').querySelectorAll('button').forEach(q => q.classList.toggle('sel', q === b)); localStorage.setItem('inkstrike', JSON.stringify(G.set)); updateBrief(); }; });
+  $('start').onclick = () => startMatch(); $('resume').onclick = () => setPause(false); $('quit').onclick = $('again').onclick = () => { G.state = 'menu'; G.paused = false; for (const id of ['pause', 'end', 'hud', 'dead', 'buy', 'report', 'tactical', 'scope', 'board']) $(id).classList.remove('on'); $('menu').classList.add('on'); G.buyOpen = G.mapOpen = false; unlockUI(); updateBrief(); };
   $('sXh').querySelectorAll('button').forEach(b => { b.classList.toggle('sel', b.dataset.v === G.set.xh); b.onclick = () => { G.set.xh = b.dataset.v; $('sXh').querySelectorAll('button').forEach(x => x.classList.toggle('sel', x === b)); localStorage.setItem('inkstrike', JSON.stringify(G.set)); }; });
   const xs = $('sXhStatic'); xs.checked = !!G.set.xhStatic; xs.onchange = () => { G.set.xhStatic = xs.checked ? 1 : 0; localStorage.setItem('inkstrike', JSON.stringify(G.set)); };
-  for (const [id, key, fn] of [['sSens', 'sens', v => v], ['sFov', 'fov', v => v], ['sVol', 'vol', v => { SFX.setVol(v); return v; }], ['sXhSize', 'xhSize', v => v]]) { const el = $(id), lab = $(id + 'V'); el.value = G.set[key]; lab.textContent = G.set[key]; el.oninput = () => { G.set[key] = fn(+el.value); lab.textContent = el.value; localStorage.setItem('inkstrike', JSON.stringify(G.set)); }; }
+  for (const [id, key, fn] of [['sSens', 'sens', v => v], ['sFov', 'fov', v => v], ['sVol', 'vol', v => { SFX.setVol(v); return v; }], ['sXhSize', 'xhSize', v => v], ['sMotion', 'motion', v => v]]) { const el = $(id), lab = $(id + 'V'); el.value = G.set[key]; lab.textContent = G.set[key]; el.oninput = () => { G.set[key] = fn(+el.value); lab.textContent = el.value; localStorage.setItem('inkstrike', JSON.stringify(G.set)); }; }
 }
 
 /* ---------------- camera + frame ---------------- */
 function updateCamera(dt) {
   const pl = G.player; let fov = G.set.fov; G.shake = damp(G.shake, 0, 9, dt);
-  if (pl.alive) { G.spec = null; camera.position.set(pl.pos.x, pl.pos.y + eyeY(pl) + pl.stepSmooth, pl.pos.z); const sh = G.shake * .012; camera.rotation.set(pl.pitch + pl.recP + pl.punch * .5 + gauss() * sh, pl.yaw + pl.recY + gauss() * sh, pl.roll + pl.punch * .3); if (pl.scoped) fov = pl.scoped === 1 ? 38 : 13; }
+  if (pl.alive) { G.spec = null; camera.position.set(pl.pos.x, pl.pos.y + eyeY(pl) + pl.stepSmooth, pl.pos.z); const motion = G.set.motion, sh = G.shake * .012 * motion; camera.rotation.set(pl.pitch + pl.recP + pl.punch * .5 * motion + gauss() * sh, pl.yaw + pl.recY + gauss() * sh, (pl.roll + pl.punch * .3) * motion); if (pl.scoped) fov = pl.scoped === 1 ? 38 : 13; }
   else if (G.deathCam) { const d = G.deathCam; d.t += dt; if (d.t < 2.6 || G.mode === 'dm') { const h = Math.min(3.2, .4 + d.t * 1.6), bx = pl.pos.x + Math.sin(d.yaw) * h * .8, bz = pl.pos.z + Math.cos(d.yaw) * h * .8; camera.position.set(bx, pl.pos.y + h, bz); camera.lookAt(pl.pos.x, pl.pos.y + .3, pl.pos.z); }
     else { if (!G.spec || !G.spec.alive || G.fireEdge) { const mates = G.ents.filter(e => e.alive && e.team === pl.team && e !== G.spec); G.spec = mates.length ? pick(mates) : (G.spec && G.spec.alive ? G.spec : null); if (G.spec) $('deadBy').textContent = `观战中 · ${G.spec.name}（点击切换）`; }
       if (G.spec) { const s = G.spec, bx = s.pos.x + Math.sin(s.yaw) * 2.6, bz = s.pos.z + Math.cos(s.yaw) * 2.6; _cv.set(bx, s.pos.y + 2.1, bz); const ok = segClear(s.pos.x, s.pos.y + 1.6, s.pos.z, bx, s.pos.y + 2.1, bz); if (!ok) _cv.set(s.pos.x, s.pos.y + 2.3, s.pos.z); camera.position.lerp(_cv, 1 - Math.exp(-8 * dt)); camera.rotation.set(damp(camera.rotation.x, s.pitch - .18, 8, dt), camera.rotation.y + angDiff(s.yaw, camera.rotation.y) * (1 - Math.exp(-8 * dt)), 0); } } }
@@ -280,10 +282,22 @@ function updateCamera(dt) {
   SFX.L.x = camera.position.x; SFX.L.z = camera.position.z; SFX.L.yaw = camera.rotation.y;
 }
 function frame(dt) {
-  if (G.state === 'menu') { const t = performance.now() / 1000 * .05; camera.position.set(Math.sin(t) * 70, 30, Math.cos(t) * 70); camera.lookAt(0, 0, 0); renderer.clear(); renderer.render(scene, camera); return; }
+  if (G.state === 'menu') { const t = G.now * .04; camera.position.set(57 + Math.sin(t) * 2, 37, 60); camera.lookAt(0, 1, -12); renderer.clear(); renderer.render(scene, camera); return; }
   if (!G.paused && G.state !== 'matchEnd') { const sdt = dt * G.timescale; G.now += sdt; updateFlow(sdt); const pl = G.player;
     if (G.state !== 'matchEnd' && G.state !== 'menu') { if (TOUCH.on) updateTouch(sdt); if (pl.alive) updatePlayer(sdt); for (const b of G.bots) updateBot(b, sdt, G.now); updateNades(sdt); bombUpdate(sdt); smokeUpdate(sdt); FX.update(sdt, camera); updateCamera(sdt); VM.update(sdt, pl, WEAPONS[pl.cur], G.mdx, G.mdy); updateHUD(dt);
       if (G.now - (G._spotT || 0) > .2) { G._spotT = G.now; if (pl.alive) for (const e of G.ents) if (e.alive && e.team !== pl.team && botSee(pl, e)) { const a = Math.abs(angDiff(Math.atan2(-(e.pos.x - pl.pos.x), -(e.pos.z - pl.pos.z)), pl.yaw)); if (a < 1) e.spottedT = G.now; } } }
     G.mdx = G.mdy = 0; G.fireEdge = G.altEdge = false; }
   renderer.clear(); renderer.render(scene, camera); if (G.player && G.player.alive) { renderer.clearDepth(); renderer.render(VM.scene, VM.cam); }
 }
+
+/* ---------------- field map + adaptive roster ---------------- */
+function addRosterBot(team, money) { const n = G.botSerial++, name = BOT_NAMES[n % BOT_NAMES.length] + (n >= BOT_NAMES.length ? ' ' + (1 + Math.floor(n / BOT_NAMES.length)) : ''), b = makeBot(team, name, scene); b.money = money; G.ents.push(b); G.bots.push(b); return b; }
+function resizeRoster(size) { for (const team of ['blue', 'red']) { const want = size - (team === G.team ? 1 : 0), list = G.bots.filter(b => b.team === team), cash = Math.round(list.reduce((n, b) => n + b.money, 0) / Math.max(1, list.length)); while (list.length > want) { const b = list.pop(); scene.remove(b.model.root); G.ents.splice(G.ents.indexOf(b), 1); G.bots.splice(G.bots.indexOf(b), 1); disposeBotModel(b); } while (list.length < want) list.push(addRosterBot(team, Math.max(800, cash))); } G.teamSize = size; G.set.autoTeamSize = size; G.perf.pending = null; G.perf.samples = []; G.perf.cpu = []; G.perf.elapsed = 0; localStorage.setItem('inkstrike', JSON.stringify(G.set)); }
+function samplePerformance(elapsed, cpu) { if (G.manualStep || G.state !== 'live' || G.paused || G.buyOpen || G.mapOpen || document.hidden || G.mode === 'range' || elapsed < 1) return; const p = G.perf; p.samples.push(Math.min(1000, elapsed)); p.cpu.push(cpu); p.elapsed += elapsed; if (p.samples.length < 300 && (p.elapsed < 8000 || p.samples.length < 30)) return; const sorted = p.samples.slice().sort((a, b) => a - b), costs = p.cpu.slice().sort((a, b) => a - b); p.p90 = sorted[Math.floor(sorted.length * .9)]; p.ms = costs[Math.floor(costs.length * .9)]; p.samples = []; p.cpu = []; p.elapsed = 0; if (G.set.battleSize !== 'auto') return; const steps = [5, 8, 12], i = steps.indexOf(G.teamSize), next = p.p90 > 28 || p.ms > 20 ? steps[Math.max(0, i - 1)] : p.p90 < 19 && p.ms < 10 ? steps[Math.min(2, i + 1)] : G.teamSize; p.pending = next === G.teamSize ? null : next; G.set.autoTeamSize = next; localStorage.setItem('inkstrike', JSON.stringify(G.set)); }
+function updateBrief() { const mode = G.mode, count = G.set.battleSize === 'auto' ? '自动人数' : `${G.set.battleSize}v${G.set.battleSize}`; $('briefTitle').textContent = mode === 'range' ? '靶场 / 每一笔，都可控' : mode === 'dm' ? `死斗 / ${count}` : `竞技 / ${count}`; $('briefText').textContent = mode === 'range' ? '五档距离假人，固定弹道墙。免费取枪，找到属于你的压枪节奏。' : mode === 'dm' ? '无限重生，随时换装。率先拿下 40 次击倒的队伍获胜。' : G.team === 'red' ? '掩护墨核携带者，前往 A 或 B。按住互动键 3.2 秒完成安放。' : '守住两个点位，听声转点。墨核安放后，按住互动键 6 秒拆除。'; $('sizeHint').textContent = G.set.battleSize === 'auto' ? '按实战帧耗时调整 · 竞技在下一回合生效' : '手动固定人数 · 若帧率下降可选择自动'; $('optSize').parentElement.style.display = mode === 'range' ? 'none' : ''; if (MAP.mini) $('briefMap').src = MAP.mini.toDataURL(); }
+function toggleMap(force) { const on = force === undefined ? !G.mapOpen : force; if (on && G.paused) return; G.mapOpen = on; $('tactical').classList.toggle('on', on); if (on) { G.buyOpen = false; $('buy').classList.remove('on'); unlockUI(); drawTactical(); } else { clearInput(); if (G.state !== 'menu' && !G.paused) lock(); } }
+function drawTactical() { const c = $('tacticalMap'), g = c.getContext('2d'), sx = c.width / 128, sz = c.height / 112, point = (x, z) => [(x + 64) * sx, (z + 56) * sz]; g.clearRect(0, 0, c.width, c.height); g.drawImage(MAP.mini, 0, 0, c.width, c.height); g.font = 'bold 17px monospace'; g.textAlign = 'center'; for (const [label, x, z, col] of [['蓝方', 0, -47, '#2d6cb3'], ['红方', 0, 45, '#d42a2a']]) { const [px, py] = point(x, z); g.fillStyle = col; g.fillRect(px - 23, py - 14, 46, 28); g.fillStyle = label.length === 1 ? '#16161c' : '#f5f2ea'; g.fillText(label, px, py + 6); } if (G.state === 'menu') return; for (const e of G.ents) { if (!e.alive || e.team !== G.team && G.now - e.spottedT > 1.5) continue; const [x, y] = point(e.pos.x, e.pos.z); g.save(); g.translate(x, y); g.rotate(-e.yaw); g.fillStyle = e.team === 'blue' ? '#2d6cb3' : '#d42a2a'; g.strokeStyle = '#f5f2ea'; g.lineWidth = 2; g.beginPath(); if (e.isPlayer) { g.moveTo(0, -9); g.lineTo(7, 7); g.lineTo(0, 3); g.lineTo(-7, 7); g.closePath(); } else g.arc(0, 0, 5, 0, Math.PI * 2); g.fill(); g.stroke(); g.restore(); } if (G.mode === 'comp' && (BOMB.state === 'planted' || BOMB.state === 'dropped' && G.team === 'red')) { const [x, y] = point(BOMB.pos.x, BOMB.pos.z); g.fillStyle = '#e9a520'; g.fillRect(x - 5, y - 5, 10, 10); } }
+window.render_game_to_text = () => JSON.stringify({ coordinates: 'meters; x east, y up, z south; north is -z', state: G.state, mode: G.mode, teamSize: G.teamSize, paused: G.paused, buyOpen: G.buyOpen, mapOpen: G.mapOpen, score: G.score, round: G.round, player: G.player && { position: G.player.pos, alive: G.player.alive, hp: G.player.hp, weapon: G.player.cur, ammo: G.player.ammo[G.player.cur], yaw: G.player.yaw, pitch: G.player.pitch }, bots: G.bots.length, objective: { state: BOMB.state, site: BOMB.site, seconds: BOMB.t }, performance: { p90: G.perf.p90, cpuP90: G.perf.ms, nextTeamSize: G.perf.pending } });
+window.advanceTime = ms => { G.manualStep = true; for (let i = 0, n = Math.max(1, Math.round(ms / (1000 / 60))); i < n; i++) frame(1 / 60); };
+addEventListener('blur', () => { clearInput(); if (G.state !== 'menu' && G.state !== 'matchEnd') setPause(true); });
+document.addEventListener('visibilitychange', () => { if (document.hidden && G.state !== 'menu' && G.state !== 'matchEnd') setPause(true); });

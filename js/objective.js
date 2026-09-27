@@ -13,9 +13,11 @@ function bombInit(scene) {
 }
 function bombReset() {
   BOMB.state = 'none'; BOMB.carrier = null; BOMB.defuser = null; BOMB.site = null; if (BOMB.mesh) BOMB.mesh.visible = false; for (const e of G.ents) e.act = null;
-  if (G.mode !== 'comp') return; const reds = G.ents.filter(e => e.team === 'red'); BOMB.carrier = reds.find(e => e.isPlayer && Math.random() < .4) || pick(reds.filter(e => !e.isPlayer)); BOMB.state = 'carried';
-  G.plan = { site: Math.random() < .5 ? 'A' : 'B' }; G.intel = { red: null, blue: null };
-  const hs = ['A', 'B', 'A', 'B', 'MID'].sort(() => Math.random() - .5); let i = 0; for (const b of G.bots) { b.rot = Math.random(); b.holdYaw = null; if (b.team === 'blue') b.holdSite = hs[i++ % 5]; }
+  G.intel = { red: null, blue: null }; const slots = { red: 0, blue: 0 }, shift = Math.random() < .5 ? 0 : 1;
+  for (const b of G.bots) { const i = slots[b.team]++; b.slot = i; b.squad = Math.floor(i / 3); b.lane = i % 3 - 1; b.rot = Math.random(); b.role = b.team === 'red' ? ['entry', 'support', 'flank', 'support'][i % 4] : i % 5 === 4 ? 'rotate' : 'anchor'; b.holdSite = i % 5 === 4 ? 'MID' : ['A', 'B'][(i + shift) % 2]; b.holdYaw = null; b.holdPos = null; b.routeReady = false; b.respondedT = -9; b.tacticalT = G.now + i * .025; b.intent = '部署'; b.fireClear = true; b.saving = false; b.waitT = G.now + (G.state === 'freeze' ? G.timer : 0) + .012 + (i + (b.team === 'blue' ? .5 : 0)) * .02; }
+  if (G.mode !== 'comp') return; const reds = G.ents.filter(e => e.team === 'red'); BOMB.carrier = reds.find(e => e.isPlayer && Math.random() < .4) || pick(reds.filter(e => !e.isPlayer)); BOMB.state = 'carried'; if (BOMB.carrier && !BOMB.carrier.isPlayer) BOMB.carrier.role = 'carrier';
+  G.plan = { site: Math.random() < .5 ? 'A' : 'B' };
+
 }
 const canPlant = e => BOMB.state === 'carried' && BOMB.carrier === e && e.onGround && G.state === 'live' && siteAt(e.pos);
 const canDefuse = e => BOMB.state === 'planted' && e.team === 'blue' && G.state === 'live' && e.pos.distanceTo(BOMB.pos) < 1.9;
@@ -29,7 +31,7 @@ function entInteract(e, want, dt) {
 function bombPlant(e) {
   const fx = e.pos.x - Math.sin(e.yaw) * .45, fz = e.pos.z - Math.cos(e.yaw) * .45; BOMB.state = 'planted'; BOMB.site = siteAt(e.pos); BOMB.pos.set(fx, e.pos.y, fz); BOMB.t = BOMB_T; BOMB.carrier = null; BOMB.beepT = 0;
   BOMB.mesh.position.copy(BOMB.pos); BOMB.mesh.rotation.y = e.yaw; BOMB.mesh.visible = true; e.money = Math.min(16000, e.money + 300); PROG.rstat(e).plant = 1;
-  banner('墨核已安放', `${SITES[BOMB.site].name} · ${BOMB_T} 秒后引爆`, G.team === 'red' ? 'go' : 'lose'); SFX.plant(); for (const b of G.bots) { b.path = null; b.waitT = 0; b.holdYaw = null; }
+  banner('墨核已安放', `${SITES[BOMB.site].name} · ${BOMB_T} 秒后引爆`, G.team === 'red' ? 'go' : 'lose'); SFX.plant(); for (const b of G.bots) { b.path = null; b.waitT = G.now + (b.slot || 0) * .02; b.holdYaw = null; }
 }
 function bombDefuse(e) { BOMB.state = 'defused'; BOMB.defuser = null; e.money = Math.min(16000, e.money + 300); PROG.rstat(e).defuse = 1; BOMB.light.visible = false; endRound('blue', `${e.name} 拆除了墨核`); }
 function bombUpdate(dt) {
@@ -45,20 +47,25 @@ function bombUpdate(dt) {
 
 /* ---------------- bot objective brain (comp mode) ---------------- */
 function randIn(r, tries = 40) { for (let k = 0; k < tries; k++) { const x = rand(r.x1, r.x2), z = rand(r.z1, r.z2), c = navIdx(x, z); if (MAP.reach[c] && (r.y === undefined || Math.abs(MAP.fh[c] - r.y) < .3)) return { x, z, cover: MAP.pen[c] }; } return { x: (r.x1 + r.x2) / 2, z: (r.z1 + r.z2) / 2 }; }
+function botCoverGoal(b, r, face, minDist = 0) { let best = null, score = -1e9; for (let k = 0; k < 8; k++) { const p = randIn(r, 18), c = navIdx(p.x, p.z); if (!MAP.reach[c] || (face && Math.hypot(p.x - face.x, p.z - face.z) < minDist)) continue; let q = (p.cover || 0) * 2 - Math.hypot(p.x - b.pos.x, p.z - b.pos.z) * .025;
+    for (const o of G.bots) if (o !== b && o.alive && o.team === b.team) { const h = o.holdPos || o.pos, d = Math.hypot(h.x - p.x, h.z - p.z); if (d < 5) q -= (5 - d) * 2; } if (face && segClear(p.x, MAP.fh[c] + 1.3, p.z, face.x, (face.y || 0) + 1, face.z)) q += 1.5; if (q > score) { best = p; score = q; } }
+  if (!best) best = navPos(navSnap((r.x1 + r.x2) / 2, (r.z1 + r.z2) / 2)); b.holdPos = best; return { ...best, hold: true, face }; }
 function botObjective(b, now) {
-  if (G.mode !== 'comp' || BOMB.state === 'none') return null; const planted = BOMB.state === 'planted';
+  if (G.mode !== 'comp' || BOMB.state === 'none') return null; const planted = BOMB.state === 'planted', plan = SITES[G.plan.site];
   if (b.team === 'red') {
-    if (BOMB.state === 'dropped') { let best = null, bd = 1e9; for (const o of G.bots) if (o.alive && o.team === 'red') { const d = o.pos.distanceTo(BOMB.pos); if (d < bd) { bd = d; best = o; } } if (best === b) return { x: BOMB.pos.x, z: BOMB.pos.z }; }
-    if (planted) { const p = BOMB.pos; let best = null; for (let k = 0; k < 6; k++) { const c = randIn({ x1: p.x - 13, x2: p.x + 13, z1: p.z - 13, z2: p.z + 13 }); const d = Math.hypot(c.x - p.x, c.z - p.z); if (d > 4 && (!best || (c.cover || 0) > (best.cover || 0))) best = c; } return best && { ...best, hold: true, face: p }; }
-    if (BOMB.carrier === b || Math.random() < .72 || G.timer < 45) { const c = randIn(SITES[G.plan.site]); return { ...c, hold: BOMB.carrier !== b }; }
-    return null;
+    if (BOMB.state === 'dropped') { let best = null, bd = 1e9; for (const o of G.bots) if (o.alive && o.team === 'red') { const d = o.pos.distanceToSquared(BOMB.pos); if (d < bd) { bd = d; best = o; } } if (best === b) { b.intent = '回收墨核'; return { x: BOMB.pos.x, z: BOMB.pos.z }; } }
+    if (planted) { b.intent = '交叉守核'; const p = BOMB.pos; return botCoverGoal(b, { x1: p.x - 13, x2: p.x + 13, z1: p.z - 13, z2: p.z + 13 }, p, 4); }
+    if (BOMB.carrier === b) { b.intent = '携核推进'; return randIn(plan); }
+    const carrier = BOMB.carrier; if (b.role === 'support' && carrier && carrier.alive && Math.hypot(b.pos.x - carrier.pos.x, b.pos.z - carrier.pos.z) > 12 && G.timer > 35) { b.intent = '护送携核'; const p = navPos(navSnap(carrier.pos.x + b.lane * 3, carrier.pos.z + 4)); return p; }
+    if (b.role === 'flank' && !b.routeReady && G.timer > 45) { const point = MAP.points.find(p => p.n === (G.plan.site === 'A' ? 'SHORT' : 'MARKET')); if (b.pos.z < -10 || Math.hypot(b.pos.x - point.x, b.pos.z - point.z) < 5) b.routeReady = true; else { b.intent = '侧翼推进'; return { x: point.x + b.lane * 2, z: point.z }; } }
+    b.intent = b.role === 'support' ? '掩护进点' : '前出清点'; return botCoverGoal(b, plan, { x: (plan.x1 + plan.x2) / 2, z: plan.z1 - 8, y: plan.y });
   }
-  if (planted) return { x: BOMB.pos.x, z: BOMB.pos.z };
+  if (planted) { let def = BOMB.defuser && BOMB.defuser.alive && BOMB.defuser.act && BOMB.defuser.act.type === 'defuse' ? BOMB.defuser : null, bd = 1e9; if (!def) for (const o of G.bots) if (o.alive && o.team === 'blue') { const d = o.pos.distanceToSquared(BOMB.pos) + (o.targetVis ? 16 : 0); if (d < bd) { bd = d; def = o; } } if (def === b || BOMB.t < DEFUSE_T + 4) { b.intent = '回防拆核'; return { x: BOMB.pos.x, z: BOMB.pos.z }; } b.intent = '掩护拆核'; const p = BOMB.pos; return botCoverGoal(b, { x1: p.x - 9, x2: p.x + 9, z1: p.z - 9, z2: p.z + 9 }, p, 3); }
   const mine = G.ents.filter(e => e.alive && e.team === 'blue').length, foes = G.ents.filter(e => e.alive && e.team === 'red').length;
-  if (mine === 1 && foes >= 3 && G.timer < 45 && !b.isPlayer) { b.saving = true; return navRandomIn(MAP.spawn.blue); }
-  const it = G.intel && G.intel.blue; if (it && now - it.t < 4 && b.rot < .5 && Math.hypot(it.x - b.pos.x, it.z - b.pos.z) > 18) return { x: it.x + rand(-3, 3), z: it.z + rand(-3, 3) };
-  if (b.holdSite === 'MID') return { x: rand(-4, 4), z: rand(-36, -28), hold: true };
-  let best = null; for (let k = 0; k < 5; k++) { const c = randIn(SITES[b.holdSite]); if (!best || (c.cover || 0) > (best.cover || 0)) best = c; } return { ...best, hold: true };
+  if (mine === 1 && foes >= 3 && G.timer < 45 && !b.isPlayer) { b.saving = true; b.intent = '保存装备'; return navRandomIn(MAP.spawn.blue); }
+  const it = G.intel && G.intel.blue; if (it && now - it.t < 4 && (b.role === 'rotate' || b.slot % 3 === 0) && Math.hypot(it.x - b.pos.x, it.z - b.pos.z) > 18) { b.intent = '响应报点'; b.respondedT = now; return navPos(navSnap(it.x + b.lane * 3, it.z - 3)); }
+  b.intent = '交叉架点'; if (b.holdSite === 'MID') return botCoverGoal(b, { x1: -6, x2: 6, z1: -37, z2: -28 }, { x: 0, z: -6 });
+  const r = SITES[b.holdSite]; return botCoverGoal(b, r, { x: (r.x1 + r.x2) / 2, z: r.z2 + 14, y: r.y });
 }
 function botHoldYaw(b, face) {          // pre-aim: look down the route the enemy is most likely to arrive from
   if (face) return Math.atan2(-(face.x - b.pos.x), -(face.z - b.pos.z)); const s = MAP.spawn[b.team === 'red' ? 'blue' : 'red'], p = navPath(b.pos.x, b.pos.z, (s.x1 + s.x2) / 2, (s.z1 + s.z2) / 2); if (!p || p.length < 2) return b.yaw;
@@ -73,7 +80,7 @@ function smokeSpawn(x, y, z) {
   const g = s.bake(_smokeFm, _smokeLm); g.position.set(x, y, z); g.scale.setScalar(.05); g.traverse(o => o.frustumCulled = false); scene.add(g); SMOKES.push({ p: new V3(x, y + 1.6, z), r: 4.7, t: 16, g, age: 0 }); SFX.hiss({ x, y, z });
 }
 function smokeUpdate(dt) { for (let i = SMOKES.length - 1; i >= 0; i--) { const s = SMOKES[i]; s.t -= dt; s.age += dt; const k = Math.min(1, s.age / 1.1) * Math.min(1, s.t / 1.8); s.g.scale.setScalar(Math.max(.02, k)); s.g.rotation.y += dt * .07; s.live = k > .75; if (s.t <= 0) { scene.remove(s.g); s.g.traverse(o => o.geometry && o.geometry.dispose()); SMOKES.splice(i, 1); } } }
-function smokeClear() { for (const s of SMOKES) scene.remove(s.g); SMOKES.length = 0; }
+function smokeClear() { for (const s of SMOKES) { scene.remove(s.g); s.g.traverse(o => o.geometry && o.geometry.dispose()); } SMOKES.length = 0; }
 function smokeBlocks(ax, ay, az, bx, by, bz) { for (const s of SMOKES) { if (!s.live) continue; const dx = bx - ax, dy = by - ay, dz = bz - az, l2 = dx * dx + dy * dy + dz * dz || 1, t = clamp(((s.p.x - ax) * dx + (s.p.y - ay) * dy + (s.p.z - az) * dz) / l2, 0, 1), qx = ax + dx * t - s.p.x, qy = (ay + dy * t - s.p.y) * .8, qz = az + dz * t - s.p.z; if (qx * qx + qy * qy + qz * qz < s.r * s.r * .8) return true; } return false; }
 const inSmoke = p => { for (const s of SMOKES) if (s.live) { const d = Math.hypot(p.x - s.p.x, (p.y - s.p.y) * .8, p.z - s.p.z); if (d < s.r) return clamp((s.r - d) / 1.2, 0, 1); } return 0; };
 function flashBang(x, y, z) {

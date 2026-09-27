@@ -4,7 +4,7 @@
 
 ## 1. 这是什么
 
-线稿 / 排线画风的**浏览器第一人称射击游戏**,玩法对标 CS:5v5 对战 Bot。
+线稿 / 排线画风的**浏览器第一人称射击游戏**,支持 5v5 / 8v8 / 12v12 对战 Bot 与性能自适应人数。
 
 | 模式 | 规则 |
 |---|---|
@@ -100,10 +100,10 @@
 ## 7. 已知问题与技术债
 
 - 竞技模式约 40% 概率玩家自己携带墨核;玩家不下包时 Bot 只会去点位守着。可考虑:携带者 20s 不动时提示 / Bot 请求传包(按 G 丢包)。
-- `map.js` 里导航点 `PIT`(A 大道旁死角)不可达,Bot 不会去;冒烟测试已豁免它。
+- Revision 02 已修复 PIT 和蓝方到 NEST 的导航问题；全部目标均须通过冒烟检查，不再豁免。
 - `hurt()` 开头有一个恒假的死条件 `&& false`;`G.huntAll` 已不再被置为 true,`actors.js` 里依赖它的分支是死代码,可清理。
-- `index.html` 的脚本加载用 `?v=${Date.now()}` 强制绕缓存 → 线上每次都重新下载游戏 JS(~200KB;three.js 仍可缓存)。上线稳定后可改成版本号。
-- `rayWorld` 是对全部 ~220 个碰撞盒线性遍历;Bot 数量再翻倍或加地图时考虑用 `MAP.buckets` 做 DDA 加速。
+- 脚本缓存标识改为 `revision-02`；后续发布改 JS 必须同步更新 `index.html` 的版本标识。
+- `rayWorld` 使用现有 buckets 的 XZ DDA；轴向射线保留线性语义。修改地图网格边界后须运行 `tools/raycheck.js`。
 - 每个音效实时创建 Web Audio 节点;极端混战下低端手机可能卡顿,可加并发上限。
 - 内嵌预览面板(IDE 内浏览器)不支持 Pointer Lock,会自动降级;真实浏览器正常。
 - 真机体验(手机触控手感、按钮布局、枪声听感)尚未在实机大规模验证。
@@ -120,3 +120,19 @@
 ## 9. 仓库外的相关资产
 
 - `~/Desktop/inkstrike-promo/`:小红书 30s 竖屏宣传片 `inkstrike_xhs_30s.mp4`、`发布说明.txt`(配乐署名:Kevin MacLeod《Clash Defiant》CC BY 4.0,发布时必须署名)、`tools/director.js + capture.js`(导演脚本 + 逐帧录制器,可重新生成视频)。
+
+## 10. Revision 02 — 2026-09-27
+
+- `G.teamSize` 替代固定每队 5 人；菜单 `G.set.battleSize` 为 auto/5/8/12。HUD 存活数、生成队伍及人数变更均使用它。
+- `samplePerformance` 仅采真实 RAF，排除隐藏/暂停/菜单和人工步进。300 样本，或至少 30 样本且累计 8 秒后，按 p90 帧间隔与 CPU 提交耗时推荐下一档。p90 >28ms 或 CPU >20ms 降一档；p90 <19ms 且 CPU <10ms 升一档。停顿帧仍计入，避免极慢设备无法降档。阈值为当前启发式，非跨设备帧率保证。
+- `resizeRoster` 仅在下一竞技回合开始调用，保留玩家经济/比分；死斗在下一局采用推荐人数。手动档不调整。靶场仍为 5 个距离假人。
+- `bombReset` 分配 Bot `slot/squad/lane/role`；`botCoverGoal` 避免队友目标重叠，`botObjective` 负责突击、护送、侧翼、交叉架点和单人拆核，其余人掩护。观察字段 `b.intent` 表示当前意图。感知精度 `DIFFS` 未提高。
+- `disposeBotModel` 仅释放独占材质及队友标记，共享人物/武器几何保留。`smokeClear` 释放烟云独占几何。
+- `inkBlock/inkLimb/finishGun/viewGlove` 位于 weapons.js，actors.js 依赖它们，脚本加载顺序必须保持 weapons 在 actors 前。
+- `clearInput/unlockUI` 统一处理采购、暂停和地图；打开 UI 会释放 Pointer Lock，关闭后请求恢复。内嵌面板和自动化环境可降级非锁定模式，真实浏览器 Pointer Lock 仍需设备体验验收。
+- `touchReset` 处理失焦、多指释放和布局编辑；默认线性瞄准，`touchAccel` 可开关；烟雾/闪光阻断自动瞄准。
+- 设置新增 `quality`（low/balanced/high，对应像素比上限 1/1.5/2）、`motion`（仅装饰镜头摇晃，真实后坐保留）、`battleSize`、`autoTeamSize`、`touchAccel`。旧设置与熟练度存档保留。
+- `M` 打开俯视地图；采购支持鼠标/触屏与数字键。地图与采购期间战斗继续，阻断玩家移动/开火/跳蹲输入。
+- `window.render_game_to_text()` 提供测试状态；`advanceTime(ms)` 进入手动模拟步进（刷新退出）。原 `frame(dt)` 仍可调用。
+- 回归：原 smoke、`upgrade-check.js`（交互/人数/AI/触控）、`raycheck.js`（固定射线等价性与微基准），`profile.js`（三轮真实 RAF）。生成证据在忽略的 `outputs/revision-02/`。
+- 未做：联机、第二张完整地图、骨骼 IK、移动设备实机性能认证；本轮未部署。
