@@ -1,21 +1,23 @@
 'use strict';
 /* ============ INK STRIKE · progress: multi-kills, MVP, damage report, weapon mastery & stroke skins ============ */
 const SKINS = [{ n: '素描', need: 0, ink: INK, w: 1.7 }, { n: '朱砂', need: 10, ink: 0xa81f1f, w: 1.8 }, { n: '靛青', need: 30, ink: 0x1f4f8f, w: 1.8 }, { n: '鎏金', need: 75, ink: 0x9a6a00, w: 2.1 }];
-const STREAK = ['', '', '双杀 · 连笔', '三杀 · 行云', '四杀 · 泼墨', '五杀 · 一气呵成'];
+const STREAK = ['', '', '双杀 · 连笔', '三杀 · 行云', '四杀 · 泼墨', '五杀 · 一气呵成', '六杀 · 破阵', '七杀 · 飞墨', '八杀 · 横扫', '九杀 · 狂澜'];
+const streakTitle = n => STREAK[n] || `超神 · ${n} 连杀`;
 const PROG = {
-  data: Object.assign({ kills: {}, skin: {}, mvp: 0 }, JSON.parse(localStorage.getItem('inkstrike_prog') || '{}')), dmg: {}, rs: new Map(), streakN: 0, streakT: -9,
+  data: Object.assign({ kills: {}, skin: {}, mvp: 0 }, JSON.parse(localStorage.getItem('inkstrike_prog') || '{}')), dmg: {}, rs: new Map(), streakN: 0, streakT: -9, streakEpoch: 0, streakTimer: 0,
   save() { localStorage.setItem('inkstrike_prog', JSON.stringify(this.data)); },
   tier(k) { const n = this.data.kills[k] || 0; let t = 0; SKINS.forEach((s, i) => { if (n >= s.need) t = i; }); return t; },
   skin(k) { const t = this.tier(k), s = this.data.skin[k]; return s === undefined ? t : Math.min(s, t); },
   rstat(e) { let r = this.rs.get(e); if (!r) this.rs.set(e, r = { k: 0, dmg: 0, plant: 0, defuse: 0 }); return r; },
-  resetRound() { this.rs.clear(); this.dmg = {}; if (G.mode === 'comp') this.streakN = 0; $('report').classList.remove('on'); },
-  onHurt(e, dmg, by) { if (!by || by === e) return; this.rstat(by).dmg += dmg; const pl = G.player; if (by === pl) { const r = this.dmg[e.name] || (this.dmg[e.name] = { team: e.team, dealt: 0, hits: 0, taken: 0, thits: 0 }); r.dealt += dmg; r.hits++; } else if (e === pl) { const r = this.dmg[by.name] || (this.dmg[by.name] = { team: by.team, dealt: 0, hits: 0, taken: 0, thits: 0 }); r.taken += dmg; r.thits++; } },
+  resetStreak() { clearTimeout(this.streakTimer); this.streakTimer = 0; this.streakN = 0; this.streakT = -9; this.streakEpoch++; },
+  cancelNotices() { this.resetStreak(); },
+  resetRound() { this.rs.clear(); this.dmg = {}; this.resetStreak(); $('report').classList.remove('on'); },
+  onHurt(e, dmg, by, wkey) { botOnDamage(e, by, wkey); if (!by || by === e) return; this.rstat(by).dmg += dmg; const pl = G.player; if (by === pl) { const r = this.dmg[e.name] || (this.dmg[e.name] = { team: e.team, dealt: 0, hits: 0, taken: 0, thits: 0 }); r.dealt += dmg; r.hits++; } else if (e === pl) { const r = this.dmg[by.name] || (this.dmg[by.name] = { team: by.team, dealt: 0, hits: 0, taken: 0, thits: 0 }); r.taken += dmg; r.thits++; } },
   onKill(e, by, wkey) {
-    if (!by || by === e) return; this.rstat(by).k++; if (!by.isPlayer) return;
-    const now = G.now; this.streakN = (G.mode === 'comp' || now - this.streakT < 4.5) ? this.streakN + 1 : 1; this.streakT = now;
-    if (this.streakN >= 2) { const n = Math.min(5, this.streakN); setTimeout(() => { combatNotice(STREAK[n], `连续击倒 ×${this.streakN}`, 'go'); SFX.streak(n); }, 350); }
+    botOnDeath(e, by, wkey); if (e.isPlayer) this.resetStreak(); if (!by || by === e) return; this.rstat(by).k++; if (!by.isPlayer) return;
+    const now = G.now, owner = by, epoch = this.streakEpoch; if (owner.alive && G.mode !== 'range') { this.streakN = (G.mode === 'comp' || now - this.streakT < 4.5) ? this.streakN + 1 : 1; this.streakT = now; const n = this.streakN; clearTimeout(this.streakTimer); if (n >= 2) this.streakTimer = setTimeout(() => { this.streakTimer = 0; if (epoch !== this.streakEpoch || owner !== G.player || !owner.alive || G.state === 'menu' || G.state === 'matchEnd') return; combatNotice(streakTitle(n), `连续击倒 ×${n}`, 'go'); SFX.streak(Math.min(8, n)); }, 350); }
     if (wkey && WEAPONS[wkey] && G.mode !== 'range') { const before = this.tier(wkey); this.data.kills[wkey] = (this.data.kills[wkey] || 0) + 1; const after = this.tier(wkey); this.save();
-      if (after > before) { delete this.data.skin[wkey]; this.save(); setTimeout(() => { combatNotice(`解锁「${SKINS[after].n}」笔触`, `${WEAPONS[wkey].name} · 熟练度 ${this.data.kills[wkey]} 击倒`, 'go'); SFX.bell(true); if (G.player.cur === wkey) { VM.key = null; switchTo(wkey); } }, 1500); } }
+      if (after > before) { delete this.data.skin[wkey]; this.save(); setTimeout(() => { if (epoch !== this.streakEpoch || owner !== G.player || G.state === 'menu' || G.state === 'matchEnd') return; combatNotice(`解锁「${SKINS[after].n}」笔触`, `${WEAPONS[wkey].name} · 熟练度 ${this.data.kills[wkey]} 击倒`, 'go'); SFX.bell(true); if (G.player.cur === wkey) { VM.key = null; switchTo(wkey); } }, 1500); } }
   },
   mvp(win) { let best = null, bs = -1; for (const [e, r] of this.rs) { if (e.team !== win) continue; const s = r.k * 100 + r.dmg + (r.plant + r.defuse) * 160; if (s > bs) { bs = s; best = e; } } if (!best) return ''; best.mvps = (best.mvps || 0) + 1; if (best.isPlayer) { this.data.mvp++; this.save(); } const r = this.rs.get(best); return `MVP · ${best.name}(${r.defuse ? '拆除墨核 · ' : r.plant ? '安放墨核 · ' : ''}${r.k} 击倒 / ${Math.round(r.dmg)} 伤害)`; },
   report(title) {

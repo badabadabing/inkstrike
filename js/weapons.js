@@ -4,11 +4,11 @@ const WEAPONS = {
   knife:  { name: '刻刀', en: 'ETCHER', slot: 3, dmg: 40, dmg2: 65, rate: .42, rate2: .9, range: 2.0, speed: 1.0, draw: .35, reward: 1500, melee: true, price: 0 },
   p9:     { name: 'P9 速写', en: 'P9 SKETCH', slot: 2, dmg: 30, arm: .52, rate: .14, auto: false, mag: 12, res: 48, reload: 1.9, spread: .0035, moveSp: .022, sprayInc: .004, up: .016, side: .004, vm: .05, speed: .98, draw: .4, reward: 300, price: 200, snd: 'pistol', fall: .82 },
   deagle: { name: '重墨 .50', en: 'HEAVY INK .50', slot: 2, dmg: 58, arm: .93, rate: .27, auto: false, mag: 7, res: 35, reload: 2.1, spread: .0025, moveSp: .04, sprayInc: .03, up: .05, side: .012, vm: .11, speed: .95, draw: .5, reward: 300, price: 700, snd: 'deagle', fall: .85 },
-  viper:  { name: '飞白 冲锋枪', en: 'DRYBRUSH SMG', slot: 1, dmg: 25, arm: .6, rate: .072, auto: true, mag: 30, res: 120, reload: 2.2, spread: .008, moveSp: .012, sprayInc: .0012, up: .0085, side: .0055, vm: .035, speed: .97, draw: .5, reward: 600, price: 1250, snd: 'smg', fall: .75 },
+  viper:  { name: '飞白 冲锋枪', en: 'DRYBRUSH SMG', slot: 1, dmg: 25, arm: .6, rate: .072, auto: true, mag: 30, res: 120, reload: 2.2, spread: .008, moveSp: .012, sprayInc: .0012, up: .0085, side: .0055, vm: .035, speed: .97, draw: .5, reward: 600, price: 1250, snd: 'smg', fall: .75, optic: 'reflex', adsFov: 70 },
   nova:   { name: '泼墨 霰弹枪', en: 'SPLASH SHOTGUN', slot: 1, dmg: 20, pellets: 9, arm: .5, rate: .85, auto: false, mag: 8, res: 32, reload: 2.6, spread: .045, moveSp: .01, sprayInc: 0, up: .07, side: .015, vm: .16, speed: .93, draw: .6, reward: 900, price: 1050, snd: 'shotgun', fall: .55, pump: true },
   ak:     { name: 'AK 焦墨', en: 'AK CHARCOAL', slot: 1, dmg: 36, arm: .78, rate: .1, auto: true, mag: 30, res: 90, reload: 2.4, spread: .0022, moveSp: .05, sprayInc: .0011, up: .0135, side: .0085, vm: .06, speed: .9, draw: .6, reward: 300, price: 2700, snd: 'rifle', fall: .95 },
-  m4:     { name: 'M4 工笔', en: 'M4 FINELINE', slot: 1, dmg: 31, arm: .7, rate: .092, auto: true, mag: 30, res: 90, reload: 2.7, spread: .0018, moveSp: .045, sprayInc: .0009, up: .0105, side: .006, vm: .045, speed: .92, draw: .6, reward: 300, price: 3100, snd: 'm4', fall: .95 },
-  awp:    { name: '一笔 狙击枪', en: 'ONE STROKE', slot: 1, dmg: 115, arm: .97, rate: 1.4, auto: false, mag: 5, res: 25, reload: 3.3, spread: .0004, noScope: .07, moveSp: .12, sprayInc: 0, up: .06, side: .01, vm: .2, speed: .82, draw: .9, reward: 100, price: 4750, snd: 'awp', fall: 1, scope: true, bolt: true },
+  m4:     { name: 'M4 工笔', en: 'M4 FINELINE', slot: 1, dmg: 31, arm: .7, rate: .092, auto: true, mag: 30, res: 90, reload: 2.7, spread: .0018, moveSp: .045, sprayInc: .0009, up: .0105, side: .006, vm: .045, speed: .92, draw: .6, reward: 300, price: 3100, snd: 'm4', fall: .95, optic: 'holo', adsFov: 64 },
+  awp:    { name: '一笔 狙击枪', en: 'ONE STROKE', slot: 1, dmg: 115, arm: .97, rate: 1.65, auto: false, mag: 5, res: 25, reload: 3.3, spread: .0004, noScope: .08, moveSp: .16, sprayInc: 0, up: .06, side: .01, vm: .2, speed: .82, draw: .9, reward: 100, price: 4750, snd: 'awp', fall: 1, scope: true, bolt: true },
   he:     { name: '墨爆弹', en: 'INK BOMB', slot: 4, speed: .98, draw: .4, price: 300, reward: 300, nade: true, rate: 1, fuse: 1.7 },
   flash:  { name: '曝光弹', en: 'OVEREXPOSE', slot: 4, speed: .98, draw: .4, price: 200, reward: 300, nade: true, rate: 1, fuse: 1.45 },
   smoke:  { name: '烟墨弹', en: 'SMOKE WASH', slot: 4, speed: .98, draw: .4, price: 300, reward: 300, nade: true, rate: 1, fuse: 2.3 }
@@ -40,7 +40,7 @@ const GUNS = {
   m4(p) { const b = p.body;
     b.box(.042, .048, .22, 0, .022, -.02); b.prof([[-.09, 0], [.10, 0], [.10, -.036], [.05, -.042], [-.02, -.042], [-.09, -.02]], .038);
     b.box(.022, .012, .2, 0, .052, -.02); { const a = []; for (let i = 0; i < 10; i++) a.push(-.011, .059, .07 - i * .02, .011, .059, .07 - i * .02); b.line(a); }
-    b.box(.03, .014, .07, 0, .065, .0); for (const s of [-.021, .021]) b.box(.004, .044, .05, s, .094, .0); b.box(.046, .004, .05, 0, .118, 0); b.box(.038, .04, .002, 0, .094, -.02, { tint: GLASS, tone: 0, edges: false }); b.sph(.004, 0, .094, -.022, { tint: AMBER, tone: 0, edges: false, ws: 5, hs: 3 });
+    b.box(.03, .036, .05, 0, .076, -.07, { tone: .33 });
     b.prof([[.13, -.026], [.40, -.02], [.40, .046], [.13, .046]], .048); { const a = []; for (let i = 0; i < 6; i++) { const z = -.16 - i * .04; a.push(.0245, .0, z, .0245, .03, z - .012, -.0245, .0, z, -.0245, .03, z - .012); } b.line(a); }
     b.prof([[.405, .0], [.45, .0], [.432, .088], [.42, .088]], .012); b.cyl(.008, .008, .16, 6, 0, .012, -.46, { ax: 'z', ea: 50 }); b.cyl(.019, .019, .2, 8, 0, .012, -.62, { ax: 'z', tone: .33 });
     b.prof([[-.06, -.02], [-.012, -.03], [-.046, -.132], [-.098, -.12]], .03, { tone: .66 }); b.cyl(.014, .014, .22, 8, 0, .02, .2, { ax: 'z' });
@@ -109,6 +109,7 @@ function finishGun(key, p) { const meta = GUNS[key](p), b = p.body, w = WEAPONS[
     if (key === 'awp') { for (const z of [.13, -.29]) { b.cyl(.028, .028, .008, 12, 0, .082, z, { ax: 'z', tone: .33 }); } inkBlock(b, .054, .15, .018, 0, -.036, .438, { tone: .66 }); b.cyl(.010, .010, .025, 8, .033, .048, .276, { ax: 'x', tone: 1 }); }
   }
   if (['ak', 'm4', 'viper'].includes(key)) { const x = key === 'ak' ? .0145 : .0135; for (const q of [-1, 1]) { const a = key === 'ak' ? [[.135, -.066], [.165, -.154], [.217, -.218]] : key === 'm4' ? [[.048, -.076], [.055, -.174]] : [[-.012, -.15], [-.021, -.224]]; for (let i = 0; i < 3; i++) p.mag.poly(a.map(([f, u]) => [q * x, u, -f - i * .011])); } }
+  if (w.optic) { const oy = .118, z = -.07; meta.opticY = oy; b.box(.055,.008,.055,0,oy-.025,z,{tone:.66}); for(const x of [-.026,.026]) b.box(.007,.047,.032,x,oy,z,{tone:.66}); b.box(.055,.007,.032,0,oy+.023,z,{tone:.66}); b.cyl(.008,.008,.014,8,.039,oy-.013,z,{ax:'x',tone:1}); }
   return meta;
 }
 function viewSleeve(s, a, b, r1, r2, tone) { const A = new V3(...a), B = new V3(...b), d = B.clone().sub(A), q = new THREE.Quaternion().setFromUnitVectors(new V3(0, 1, 0), d.clone().normalize()), m = new THREE.Matrix4().compose(A.add(B).multiplyScalar(.5), q, new V3(1, 1, .86)); s.add(new THREE.CylinderGeometry(r2, r1, d.length(), 7, 1), m, { ...(tone === undefined ? {} : { tone }), ea: 35 }); }
@@ -118,7 +119,7 @@ function viewGlove(s, f, u, support, pistol) { const z = -f, side = support ? -1
   } else if(support&&pistol) { for(let i=0;i<3;i++) { const y=u+.004-i*.017; inkLimb(s,[-.045,y,z+.014],[-.042,y-.003,z-.020],.015,.018,{tone:.33}); inkLimb(s,[-.042,y-.003,z-.020],[.005,y-.006,z-.023],.014,.017,{tone:.33}); } inkLimb(s,[-.042,u+.014,z+.014],[-.039,u+.023,z-.022],.018,.019,{tone:.33});
   } else { for(let i=0;i<3;i++) { const y=u+.004-i*.017; inkLimb(s,[.030,y,z+.006],[.029,y-.004,z-.025],.016,.018,{tone:.33}); inkLimb(s,[.029,y-.004,z-.025],[-.012,y-.008,z-.027],.014,.017,{tone:.33}); } inkLimb(s,[-.021,u+.009,z+.006],[-.024,u+.021,z-.014],.020,.019,{tone:.33}); inkLimb(s,[-.024,u+.021,z-.014],[-.010,u+.018,z-.031],.017,.018,{tone:.33}); inkLimb(s,[.030,u+.021,z+.008],[.028,u+.023,z-.038],.015,.016,{tone:.33}); inkLimb(s,[.028,u+.023,z-.038],[.008,u+.015,z-.045],.014,.015,{tone:.33}); }
   const wrist=[x+side*.010,u-.028,z+.046],elbow=support?[-.11,u-.17,z+.25]:[.10,u-.19,z+.28],shoulder=support?[-.155,u-.35,z+.48]:[.18,u-.36,z+.47];
-  viewSleeve(s,elbow,wrist,.050,.031,.33); viewSleeve(s,shoulder,elbow,.062,.051,.33); const cuff=wrist.map((v,i)=>v*.77+elbow[i]*.23); viewSleeve(s,cuff,wrist,.038,.035,.66);
+  viewSleeve(s,elbow,wrist,.050,.031,.33); viewSleeve(s,shoulder,elbow,.062,.051,.33); const cuff=wrist.map((v,i)=>v*.77+elbow[i]*.23); viewSleeve(s,cuff,wrist,.038,.035,.66); const style = G.set.actorStyle || 'scribe'; if(style==='scout') for(let i=0;i<3;i++) { const t=.15+i*.13,a=wrist.map((v,j)=>v*(1-t)+elbow[j]*t),b=wrist.map((v,j)=>v*(1-t-.04)+elbow[j]*(t+.04)); viewSleeve(s,b,a,.041,.04,1); } if(style==='warden') { inkBlock(s,.073,.068,.022,x,u-.007,z+.044,{tone:1,bevel:.25}); inkBlock(s,.064,.030,.020,cuff[0],cuff[1],cuff[2]-.035,{tone:.66,bevel:.22}); }
   inkBlock(s,.060,.062,.045,elbow[0],elbow[1],elbow[2]-.026,{tone:.66,r:[.42,0,support?-.25:.22],bevel:.25});
 }
 
@@ -150,7 +151,7 @@ const VM = { off: {},
     if (key === 'nova') m.parts.mag.visible = false;
     return m;
   },
-  show(key) { if (this.cur) this.root.remove(this.cur.group); const sk = PROG.skin(key), id = key + sk; this.cur = this.models[id] || (this.models[id] = this.build(key, sk)); this.key = key; this.root.add(this.cur.group);
+  show(key) { if (this.cur) this.root.remove(this.cur.group); const sk = PROG.skin(key), id = key + sk + ':' + (G.set.actorStyle || 'scribe'); this.cur = this.models[id] || (this.models[id] = this.build(key, sk)); this.key = key; this.root.add(this.cur.group);
     this.cur.group.add(this.flash); const mz = this.cur.meta.muzzle; this.flash.position.set(0, mz[1], -mz[0] - .03); this.drawT = 0; this.reloadT = -1; this.atk = 1; this.insp = 1; this.cyc = 1; },
   fire(w) { this.kick = Math.min(this.kick + w.vm, .22); this.kickR = Math.min(this.kickR + w.vm * 1.6, .4); this.boltT = 1; this.flashT = .05; this.flash.rotation.z = rand(6.28); this.flash.scale.setScalar(rand(.05, .085) * (w.snd === 'm4' ? .5 : 1)); if (w.bolt || w.pump) this.cyc = 0; this.insp = 1; },
   update(dt, pl, w, mdx, mdy) {
@@ -180,6 +181,6 @@ const VM = { off: {},
     if (this.atk < 1) { this.atk = Math.min(1, this.atk + dt / (this.atkKind ? .5 : .3)); const k = Math.sin(this.atk * Math.PI);
       if (meta.nade) { z -= k * .22; y += k * .1; rx -= k * .8; } else if (this.atkKind) { z -= k * .28; rx -= k * .3; ry -= k * .5; } else { x -= k * .2; ry += k * 1.0; rz += k * .6; z -= k * .08; } }
     if (this.insp < 1) { this.insp = Math.min(1, this.insp + dt / 2.6); const k = Math.sin(this.insp * Math.PI), q = Math.sin(this.insp * 6.2832); ry += k * .95; rz += q * .4; x -= k * .06; y += k * .025; rx += k * .15; }
-    r.position.set(x, y, z); r.rotation.set(rx, ry, rz, 'YXZ'); r.visible = !(pl.scoped > 0) && pl.alive;
+    this.ads = damp(this.ads || 0, pl.scoped && w.optic ? 1 : 0, 18, dt); const ad = this.ads; x *= 1 - ad; y = y * (1 - ad) + (-(meta.opticY || .118) - this.kick * .04) * ad; z = z * (1 - ad) - .44 * ad; rx *= 1 - ad * .9; ry *= 1 - ad; rz *= 1 - ad; r.position.set(x, y, z); r.rotation.set(rx, ry, rz, 'YXZ'); r.visible = !(pl.scoped > 0 && w.scope) && pl.alive;
   }
 };

@@ -224,6 +224,13 @@ body.touch #tTop .tb{width:40px;font-size:10px}body.touch #hpBox,body.touch #amm
 #pause .box{max-height:94vh;overflow-y:auto}#boardIn{max-height:88vh;overflow-y:auto}
 body.touch #training{left:calc(10px + env(safe-area-inset-left));right:auto;top:136px;max-width:215px;font-size:10px;line-height:1.5;padding:4px 7px;opacity:.95}body.touch #combatNotice{top:55px;max-width:56vw;font-size:9px;padding:4px 8px}body.touch #orderState{top:81px;font-size:8px}body.touch #precisionTrack{display:none}body.touch .buy-tools{align-items:flex-start}body.touch .buy-tools p{font-size:8px}body.touch .buy-tools button{font-size:9px;min-width:90px;padding:7px}body.touch #squadControls button,body.touch #rangeControls button{min-height:38px;font-size:10px}body.touch #squadControls,body.touch #rangeControls{padding:8px 0}
 @media(max-height:560px){.tactical-grid{grid-template-columns:1fr;gap:0}.map-notes{display:none}.tactical-head{padding-bottom:6px}#tacticalMap{max-height:46vh}.map-foot{padding-top:6px;font-size:9px}#squadControls button,#rangeControls button{padding:6px 8px}.buy-tools{margin-bottom:8px}#tacticalMap{max-height:48vh}#training{top:205px}.sl{margin-bottom:7px}}
+
+/* Revision 04 feedback controls */
+#sMap{width:100%;font:inherit;font-size:12px;padding:9px;background:var(--paper);color:var(--ink);border:1px solid var(--ink)}#looksBtn{font-size:11px;letter-spacing:1px;padding:9px;margin-top:8px;background:transparent;color:var(--ink);box-shadow:none}#looks{z-index:9;background:rgba(22,22,28,.6)}.looks-panel{width:min(400px,92vw);max-height:94vh;overflow:auto;padding:22px;text-align:center}.looks-panel h2{font-size:22px}.looks-panel img{display:block;width:100%;height:240px;object-fit:contain;margin:6px 0}.looks-panel select{width:100%;font:inherit;padding:10px;background:var(--paper);border:1px solid var(--ink)}.looks-panel p{font-size:11px;line-height:1.7;margin:12px 0}.looks-panel button{padding:10px 30px;background:var(--ink);color:var(--paper);font:inherit;border:0;cursor:pointer}
+#specControls{position:fixed;z-index:8;bottom:7%;left:50%;transform:translateX(-50%);display:flex;gap:12px;align-items:center;max-width:96vw;padding:10px;background:var(--paper);border:1px solid var(--ink);pointer-events:auto}#specControls[hidden]{display:none}#specControls button{font:inherit;font-size:12px;white-space:nowrap;padding:9px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}#specLabel{font-size:12px;min-width:110px;text-align:center}
+#optic{position:fixed;pointer-events:none;z-index:2;display:none;left:50%;top:50%;transform:translate(-50%,-50%);width:48px;height:37px;border:0;border-radius:6px;background:transparent}#optic.on{display:block}#optic i{position:absolute;width:4px;height:4px;border-radius:50%;background:var(--red);top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 0 2px var(--red)}#optic.holo i{width:16px;height:16px;border:1px solid var(--red);background:radial-gradient(circle,var(--red) 0 1.5px,transparent 2px);box-shadow:none}#optic.reflex{width:40px;height:32px;border-radius:50% 50% 4px 4px}.input-hint{font-size:10px;line-height:1.6;opacity:.7;margin:0 0 8px}
+#layoutBar{left:8px;transform:none;width:min(600px,68vw);flex-wrap:wrap;justify-content:center;gap:6px;font-size:11px}#layoutBar label{display:flex;gap:5px;align-items:center}#layoutBar input{width:90px;height:30px}#layoutBar em{width:35px;font-style:normal;font-size:10px}#layoutBar select{max-width:130px;font:inherit;background:var(--paper);color:var(--ink)}#layoutBar .layout-guide{width:100%;text-align:center;font-size:10px}body.layoutEdit #touch .layout-selected{outline:3px solid var(--blue);background:rgba(45,108,179,.18)!important}body.layoutEdit #joyBase{pointer-events:auto!important;outline:2px dashed var(--red)}
+@media(max-height:560px){#sMap{padding:5px;font-size:10px}#looksBtn{padding:6px;font-size:10px}#layoutBar{top:4px;gap:3px;padding:4px;max-width:68vw}#layoutBar label{font-size:9px}#layoutBar button{font-size:10px;padding:5px}#layoutBar input{width:68px}.looks-panel{padding:12px}.looks-panel img{height:150px}.looks-panel p{margin:6px 0}#specControls{bottom:6%;padding:6px}#specControls button{padding:8px;font-size:11px}#specLabel{min-width:85px;font-size:10px}}
 </style>
 </head>
 <body>
@@ -231,7 +238,7 @@ body.touch #training{left:calc(10px + env(safe-area-inset-left));right:auto;top:
 <div class="vig"></div>
 <canvas id="fx"></canvas>
 <div id="smokeOv"></div><div id="flashOv"></div>
-<div id="scope"></div>
+<div id="scope"></div><div id="optic"><i></i></div>
 
 <div id="hud">
   <div id="radarBox"><canvas id="radar" width="176" height="176"></canvas><div id="zone" class="hand"></div></div>
@@ -263,6 +270,7 @@ body.touch #training{left:calc(10px + env(safe-area-inset-left));right:auto;top:
   <div class="tb" id="tUse" data-b="use">互动</div>
   <div id="tTop"><div class="tb" data-b="map">地图</div><div class="tb" data-b="buy">采购</div><div class="tb" data-b="board">战绩</div><div class="tb" data-b="pause">暂停</div></div>
 </div>
+<div id="specControls" hidden><button id="specPrev">◀ 上一名</button><span id="specLabel">观战</span><button id="specNext">下一名 ▶</button></div>
 <div id="dead"><h2 class="hand">阵 亡</h2><div id="deadBy"></div></div>
 
 <div id="buy" class="ov"><div id="buyIn" class="panel"><h3 class="hand"><span>军械铺</span><span><span id="buyMoney">$0</span><button id="buyClose">关闭</button></span></h3><div class="buy-tools"><p id="buyBudget"></p><button id="rebuy">复购上次配置</button></div><div id="buyGrid"></div><p>按数字键 1–9 / 0 购买 · B 关闭 · 同槽位新武器会替换旧武器</p></div></div>
@@ -272,30 +280,33 @@ body.touch #training{left:calc(10px + env(safe-area-inset-left));right:auto;top:
 
 <div id="menu" class="ov">
   <div id="menuIn">
-    <div class="edition">PAPER TOWN / REVISION 03</div>
+    <div class="edition">INK BATTLEGROUNDS / REVISION 04</div>
     <h1>INK<br><em>STRIKE</em></h1>
     <h2>墨 线 突 击</h2>
     <div class="tag">纸上有街巷，落笔即交锋。<br>穿过折页门，守住刻度台。下一道墨迹，由你留下。</div>
+    <div class="opt"><label>地图 MAP</label><select id="sMap"><option value="papertown">纸镇 · 原创街区</option><option value="warehouse">折页货场 · 仓库布局</option><option value="dunes">双井沙城 · 长短道 / 中门</option></select></div>
     <div class="opt"><label>模式 MODE</label><div class="seg" id="optMode"><button data-v="comp" class="sel">竞技<small>安放 / 拆除墨核 · 先取 7 胜</small></button><button data-v="dm">死斗<small>无限重生 · 先取 40 击倒</small></button><button data-v="range">靶场<small>固定弹道 · 自由练枪</small></button></div></div>
     <div class="opt"><label>阵营 SIDE</label><div class="seg" id="optTeam"><button data-v="blue" class="sel">靛青 · 蓝方<small>防守 · 守点 / 拆除</small></button><button data-v="red">朱砂 · 红方<small>进攻 · 护送 / 安放</small></button></div></div>
     <div class="opt"><label>规模 SQUAD SIZE</label><div class="seg" id="optSize"><button data-v="auto" class="sel">自动</button><button data-v="5">5 v 5</button><button data-v="8">8 v 8</button><button data-v="12">12 v 12</button></div><div id="sizeHint"></div></div>
     <div class="opt"><label>对手 BOTS</label><div class="seg" id="optDiff"><button data-v="0">新兵</button><button data-v="1" class="sel">老兵</button><button data-v="2">精英</button></div></div>
     <button class="go hand" id="start">开始行动</button>
-    <button class="go alt" id="armoryBtn">武库 · 熟练度与笔触</button>
+    <button class="go alt" id="armoryBtn">武库 · 熟练度与笔触</button><button class="go alt" id="looksBtn">人员装备 · 外观</button>
     <div class="keys"><kbd>WASD</kbd>移动 <kbd>鼠标</kbd>瞄准/射击 <kbd>右键</kbd>开镜/重刺 <kbd>空格</kbd>跳跃 <kbd>C</kbd>蹲<br><kbd>SHIFT</kbd>静步 <kbd>R</kbd>换弹 <kbd>1-4</kbd>/<kbd>滚轮</kbd>切换 <kbd>Q</kbd>上一把 <kbd>B</kbd>采购 <kbd>E</kbd>安放/拆除 <kbd>G</kbd>交接墨核 <kbd>F</kbd>检视 <kbd>M</kbd>地图 <kbd>TAB</kbd>战绩</div>
   </div>
   <div id="menuStamp">OFFLINE / UP TO 24 / INK ON PAPER</div>
-  <aside id="fieldCard"><div class="field-meta"><span>作战区域 01</span><span>128 × 112 m</span></div><h3>纸镇</h3><div class="field-en">PAPER TOWN</div><img id="briefMap" alt="纸镇地图概览"><div id="briefTitle"></div><p id="briefText"></p><button id="mapPreview">查看战术地图 ↗</button></aside>
+  <aside id="fieldCard"><div class="field-meta"><span>作战区域 01</span><span>128 × 112 m</span></div><h3 id="fieldName">纸镇</h3><div class="field-en" id="fieldEn">PAPER TOWN</div><img id="briefMap" alt="纸镇地图概览"><div id="briefTitle"></div><p id="briefText"></p><button id="mapPreview">查看战术地图 ↗</button></aside>
 </div>
 
-<div id="tactical" class="ov"><div class="panel tactical-in"><div class="tactical-head"><h2>纸镇 / 战术地图</h2><button id="mapClose">关闭 · M</button></div><div class="tactical-grid"><canvas id="tacticalMap" width="640" height="560"></canvas><div class="map-notes"><h4>A / 刻度台</h4><p>东侧长街与近道相连。借掩体逐段推进，留意高处平台。</p><h4>B / 印运仓</h4><p>西侧巷道通向货仓。利用烟墨封住长线，进入后检查两侧。</p><h4>中路 / 折页门</h4><p>连接左右两翼。控制中路，可以缩短转点距离。</p><strong>▲ 你　● 队友</strong><p>敌人显示己方最后目击位置，短暂保留后消失。地图打开时战斗继续。</p></div></div><div id="squadControls"><span>小队指令</span><button data-order="A">前往 A</button><button data-order="B">前往 B</button><button data-order="rally">向我集合</button><button data-order="auto">自主战术</button><button id="corePass">交接墨核 · G</button></div><div id="rangeControls" hidden><span>训练设置</span><button id="trainStart">开始 30 秒训练</button><button id="trainMotion">横移靶：关</button><small>计时训练须手动开火；地图与采购暂停计时</small></div><div class="map-foot">北 ↑　·　蓝方防守 / 红方进攻　·　地图为俯视示意</div></div></div>
+<div id="tactical" class="ov"><div class="panel tactical-in"><div class="tactical-head"><h2 id="mapTitle">纸镇 / 战术地图</h2><button id="mapClose">关闭 · M</button></div><div class="tactical-grid"><canvas id="tacticalMap" width="640" height="560"></canvas><div class="map-notes"><p id="mapNotes"></p><strong>▲ 你　● 队友</strong><p>地图不显示敌人位置。地图打开时战斗继续。</p></div></div><div id="squadControls"><span>小队指令</span><button data-order="A">前往 A</button><button data-order="B">前往 B</button><button data-order="rally">向我集合</button><button data-order="auto">自主战术</button><button id="corePass">交接墨核 · G</button></div><div id="rangeControls" hidden><span>训练设置</span><button id="trainStart">开始 30 秒训练</button><button id="trainMotion">横移靶：关</button><small>计时训练须手动开火；地图与采购暂停计时</small></div><div class="map-foot">北 ↑　·　蓝方防守 / 红方进攻　·　地图为俯视示意</div></div></div>
 
-<div id="layoutBar">拖动按钮到顺手的位置 <button id="layoutReset">重置</button><button id="layoutDone">完成</button></div>
+<div id="looks" class="ov"><div class="panel looks-panel"><h2>人员装备</h2><img id="actorPreview" alt="原创队员装备实机预览"><select id="sActorStyle"></select><p id="actorDesc"></p><button id="looksClose">完成</button></div></div>
+<div id="layoutBar"><span class="layout-guide">拖动排布；拖动摇杆后固定，恢复当前可回到浮动。</span><label>选择 <select id="layoutTarget"></select></label><label>按钮 <input id="layoutSize" type="range" min=".6" max="1.8" step=".05"><em id="layoutSizeV"></em></label><label>圆环 <input id="layoutJoy" type="range" min=".65" max="1.6" step=".05"><em id="layoutJoyV"></em></label><button id="layoutSelectedReset">恢复当前</button><button id="layoutReset">全部重置</button><button id="layoutDone">完成</button></div>
 <div id="pause" class="ov"><div class="box panel"><h2 class="hand">暂 停</h2>
   <div class="sl touchOnly"><span>触控灵敏度</span><input id="sTs" type="range" min=".3" max="2.5" step=".05"><em id="sTsV"></em></div>
   <div class="sl touchOnly"><span>滑动加速</span><input id="sAccel" type="checkbox" style="flex:none;width:22px;height:22px"><em>可选</em></div>
   <div class="sl touchOnly"><span>自动开火</span><input id="sAuto" type="checkbox" style="flex:none;width:22px;height:22px"><em></em></div>
-  <div class="sl deskOnly"><span>鼠标灵敏度</span><input id="sSens" type="range" min=".2" max="3" step=".05"><em id="sSensV"></em></div>
+  <div class="sl deskOnly"><span>瞄准设备</span><select id="sAimMode"><option value="trackpad">触控板 · 稳定低灵敏</option><option value="mouse">鼠标 · 直接输入</option></select></div><p class="deskOnly input-hint">触控板可用 Z 开火、V 瞄准、1–4 切枪，禁用滚轮切枪。未锁定预览中，按住 H 可移动光标复位，松开继续瞄准。</p>
+  <div class="sl deskOnly"><span>瞄准灵敏度</span><input id="sSens" type="range" min=".2" max="3" step=".05"><em id="sSensV"></em></div>
   <div class="sl"><span>视野 FOV</span><input id="sFov" type="range" min="60" max="105" step="1"><em id="sFovV"></em></div>
   <div class="sl"><span>画面精度</span><select id="sQuality"><option value="low">流畅 · 较低分辨率</option><option value="balanced">均衡</option><option value="high">精细 · 较高分辨率</option></select></div>
   <div class="sl"><span>镜头晃动</span><input id="sMotion" type="range" min="0" max="1" step=".05"><em id="sMotionV"></em></div>
@@ -304,7 +315,7 @@ body.touch #training{left:calc(10px + env(safe-area-inset-left));right:auto;top:
   <div class="sl"><span>准星颜色</span><div class="seg" id="sXh" style="flex:1"><button data-v="ink">墨</button><button data-v="red">红</button><button data-v="blue">蓝</button><button data-v="amber">黄</button><button data-v="green">绿</button></div></div>
   <div class="sl"><span>准星大小</span><input id="sXhSize" type="range" min=".6" max="2" step=".1"><em id="sXhSizeV"></em></div>
   <div class="sl"><span>静态准星</span><input id="sXhStatic" type="checkbox" style="flex:none;width:22px;height:22px"><em></em></div>
-  <div class="sl touchOnly"><span>按钮大小</span><input id="sBtn" type="range" min=".7" max="1.6" step=".05"><em id="sBtnV"></em></div>
+  <div class="sl touchOnly"><span>整体按钮比例</span><input id="sBtn" type="range" min=".7" max="1.6" step=".05"><em id="sBtnV"></em></div>
   <button class="go alt touchOnly" id="layoutBtn" style="display:none">调整按钮布局</button>
   <button class="go hand" id="resume">继 续</button><button class="go alt" id="quit">返回标题</button></div></div>
 <div id="end" class="ov"><div class="box panel"><h2 class="hand" id="endTitle"></h2><div id="endSub"></div><button class="go hand" id="again">再 来</button></div></div>
@@ -321,7 +332,7 @@ import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 Object.assign(window, { THREE, LineSegments2, LineSegmentsGeometry, LineMaterial });
 const files = ['core', 'map', 'weapons', 'actors', 'fx', 'objective', 'progress', 'touch', 'game'];
-for (const f of files) await new Promise((ok, err) => { const s = document.createElement('script'); s.src = `js/${f}.js?v=revision-03`; s.onload = ok; s.onerror = err; document.body.appendChild(s); });
+for (const f of files) await new Promise((ok, err) => { const s = document.createElement('script'); s.src = `js/${f}.js?v=revision-04`; s.onload = ok; s.onerror = err; document.body.appendChild(s); });
 try { boot(); } catch (e) { document.getElementById('loadTxt').textContent = '启动失败: ' + e.message; console.error(e); }
 </script>
 </body>

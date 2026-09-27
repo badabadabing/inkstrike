@@ -1,6 +1,6 @@
 'use strict';
 /* ============ INK STRIKE · objective: ink-core (bomb) plant/defuse, smoke & flash utility, ladders, surfaces ============ */
-const SITES = { A: { x1: 32.5, z1: -37.5, x2: 53.5, z2: -22.5, y: 1, name: 'A 点' }, B: { x1: -53.5, z1: -37.5, x2: -30.5, z2: -20.5, y: 0, name: 'B 点' } };
+const SITES = MAP.sites;
 const PLANT_T = 3.2, DEFUSE_T = 6, BOMB_T = 40;
 const BOMB = { state: 'none', carrier: null, pos: new V3(), t: 0, mesh: null, light: null, beepT: 0, site: null, defuser: null };
 const siteAt = p => { for (const k in SITES) { const s = SITES[k]; if (p.x > s.x1 && p.x < s.x2 && p.z > s.z1 && p.z < s.z2 && Math.abs(p.y - s.y) < .5) return k; } return null; };
@@ -13,7 +13,7 @@ function bombInit(scene) {
 }
 function bombReset() {
   BOMB.state = 'none'; BOMB.carrier = null; BOMB.defuser = null; BOMB.site = null; if (BOMB.mesh) BOMB.mesh.visible = false; for (const e of G.ents) e.act = null;
-  G.order = null; G.utilityT = { red: {}, blue: {} }; G.intel = { red: null, blue: null }; const slots = { red: 0, blue: 0 }, shift = Math.random() < .5 ? 0 : 1;
+  G.order = null; G.danger = { red: [], blue: [] }; G.utilityT = { red: {}, blue: {} }; G.intel = { red: null, blue: null }; const slots = { red: 0, blue: 0 }, shift = Math.random() < .5 ? 0 : 1;
   for (const b of G.bots) { const i = slots[b.team]++; b.slot = i; b.squad = Math.floor(i / 3); b.lane = i % 3 - 1; b.rot = Math.random(); b.role = b.team === 'red' ? ['entry', 'support', 'flank', 'support'][i % 4] : i % 5 === 4 ? 'rotate' : 'anchor'; b.holdSite = i % 5 === 4 ? 'MID' : ['A', 'B'][(i + shift) % 2]; b.holdYaw = null; b.holdPos = null; b.routeReady = false; b.respondedT = -9; b.tacticalT = G.now + i * .025; b.orderToken = 0; b.lastVisualT = b.heardT = -9; b.flashAvoidT = 0; b.targetVis = false; b.intent = '部署'; b.fireClear = true; b.saving = false; b.waitT = G.now + (G.state === 'freeze' ? G.timer : 0) + .012 + (i + (b.team === 'blue' ? .5 : 0)) * .02; }
   if (G.mode !== 'comp') return; const reds = G.ents.filter(e => e.team === 'red'); BOMB.carrier = reds.find(e => e.isPlayer && Math.random() < .4) || pick(reds.filter(e => !e.isPlayer)); BOMB.state = 'carried'; if (BOMB.carrier && !BOMB.carrier.isPlayer) BOMB.carrier.role = 'carrier';
   G.plan = { site: Math.random() < .5 ? 'A' : 'B' };
@@ -55,7 +55,10 @@ function botOrderGoal(b, now) { const o = G.order; if (!o || o.team !== b.team |
 
 /* ---------------- bot objective brain (comp mode) ---------------- */
 function randIn(r, tries = 40) { for (let k = 0; k < tries; k++) { const x = rand(r.x1, r.x2), z = rand(r.z1, r.z2), c = navIdx(x, z); if (MAP.reach[c] && (r.y === undefined || Math.abs(MAP.fh[c] - r.y) < .3)) return { x, z, cover: MAP.pen[c] }; } return { x: (r.x1 + r.x2) / 2, z: (r.z1 + r.z2) / 2 }; }
-function botCoverGoal(b, r, face, minDist = 0) { let best = null, score = -1e9; for (let k = 0; k < 8; k++) { const p = randIn(r, 18), c = navIdx(p.x, p.z); if (!MAP.reach[c] || (face && Math.hypot(p.x - face.x, p.z - face.z) < minDist)) continue; let q = (p.cover || 0) * 2 - Math.hypot(p.x - b.pos.x, p.z - b.pos.z) * .025;
+function botDangerDetour(b, gx, gz, now) { const list = G.danger && G.danger[b.team]; if (!list || !list.length || BOMB.state === 'planted' && b.team === 'blue' && BOMB.t < DEFUSE_T + 7) return null; const dx = gx - b.pos.x, dz = gz - b.pos.z, length = Math.hypot(dx, dz); if (length < 8) return null;
+  for (const event of list) { if (now - event.t > 8 || b.detourEventId === event.id) continue; const k = ((event.x - b.pos.x) * dx + (event.z - b.pos.z) * dz) / (length * length); if (k < .02 || k > .95 || Math.hypot(event.x - b.pos.x - k * dx, event.z - b.pos.z - k * dz) > 3.5) continue; const side = ((b.slot || G.ents.indexOf(b)) % 2 ? 1 : -1), spread = 6 + ((b.slot || 0) % 3) * 1.5;
+    for (const sign of [side, -side]) { const p = navPos(navSnap(event.x - dz / length * spread * sign, event.z + dx / length * spread * sign)); if (Math.hypot(p.x - event.x, p.z - event.z) < 4 || !navPath(b.pos.x, b.pos.z, p.x, p.z)) continue; b.detourEventId = event.id; b.intent = '绕开队友倒地区域'; return p; } } return null; }
+function botCoverGoal(b, r, face, minDist = 0) { let best = null, score = -1e9; for (let k = 0; k < 8; k++) { const p = randIn(r, 18), c = navIdx(p.x, p.z); if (!MAP.reach[c] || (face && Math.hypot(p.x - face.x, p.z - face.z) < minDist)) continue; let q = (p.cover || 0) * 2 - Math.hypot(p.x - b.pos.x, p.z - b.pos.z) * .025; for (const event of G.danger && G.danger[b.team] || []) if (G.now - event.t < 8) q -= Math.max(0, 6 - Math.hypot(event.x - p.x, event.z - p.z)) * 2;
     for (const o of G.bots) if (o !== b && o.alive && o.team === b.team) { const h = o.holdPos || o.pos, d = Math.hypot(h.x - p.x, h.z - p.z); if (d < 5) q -= (5 - d) * 2; } if (face && segClear(p.x, MAP.fh[c] + 1.3, p.z, face.x, (face.y || 0) + 1, face.z)) q += 1.5; if (q > score) { best = p; score = q; } }
   if (!best) best = navPos(navSnap((r.x1 + r.x2) / 2, (r.z1 + r.z2) / 2)); b.holdPos = best; return { ...best, hold: true, face }; }
 function botObjective(b, now) {
@@ -73,7 +76,7 @@ function botObjective(b, now) {
   const mine = G.ents.filter(e => e.alive && e.team === 'blue').length, foes = G.ents.filter(e => e.alive && e.team === 'red').length;
   if (mine === 1 && foes >= 3 && G.timer < 45 && !b.isPlayer) { b.saving = true; b.intent = '保存装备'; return navRandomIn(MAP.spawn.blue); }
   const it = G.intel && G.intel.blue; if (it && now - it.t < 4 && (b.role === 'rotate' || b.slot % 3 === 0) && Math.hypot(it.x - b.pos.x, it.z - b.pos.z) > 18) { b.intent = '响应报点'; b.respondedT = now; return navPos(navSnap(it.x + b.lane * 3, it.z - 3)); }
-  b.intent = '交叉架点'; if (b.holdSite === 'MID') return botCoverGoal(b, { x1: -6, x2: 6, z1: -37, z2: -28 }, { x: 0, z: -6 });
+  b.intent = '交叉架点'; if (b.holdSite === 'MID') return botCoverGoal(b, MAP.midHold, MAP.midHold.face);
   const r = SITES[b.holdSite]; return botCoverGoal(b, r, { x: (r.x1 + r.x2) / 2, z: r.z2 + 14, y: r.y });
 }
 function botHoldYaw(b, face) {          // pre-aim: look down the route the enemy is most likely to arrive from
@@ -100,4 +103,4 @@ function flashBang(x, y, z) {
 }
 /* ---------------- ladders & surfaces ---------------- */
 function ladderAt(p) { for (const l of MAP.ladders) if (p.x > l.x1 && p.x < l.x2 && p.z > l.z1 && p.z < l.z2 && p.y < l.y2 + .05 && p.y > l.y1 - .1) return l; return null; }
-function surfaceAt(p) { const x = p.x, y = p.y, z = p.z; if (y > 4.5 && x > -42.4 && x < -30 && z > -36.4 && z < -21.6) return 'metal'; if (y < .3 && x > -41 && x < -8 && z > -13 && z < 13) return 'tile'; if (y > .2 && x > -44 && x < -37 && z > 20 && z < 38) return 'wood'; if (y > .7 && y < 1.3 && x > 32 && x < 54 && z > -38 && z < -22) return 'stone'; if (y > .15) return 'wood'; return 'concrete'; }
+function surfaceAt(p) { const x = p.x, y = p.y, z = p.z; for (const q of MAP.surfaces || []) if (x > q[0] && z > q[1] && x < q[2] && z < q[3]) return q[4]; if (MAP.id !== 'papertown') return y > .15 ? 'wood' : 'concrete'; if (y > 4.5 && x > -42.4 && x < -30 && z > -36.4 && z < -21.6) return 'metal'; if (y < .3 && x > -41 && x < -8 && z > -13 && z < 13) return 'tile'; if (y > .2 && x > -44 && x < -37 && z > 20 && z < 38) return 'wood'; if (y > .7 && y < 1.3 && x > 32 && x < 54 && z > -38 && z < -22) return 'stone'; if (y > .15) return 'wood'; return 'concrete'; }
