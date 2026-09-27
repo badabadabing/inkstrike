@@ -30,11 +30,33 @@
   ```bash
   node tools/smoke.js      # 输出 SMOKE OK 才算过;需要 playwright(脚本里有查找逻辑,找不到会提示安装)
   ```
-- 部署(先 commit):
+- 发布目标（先完成测试并 commit，两个入口同步同一提交）：
+
+  | 目标 | Cloudflare 项目 / 配置 | 线上入口 |
+  |---|---|---|
+  | 游戏主站 | Pages 项目 `inkstrike` | https://inkstrike.pages.dev/ |
+  | 斑码盒子游戏副本 | Worker 项目 `banmabox`；`/Users/bing/Developer/banmabox/wrangler.jsonc` | https://banmabox.com/inkstrike/ （`www.banmabox.com` 同 Worker 绑定） |
+
+  **本轮用户已明确授权完成升级后发布 Cloudflare 主站，并同步斑码盒子。** 后续执行仍须依据对应任务的授权；这里记录发布流程，不扩大为永久、任意项目的发布授权。
+
+  原 `tools/deploy.sh` 会先执行 `git push`，触发 GitHub Pages，再发布 Cloudflare Pages。仅发布 Cloudflare 时可在游戏仓库将已提交资源导出到干净目录：
   ```bash
-  tools/deploy.sh          # git push → GitHub Pages 自动构建;wrangler → Cloudflare Pages
+  release_dir=$(mktemp -d)
+  git archive HEAD index.html js vendor | tar -x -C "$release_dir"
+  wrangler pages deploy "$release_dir" --project-name inkstrike --branch main
   ```
-  本机 `gh` 已登录 `badabadabing`,`wrangler` 已登录。换机器需要 `gh auth login` 和 `wrangler login`。
+
+  合集使用独立副本：把同一干净包中的 `index.html`、`js/`、`vendor/` 增量同步到 `/Users/bing/Developer/banmabox/public/inkstrike/`。`scripts/sync-games.sh` 会删除并重建整个 `public/`，单游戏更新不要运行它；保留其他已上线游戏与已本地化资产。同步前后比较 `public/inkstrike/**`、`public/main.js` 之外所有文件的路径清单与 SHA-256，确认其他资产未变化。
+
+  在 `/Users/bing/Developer/banmabox` 更新 `site/main.js` 内墨线突击的介绍后，同步首页文案与游戏副本统计，再部署 Worker：
+  ```bash
+  python3 scripts/inject_play.py public inkstrike
+  cp site/main.js public/main.js
+  wrangler deploy
+  ```
+  `inject_play.py` 只修改合集副本；每次先复制新的游戏 `index.html`，再注入一次，避免重复统计脚本。游戏主仓库不加入合集统计脚本。
+
+  发布完成必须验证两个线上入口：静态资源请求成功，实际浏览器能进入并运行对局、控制台无新错误；主站与合集的 `js/game.js` 内容哈希一致，且与本次提交一致（建议同时比较全部 `js/`）。合集 `index.html` 因统计注入允许不同。记录实际部署 ID 和验收结果，命令提交成功不能代替线上验收。发布前用 `wrangler whoami` 核验当前登录；若需执行原脚本，再核验 `gh auth status`，其他机器的登录状态不能沿用本机记录。
 
 ## 3. 文件地图(加载顺序即依赖顺序,见 `index.html` 末尾的 `files` 数组)
 
@@ -135,4 +157,11 @@
 - `M` 打开俯视地图；采购支持鼠标/触屏与数字键。地图与采购期间战斗继续，阻断玩家移动/开火/跳蹲输入。
 - `window.render_game_to_text()` 提供测试状态；`advanceTime(ms)` 进入手动模拟步进（刷新退出）。原 `frame(dt)` 仍可调用。
 - 回归：原 smoke、`upgrade-check.js`（交互/人数/AI/触控）、`raycheck.js`（固定射线等价性与微基准），`profile.js`（三轮真实 RAF）。生成证据在忽略的 `outputs/revision-02/`。
-- 未做：联机、第二张完整地图、骨骼 IK、移动设备实机性能认证；本轮未部署。
+- 未做：联机、第二张完整地图、骨骼 IK、移动设备实机性能认证。
+
+### Revision 02 线上发布 — 2026-09-27
+
+- 用户追加授权后已同步发布 Cloudflare 两个目标；运行时代码为 `f906695`，合集文案提交为 `2443e1c`。
+- Pages 生产部署：`3995b107-bb5f-4025-983a-6cf183f7e1b0`；Worker 版本：`d75ea8cd-4f79-48c6-bdbc-e7e823059b78`。
+- 发布前再次 `SMOKE OK`；线上两入口三模式启动正常，竞技/死斗 12v12（23 Bot）、靶场 5 假人；全部 9 个 JS 与本地提交哈希一致。合集桌面/手机尺寸无横向溢出，点击可进入游戏，无页面错误；统计 API 正常，www 路径通过。
+- 合集增量变更 9 个文件，其余 423 个本地资产哈希不变；未执行 GitHub push。发布证据在 `outputs/revision-02/release/`（Git 忽略）。
