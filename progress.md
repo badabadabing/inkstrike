@@ -64,3 +64,5 @@ Revision 03 — simulated player/expert panel and independent Dream Loop
 - R05共13项复现缺陷已修；32桌面/59触屏/11生命周期/15互动及门角控制恢复，既有226项回归通过；最终三图35回合3778.26模拟秒。新脚本/截图/基线保留outputs/revision-05，待性能与线上核验。
 
 - 最终独立复审通过；本机3×900真实RAF帧，p95 17.5/17.8/17.3ms，0页面错误。Cloudflare OAuth已刷新核验，准备双站发布。
+
+- R05双站完成：Pages cb7323b2-031e-428f-9d04-8c7e7b34f205；Worker 65eb86ce-c959-461c-ab31-cc859103826e。线上20项文件校验、两站3图/3模式及合集桌面/手机跳转通过，0页面/请求错误。仅6资产变化，其余426保持，未push。
