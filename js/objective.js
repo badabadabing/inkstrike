@@ -20,7 +20,7 @@ function bombReset() {
 
 }
 const canPlant = e => BOMB.state === 'carried' && BOMB.carrier === e && e.onGround && G.state === 'live' && siteAt(e.pos);
-const canDefuse = e => BOMB.state === 'planted' && e.team === 'blue' && G.state === 'live' && e.pos.distanceTo(BOMB.pos) < 1.9;
+const canDefuse = e => BOMB.state === 'planted' && e.team === 'blue' && G.state === 'live' && e.pos.distanceTo(BOMB.pos) < 1.9 && segClear(e.pos.x, e.pos.y + eyeY(e), e.pos.z, BOMB.pos.x, BOMB.pos.y + .16, BOMB.pos.z);
 function entInteract(e, want, dt) {
   const type = canPlant(e) ? 'plant' : canDefuse(e) ? 'defuse' : null;
   if (!want || !type) { if (e.act) { if (BOMB.defuser === e) BOMB.defuser = null; e.act = null; } return; }
@@ -29,7 +29,7 @@ function entInteract(e, want, dt) {
   if (e.act.t >= (type === 'plant' ? PLANT_T : DEFUSE_T)) { e.act = null; type === 'plant' ? bombPlant(e) : bombDefuse(e); }
 }
 function bombPlant(e) {
-  const fx = e.pos.x - Math.sin(e.yaw) * .45, fz = e.pos.z - Math.cos(e.yaw) * .45; BOMB.state = 'planted'; BOMB.site = siteAt(e.pos); BOMB.pos.set(fx, e.pos.y, fz); BOMB.t = BOMB_T; BOMB.carrier = null; BOMB.beepT = 0;
+  let fx = e.pos.x - Math.sin(e.yaw) * .45, fz = e.pos.z - Math.cos(e.yaw) * .45; const site = siteAt(e.pos), near = MAP.near(fx, fz), probe = { pos: new V3(fx, e.pos.y, fz), hw: .29, hgt: .38 }; if (siteAt(probe.pos) !== site || entOverlap(probe, fx, e.pos.y + .01, fz, near) || Math.abs(supportY(probe, near) - e.pos.y) > .08) { fx = e.pos.x; fz = e.pos.z; } BOMB.state = 'planted'; BOMB.site = site; BOMB.pos.set(fx, e.pos.y, fz); BOMB.t = BOMB_T; BOMB.carrier = null; BOMB.beepT = 0;
   BOMB.mesh.position.copy(BOMB.pos); BOMB.mesh.rotation.y = e.yaw; BOMB.mesh.visible = true; e.money = Math.min(16000, e.money + 300); PROG.rstat(e).plant = 1;
   banner('墨核已安放', `${SITES[BOMB.site].name} · ${BOMB_T} 秒后引爆`, G.team === 'red' ? 'go' : 'lose'); SFX.plant(); for (const b of G.bots) { b.path = null; b.waitT = G.now + (b.slot || 0) * .02; b.holdYaw = null; }
 }

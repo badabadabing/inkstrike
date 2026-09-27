@@ -48,8 +48,8 @@ function initTouch() {
   if (size) size.oninput = () => { const id = TOUCH.layoutSelected || 'tFire'; if (id === 'joyBase') return; (G.set.btnSizes = G.set.btnSizes || {})[id] = clamp(+size.value, .6, 1.8); layoutSave(); layoutApply(); };
   if (joy) joy.oninput = () => { G.set.joyScale = clamp(+joy.value, .65, 1.6); layoutSave(); layoutApply(); };
   if ($('layoutSelectedReset')) $('layoutSelectedReset').onclick = () => { const id = TOUCH.layoutSelected || 'tFire'; if (id === 'joyBase') { delete G.set.joyPos; delete G.set.joyScale; } else { if (G.set.layout) delete G.set.layout[id]; if (G.set.btnSizes) delete G.set.btnSizes[id]; } layoutSave(); layoutApply(); }; layoutSelect('tFire');
-  const rot = () => { touchReset(); layoutApply(); $('rotate').classList.toggle('on', innerHeight > innerWidth * 1.05); }; addEventListener('resize', rot); rot();
-  const suspend = () => { touchReset(); if (G.state !== 'menu' && G.state !== 'matchEnd') setPause(true); }; addEventListener('blur', suspend); document.addEventListener('visibilitychange', () => { if (document.hidden) suspend(); });
+  const rot = () => { const portrait = innerHeight > innerWidth * 1.05; touchReset(); if (portrait && !TOUCH.edit && G.state !== 'menu' && G.state !== 'matchEnd') setPause(true); layoutApply(); $('rotate').classList.toggle('on', portrait); }; addEventListener('resize', rot); rot();
+  const suspend = () => { touchReset(); if (TOUCH.edit) { G.paused = true; $('pause').classList.remove('on'); layoutApply(); } else if (G.state !== 'menu' && G.state !== 'matchEnd') setPause(true); }; addEventListener('blur', suspend); document.addEventListener('visibilitychange', () => { if (document.hidden) suspend(); });
 }
 function touchStartMatch() { const el = document.documentElement; try { const p = (el.requestFullscreen || el.webkitRequestFullscreen || (() => { })).call(el); if (p && p.then) p.then(() => screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape').catch(() => { })).catch(() => { }); } catch (e) { } }
 

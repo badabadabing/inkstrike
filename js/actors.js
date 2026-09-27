@@ -116,6 +116,11 @@ function botTacticalMotion(b, now) { if (b.act || G.state !== 'live' || b.dummy 
   const danger = b.threat; if (!b.coverPlan && danger && now < danger.until && now >= (b.threatReactT || 0) && now >= (b.coverThinkT || 0) && now >= (b.coverNext || 0)) { b.coverThinkT = now + .75 + (b.slot || 0) % 3 * .08; botFindCover(b, danger, now); }
   const plan = b.coverPlan; if (!plan) return null; if (now > plan.until) { b.coverPlan = null; b.path = null; b.waitT = now; b.coverNext = now + .8; return null; }
   let p = plan.path[plan.pi]; while (p && Math.hypot(p.x - b.pos.x, p.z - b.pos.z) < .5) p = plan.path[++plan.pi]; if (!p) { if (!plan.settled) { plan.settled = now; plan.until = now + 1 + (b.slot || 0) % 3 * .35; } b.intent = '掩体停留 · 准备换侧'; return { x: 0, z: 0, hold: true, crouch: plan.crouch }; } const dx = p.x - b.pos.x, dz = p.z - b.pos.z, d = Math.hypot(dx, dz); b.intent = danger && danger.kind === 'sniper' ? '避开狙击线' : '受压转移掩体'; return { x: dx / d, z: dz / d, hold: false, crouch: false }; }
+// A grid snap can land across a thin door when collision leaves a Bot in an outside corner.
+// Only stalled routes scan nearby entry cells; every approach is swept with the real body.
+function botRecoverPath(b, gx, gz) { const from = b.pos, fy = supportY(b, MAP.near(from.x, from.z)), candidates = [], ci = Math.floor(from.x), cj = Math.floor(from.z);
+  for (let x = ci - 3; x <= ci + 3; x++) for (let z = cj - 3; z <= cj + 3; z++) { const px = x + .5, pz = z + .5, c = navIdx(px, pz), y = MAP.fh[c], d = Math.hypot(px - from.x, pz - from.z); if (!MAP.reach[c] || d < .2 || d > 3.5 || Math.abs(y - fy) > .56) continue; let clear = true; for (let k = 1, n = Math.ceil(d / .15); k <= n; k++) { const t = k / n, sx = lerp(from.x, px, t), sz = lerp(from.z, pz, t); if (entOverlap(b, sx, lerp(fy, y, t) + .01, sz, MAP.near(sx, sz))) { clear = false; break; } } if (clear) candidates.push({ x: px, z: pz, score: d + Math.hypot(gx - px, gz - pz) * .02 }); }
+  candidates.sort((a, b) => a.score - b.score); for (const p of candidates) { const route = navPath(p.x, p.z, gx, gz); if (route) return [{ x: from.x, z: from.z, y: fy }, ...route]; } return null; }
 function botGoal(b, now) {
   let gx, gz; b.holdGoal = null; const obj = botObjective(b, now);
   if (obj && !(b.state === 'hunt' && now - b.lastSeenT < 4 && BOMB.carrier !== b && BOMB.state !== 'planted')) { gx = obj.x; gz = obj.z; b.holdGoal = obj.hold ? obj : null; b.state = 'roam'; }
@@ -213,7 +218,7 @@ function updateBot(b, dt, now) {
   b.yaw += clamp(angDiff(wantYaw, b.yaw), -7.5 * D.turn * dt, 7.5 * D.turn * dt); b.pitch = damp(b.pitch, wantPitch, 10, dt);
   groundMove(b, wx, wz, wl > .05 ? sp : 0, dt);
   const px = b.pos.x, pz = b.pos.z; moveEntity(b, dt);
-  if (wl > .3 && Math.hypot(b.pos.x - px, b.pos.z - pz) < sp * dt * .25) { b.stuckT += dt; if (b.stuckT > .5 && b.onGround && now > b.jumpT) { b.vel.y = 5.9; b.onGround = false; b.jumpT = now + .8; } if (b.stuckT > 1.6) { b.stuckT = 0; b.path = null; b.strafeDir *= -1; } } else b.stuckT = Math.max(0, b.stuckT - dt * 2);
+  if (wl > .3 && Math.hypot(b.pos.x - px, b.pos.z - pz) < sp * dt * .25) { b.stuckT += dt; if (b.stuckT > .5 && b.onGround && now > b.jumpT) { b.vel.y = 5.9; b.onGround = false; b.jumpT = now + .8; } if (b.stuckT > 1.6) { const goal = b.path && b.path[b.path.length - 1]; b.stuckT = 0; b.path = goal ? botRecoverPath(b, goal.x, goal.z) : null; b.pi = 1; b.repathT = now + 12; b.strafeDir *= -1; } } else b.stuckT = Math.max(0, b.stuckT - dt * 2);
   if (b.onGround) { b.stepAcc += Math.hypot(b.pos.x - px, b.pos.z - pz); if (b.stepAcc > 2.3) { b.stepAcc = 0; SFX.step(b.pos, .2, surfaceAt(b.pos)); if (Math.hypot(b.vel.x, b.vel.z) > 3 && b.crouchAmt < .5) botHear(b.pos, b.team, 11, 'step'); } }
   animSoldier(b, dt);
 }

@@ -182,7 +182,7 @@ body.touch #buyClose{display:inline-block}
 /* Revision 02 · field notebook */
 .grain{opacity:.035}.vig{background:radial-gradient(ellipse at center,transparent 70%,rgba(22,22,28,.10) 100%)}
 button:focus-visible{outline:3px solid var(--blue);outline-offset:4px}button:disabled{cursor:not-allowed}
-#menu{background:linear-gradient(90deg,rgba(245,242,234,.99),rgba(245,242,234,.93) 33%,rgba(245,242,234,.06) 68%);align-items:center}
+#menu{background:linear-gradient(90deg,rgba(245,242,234,.99),rgba(245,242,234,.93) 33%,rgba(245,242,234,.06) 68%);align-items:flex-start;align-items:safe center}
 #menuIn{margin:54px 0 48px 6vw;width:min(446px,43vw);position:relative;z-index:1}
 .edition{font-size:10px;letter-spacing:3px;display:flex;align-items:center;gap:10px;margin-bottom:22px}.edition:before{content:"";width:24px;height:3px;background:var(--red)}
 #menuIn h1{font-family:"IBM Plex Mono",monospace;font-size:92px;font-weight:700;letter-spacing:-7px;line-height:.87}#menuIn h1 em{font-style:normal}
@@ -227,6 +227,8 @@ body.touch #training{left:calc(10px + env(safe-area-inset-left));right:auto;top:
 
 /* Revision 04 feedback controls */
 #sMap{width:100%;font:inherit;font-size:12px;padding:9px;background:var(--paper);color:var(--ink);border:1px solid var(--ink)}#looksBtn{font-size:11px;letter-spacing:1px;padding:9px;margin-top:8px;background:transparent;color:var(--ink);box-shadow:none}#looks{z-index:9;background:rgba(22,22,28,.6)}.looks-panel{width:min(400px,92vw);max-height:94vh;overflow:auto;padding:22px;text-align:center}.looks-panel h2{font-size:22px}.looks-panel img{display:block;width:100%;height:240px;object-fit:contain;margin:6px 0}.looks-panel select{width:100%;font:inherit;padding:10px;background:var(--paper);border:1px solid var(--ink)}.looks-panel p{font-size:11px;line-height:1.7;margin:12px 0}.looks-panel button{padding:10px 30px;background:var(--ink);color:var(--paper);font:inherit;border:0;cursor:pointer}
+#captureMouse{position:fixed;z-index:8;left:50%;bottom:16%;transform:translateX(-50%);padding:12px 20px;border:1px solid var(--ink);background:var(--paper);color:var(--ink);font:inherit;font-size:14px;cursor:pointer}#captureMouse[hidden]{display:none}
+@media(max-width:740px){body.touch #ammoBox{left:41%}}
 #specControls{position:fixed;z-index:8;bottom:7%;left:50%;transform:translateX(-50%);display:flex;gap:12px;align-items:center;max-width:96vw;padding:10px;background:var(--paper);border:1px solid var(--ink);pointer-events:auto}#specControls[hidden]{display:none}#specControls button{font:inherit;font-size:12px;white-space:nowrap;padding:9px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}#specLabel{font-size:12px;min-width:110px;text-align:center}
 #optic{position:fixed;pointer-events:none;z-index:2;display:none;left:50%;top:50%;transform:translate(-50%,-50%);width:48px;height:37px;border:0;border-radius:6px;background:transparent}#optic.on{display:block}#optic i{position:absolute;width:4px;height:4px;border-radius:50%;background:var(--red);top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 0 2px var(--red)}#optic.holo i{width:16px;height:16px;border:1px solid var(--red);background:radial-gradient(circle,var(--red) 0 1.5px,transparent 2px);box-shadow:none}#optic.reflex{width:40px;height:32px;border-radius:50% 50% 4px 4px}.input-hint{font-size:10px;line-height:1.6;opacity:.7;margin:0 0 8px}
 #layoutBar{left:8px;transform:none;width:min(600px,68vw);flex-wrap:wrap;justify-content:center;gap:6px;font-size:11px}#layoutBar label{display:flex;gap:5px;align-items:center}#layoutBar input{width:90px;height:30px}#layoutBar em{width:35px;font-style:normal;font-size:10px}#layoutBar select{max-width:130px;font:inherit;background:var(--paper);color:var(--ink)}#layoutBar .layout-guide{width:100%;text-align:center;font-size:10px}body.layoutEdit #touch .layout-selected{outline:3px solid var(--blue);background:rgba(45,108,179,.18)!important}body.layoutEdit #joyBase{pointer-events:auto!important;outline:2px dashed var(--red)}
@@ -270,6 +272,7 @@ body.touch #training{left:calc(10px + env(safe-area-inset-left));right:auto;top:
   <div class="tb" id="tUse" data-b="use">互动</div>
   <div id="tTop"><div class="tb" data-b="map">地图</div><div class="tb" data-b="buy">采购</div><div class="tb" data-b="board">战绩</div><div class="tb" data-b="pause">暂停</div></div>
 </div>
+<button id="captureMouse" hidden>点击继续鼠标控制</button>
 <div id="specControls" hidden><button id="specPrev">◀ 上一名</button><span id="specLabel">观战</span><button id="specNext">下一名 ▶</button></div>
 <div id="dead"><h2 class="hand">阵 亡</h2><div id="deadBy"></div></div>
 
@@ -280,7 +283,7 @@ body.touch #training{left:calc(10px + env(safe-area-inset-left));right:auto;top:
 
 <div id="menu" class="ov">
   <div id="menuIn">
-    <div class="edition">INK BATTLEGROUNDS / REVISION 04</div>
+    <div class="edition">INK BATTLEGROUNDS / REVISION 05</div>
     <h1>INK<br><em>STRIKE</em></h1>
     <h2>墨 线 突 击</h2>
     <div class="tag">纸上有街巷，落笔即交锋。<br>穿过折页门，守住刻度台。下一道墨迹，由你留下。</div>
@@ -332,7 +335,7 @@ import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 Object.assign(window, { THREE, LineSegments2, LineSegmentsGeometry, LineMaterial });
 const files = ['core', 'map', 'weapons', 'actors', 'fx', 'objective', 'progress', 'touch', 'game'];
-for (const f of files) await new Promise((ok, err) => { const s = document.createElement('script'); s.src = `js/${f}.js?v=revision-04`; s.onload = ok; s.onerror = err; document.body.appendChild(s); });
+for (const f of files) await new Promise((ok, err) => { const s = document.createElement('script'); s.src = `js/${f}.js?v=revision-05`; s.onload = ok; s.onerror = err; document.body.appendChild(s); });
 try { boot(); } catch (e) { document.getElementById('loadTxt').textContent = '启动失败: ' + e.message; console.error(e); }
 </script>
 </body>
