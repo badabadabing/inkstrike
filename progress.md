@@ -47,3 +47,5 @@ Revision 03 — simulated player/expert panel and independent Dream Loop
 - Dream Loop独立交叉审查：功能可读性通过，环境细节丰富度部分通过；物理触控板和手机硬件未验收。
 - 本机纸镇12v12、3×900帧：p95帧间隔17.5/17.2/17.5ms，JS提交p95 1.5/1.7/1.8ms，采样shader增长0，页面错误0。
 - 在独立 codex/revision-03-review-upgrade worktree 提交发布，不切换/提交并行小红书任务的主目录分支与文件。Cloudflare两个目标在验证后发布并另记实际ID。
+
+- R04双站已发布并验收：Pages 815eaaec-86b5-4de7-8087-2a4f87892770；Worker baadf5fe-5892-4b38-8e08-c7a8a52d1329。两站全部9JS与86e5141一致，线上3图/3模式通过；其他422资产保持。证据见HANDOFF §12及outputs/revision-04/release。
