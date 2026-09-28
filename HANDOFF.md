@@ -17,7 +17,7 @@
 - 平台:桌面键鼠(Pointer Lock / 非锁定降级，鼠标与触控板输入档)+ 手机触控(浮动或固定摇杆、每按钮独立布局/尺寸、辅助减速、自动开火)。
 - 地图:纸镇 `papertown`、折页货场 `warehouse`、双井沙城 `dunes`。后两张参考仓库与长短道竞技结构，使用本项目原创纸墨几何、命名和墨核双点规则，不是 Valve 原版地图文件或一比一复刻。
 - 外观:「折锋 / 巡纸 / 守砚」三套固定装备预设，带真实模型预览；头部、护目、围巾等随整套切换，不能逐部件自由组合。
-- **当前同步目标**:https://inkstrike.pages.dev (Cloudflare Pages) · https://banmabox.com/inkstrike/ (Cloudflare Worker 静态副本)。GitHub Pages 为原有镜像，本轮未推送，不能当作最新版本。
+- **当前同步目标**:https://inkstrike.pages.dev (Cloudflare Pages) · https://banmabox.com/inkstrike/ (Cloudflare Worker 静态副本)。GitHub Pages（https://badabadabing.github.io/inkstrike/ ，推送 main 触发）自 R06 起与主站同步。
 - **仓库**:https://github.com/badabadabing/inkstrike(public,main 分支)
 
 ## 2. 技术栈与运行
@@ -301,3 +301,4 @@
 - **网格规则**：非纸镇地图 x/z 严格整数、高度 0.25m 分级（`map-check` 已同步）；`solid(..., {vis:false})` 的道具碰撞在非纸镇地图自动吸附 1m 网格，所以复用的纸镇道具可直接用（棕榈/木桶中心放 n+.5，车/卡车放整数）。小地图把可站立的台面（高台/猫道/台阶）画成地面而非障碍。
 - **步态**（`animSoldier`）：由真实位移（不是意图速度）在模型局部坐标求速度；支撑相脚线性后移 2A、摆动相平滑前移并抬脚；步频 = 速度×支撑占比/2A，跑步支撑占比降到 0.32 形成腾空期；髋部按步幅降低保证腿够得到地，含上下起伏、前倾、躯干/头部反向微摆、脚跟着地/脚尖蹬地；原地转身会小碎步；腿的侧摆用 `ZXY` 欧拉顺序保证侧移不缩短。实测支撑脚世界速度：走 0.10、跑 0.22、横移 0.26、后退 0.27 m/s（旧版 3.1–6.4）。
 - **验证**：全部 `node --check`；`smoke.js` OK；`map-check.js`（三图 12v12 竞技/死斗/靶场、导航、出生对视、射线缓存）OK；`ai-check`/`tactics-check`/`revision-check`/`lifecycle-check` OK；浏览器实际运行 dunes 死斗无控制台错误。
+- **R06 发布（用户授权提交并部署三处）**：运行时提交 `482c1ea`，已快进推送 `main`（GitHub Pages 构建完成）；Cloudflare Pages 部署 `5b0f1e48`；斑码盒子介绍提交 `ca63494`，Worker 版本 `124701ce-6c9a-49f7-8444-cd309a31841d`，其余 411 个资产哈希不变。四个入口（含 www）全部 9 个 js 与提交逐字节一致；三站实测 dunes / warehouse 竞技回合正常结束、控制台 0 错误。
