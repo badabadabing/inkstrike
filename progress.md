@@ -66,3 +66,7 @@ Revision 03 — simulated player/expert panel and independent Dream Loop
 - 最终独立复审通过；本机3×900真实RAF帧，p95 17.5/17.8/17.3ms，0页面错误。Cloudflare OAuth已刷新核验，准备双站发布。
 
 - R05双站完成：Pages cb7323b2-031e-428f-9d04-8c7e7b34f205；Worker 65eb86ce-c959-461c-ab31-cc859103826e。线上20项文件校验、两站3图/3模式及合集桌面/手机跳转通过，0页面/请求错误。仅6资产变化，其余426保持，未push。
+
+2026-09-28 — Revision 06 (Claude independent review)
+- User: new dust-style and warehouse maps far from expectation; characters slide instead of walk. Reviewed Codex R04/R05 diff: arena maps were bare boxes outside the Paper Town kit; gait stance foot moved 3–6 m/s in world.
+- Rebuilt DUNE COURT (classic desert bomb flow) and STACK DEPOT (hall A / container-yard B) on the shared buildWorld kit; rewrote gait as stance/swing with cadence matched to ground speed. Details in HANDOFF §14. All checks pass; not committed or deployed.

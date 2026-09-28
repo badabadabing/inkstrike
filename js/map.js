@@ -2,8 +2,8 @@
 /* ============ INK STRIKE · map "PAPER TOWN 纸镇": geometry, collision, navigation ============ */
 const MAP_CATALOG = {
   papertown: { id:'papertown',name:'纸镇',en:'PAPER TOWN',description:'街巷与市集交错，立体点位与多线轮转。',siteNames:{A:'刻度台',B:'印运仓'} },
-  warehouse: { id:'warehouse',name:'折页货场',en:'STACK DEPOT',description:'仓内近战：交错货垛、分拣中线与双侧装运区。',siteNames:{A:'东装运台',B:'西封签区'} },
-  dunes: { id:'dunes',name:'双井沙城',en:'DUNE COURT',description:'沙城攻防：长道、短道、偏置中门与西侧隧道。',siteNames:{A:'日晷庭',B:'井院'} }
+  warehouse: { id:'warehouse',name:'折页货场',en:'STACK DEPOT',description:'工业货场：A 在带天窗的装运大厅，B 在龙门吊集装箱场，中路 Z 形屏障与闸门。',siteNames:{A:'东装运台',B:'西封签区'} },
+  dunes: { id:'dunes',name:'双井沙城',en:'DUNE COURT',description:'经典沙城节奏：长道双门、中路拱门与猫道、上下隧道、2 米高台 A 点与井院 B 点。',siteNames:{A:'日晷庭',B:'井院'} }
 };
 const MAP = {
   id:'papertown',name:'纸镇',en:'PAPER TOWN',bounds:{x1:-60.4,x2:60.4,z1:-52.4,z2:52.4},
@@ -29,7 +29,7 @@ const MAP = {
   ]
 };
 
-function buildPaperTown(scene) {
+function buildWorld(scene) {
   const R = rng(20260921), main = new Sk('sun'), detail = new Sk('sun'), skyline = new Sk('sun'), sh = new Sk('none'), far = new Sk('none'), S = MAP.solids, BLD = []; let sk = main;
   const KX = SUN.x / -SUN.y, KZ = SUN.z / -SUN.y;
   const rr = (a, b) => a + R() * (b - a);
@@ -46,6 +46,7 @@ function buildPaperTown(scene) {
     const h = hull(pts); for (let i = 1; i < h.length - 1; i++) sh.tri([h[0][0], .012, h[0][1]], [h[i][0], .012, h[i][1]], [h[i + 1][0], .012, h[i + 1][1]], 0.33);
   }
   function solid(x1, z1, x2, z2, y0, y1, o = {}) {
+    if (o.vis === false && MAP.id !== 'papertown') { const sn = (a, b) => { let p = Math.round(a), q = Math.round(b); if (q <= p) { p = Math.floor((a + b) / 2); q = p + 1; } return [p, q]; }; [x1, x2] = sn(x1, x2); [z1, z2] = sn(z1, z2); y1 = Math.max(.25, Math.round(y1 * 4) / 4); }   // prop collision snaps to the 1m nav grid off Paper Town
     const s = { x1, y1: y0, z1, x2, y2: y1, z2, thin: !!o.thin }; S.push(s);
     if (o.vis !== false) sk.bx(x1, y0, z1, x2, y1, z2, o);
     if (o.shadow !== false && y1 > 0.4) shadow(x1, z1, x2, z2, y0, y1);
@@ -75,7 +76,7 @@ function buildPaperTown(scene) {
   }
   function decorate(b) {
     faces(b.x1, b.z1, b.x2, b.z2).forEach(f => {
-      let open = 0; for (const k of [.25, .5, .75]) { const [x, z] = fpt(f, f.len * k, 1.2); if (!inSolid(x, 2.2, z) && Math.abs(x) < 61 && Math.abs(z) < 53) open++; }
+      let open = 0; for (const k of [.25, .5, .75]) { const [x, z] = fpt(f, f.len * k, 1.2); if (!inSolid(x, 2.2, z) && x > MAP.bounds.x1 - .6 && x < MAP.bounds.x2 + .6 && z > MAP.bounds.z1 - .6 && z < MAP.bounds.z2 + .6) open++; }
       if (!open) return;
       const M = faceM(f), h = b.h, L = f.len, free = (t, y) => { const [x, z] = fpt(f, t, .5), [x2, z2] = fpt(f, t, 1.4); return !inSolid(x, y, z) && !inSolid(x2, y, z2); };
       sk.line([0, .45, .02, L, .45, .02, 0, h - .4, .02, L, h - .4, .02], M);
@@ -180,6 +181,8 @@ function buildPaperTown(scene) {
   sk.quad([-400, 0, -400], [-400, 0, 400], [400, 0, 400], [400, 0, -400], 0, PAPER);
   // Paper washes distinguish traversable street, interior floor and contact edges without extra texture noise.
   const wash = (x1, z1, x2, z2, tone, y = .005) => sk.quad([x1, y, z1], [x1, y, z2], [x2, y, z2], [x2, y, z1], -tone);
+  if (MAP.id !== 'papertown') MAP_LAYOUTS[MAP.id]({ sk, sh, solid, building, block, roof, crate, barrel, sandbags, car, truck, palm, lamp, stall, bunting, archLines, ladder, sign, wash, rr, R, BLD, inSolid, faces, faceM, windowAt, doorAt });
+  else {
   for (const q of [[-6,-38,6,38],[-54,-19,54,-15],[-54,15,54,19],[43,-20,53,38],[-53,-20,-43,38],[-59,42,59,48],[-59,-48,59,-42]]) wash(...q,.055);
   wash(-41,-13,-8,13,.10); wash(-42,-36,-30,-22,.12); wash(32,-38,54,-22,.045,1.006);
   for (let z = -36; z <= 36; z += 6) sk.line([-6,.008,z,-4,.008,z,4,.008,z,6,.008,z]);
@@ -273,6 +276,7 @@ function buildPaperTown(scene) {
   sign('折页门', 0, 5.65, -24.94, 0, 4.8, 1.1, { border: 6, bg: '#f5f2ea' }); sign('PAPER TOWN', 0, 5.65, -27.06, Math.PI, 5.5, 1.0, { border: 6, bg: '#f5f2ea', font: 'bold 60px sans-serif' }); sign('B →', -6.94, 2.6, -22, Math.PI / 2, 1.6, .6, { w: 256, h: 96, color: '#e9a520' });
   { const a = []; for (let x = -58; x < 58; x += 5) { a.push(x, .015, 45, x + 2, .015, 45, x, .015, -45, x + 2, .015, -45); } for (const [cx, cz, y, r] of [[45, -30, 1.016, 3.4], [-37, -26, .016, 3.4]]) for (let i = 0; i < 24; i++) { const p = i / 24 * 6.2832, q = (i + .6) / 24 * 6.2832; a.push(cx + Math.cos(p) * r, y, cz + Math.sin(p) * r, cx + Math.cos(q) * r, y, cz + Math.sin(q) * r); }
     for (let i = 0; i < 280; i++) { const x = rr(-60, 60), z = rr(-52, 52); if (inSolid(x, .2, z)) continue; const an = rr(0, 6.28), l = rr(.06, .3); a.push(x, .015, z, x + Math.cos(an) * l, .015, z + Math.sin(an) * l); if (R() < .15) a.push(x, .015, z, x + rr(-.8, .8), .015, z + rr(-.8, .8)); } sk.line(a); }
+  }
   // Contact strips are rendered at every quality; no quality setting changes collision or cover.
   for(const q of BLD) { wash(q.x1-.13,q.z1-.13,q.x2+.13,q.z1,.13,.009); wash(q.x1-.13,q.z2,q.x2+.13,q.z2+.13,.13,.009); wash(q.x1-.13,q.z1,q.x1,q.z2,.13,.009); wash(q.x2,q.z1,q.x2+.13,q.z2,.13,.009); }
   sk = detail; BLD.forEach(decorate); sk = skyline;
@@ -302,71 +306,192 @@ function configureMap(id) {
   id = MAP_CATALOG[id] ? id : 'papertown'; const meta=MAP_CATALOG[id], paper=id==='papertown', wh=id==='warehouse';
   Object.assign(MAP,{id,name:meta.name,en:meta.en,description:meta.description,siteNames:meta.siteNames});
   const data=paper?JSON.parse(JSON.stringify(PAPER_LAYOUT)):wh?{
-    bounds:{x1:-43.4,x2:43.4,z1:-41.4,z2:41.4},spawn:{red:{x1:-18,x2:18,z1:33,z2:39},blue:{x1:-18,x2:18,z1:-39,z2:-33}},
-    sites:{A:{x1:22,x2:37,z1:-32,z2:-24,y:0,name:'A 点'},B:{x1:-37,x2:-22,z1:-32,z2:-24,y:0,name:'B 点'}},
-    points:[['A',28,-28,3,3],['B',-28,-28,3,3],['ALONG',37,10,2,1.5],['BLANE',-38,10,2,1.5],['MID',0,10,2,2],['MIDN',0,-29,2,1],['MIDS',0,28,1,2],['MARKET',-19,-5,1.5,1.5],['SHORT',20,-10,1.5,1.5],['NE',36,-36,2,.5],['NW',-36,-36,2,.5],['SE',32,35,.5,2],['SW',-32,35,.5,2]],
-    zones:[[22,-32,37,-24,'A 点 · 东装运台'],[-37,-32,-22,-24,'B 点 · 西封签区'],[-44,-42,44,-32,'北装卸通道'],[-44,24,44,42,'南装卸通道'],[-44,-24,-21,24,'西货架走廊'],[21,-24,44,24,'东货架走廊'],[-21,-24,21,24,'中央分拣区']],
-    rangePlayer:{x:0,y:0,z:37},rangeSpots:[{x:0,z:25},{x:-15,z:28},{x:15,z:28},{x:-30,z:30},{x:30,z:30}],menuCamera:{x:34,y:7,z:39,tx:0,ty:3,tz:14},midHold:{x1:-4,x2:4,z1:-31,z2:-27,face:{x:0,z:12}}
+    bounds:{x1:-49.4,x2:49.4,z1:-43.4,z2:43.4},spawn:{red:{x1:-14,x2:14,z1:35,z2:40},blue:{x1:-16,x2:16,z1:-42,z2:-37}},
+    sites:{A:{x1:24,x2:43,z1:-40,z2:-20,y:0,name:'A 点'},B:{x1:-46,x2:-29,z1:-39,z2:-24,y:0,name:'B 点'}},
+    points:[['A',32,-35,3,3],['B',-36,-26,3,3],['ALONG',32,10,2,1.5],['BLANE',-42,6,2,1.5],['MID',0,4,2,2],['MIDN',0,-24,2,1],['MIDS',0,28,1,2],['MARKET',-13,-23,1.5,1.5],['SHORT',13,-21,1.5,1.5],['NE',46,-30,2,.5],['NW',-46,-34,2,.5],['SE',44,36,.5,2],['SW',-40,34,.5,2],['PACK',15,7,1.5,1],['CTYARD',-8,-35,.5,2]],
+    zones:[[21,-43,49,-11,'A 点 · 装运大厅'],[-49,-43,-20,-14,'B 点 · 集装箱场'],[6,4,24,10,'装箱间'],[6,-24,20,-18,'A 侧廊'],[-20,-26,-6,-20,'B 连廊'],[-20,-43,20,-28,'守方堆场'],[-6,-28,6,32,'中路'],[24,-10,49,32,'A 主道'],[-49,-14,-36,32,'B 主道'],[-49,32,49,43,'南卸货场']],
+    rangePlayer:{x:-4,y:0,z:30},rangeSpots:[{x:-1,z:24},{x:3,z:20},{x:-5,z:10},{x:-4,z:-2},{x:-2,z:-20}],menuCamera:{x:44,y:24,z:40,tx:0,ty:0,tz:-10},midHold:{x1:-10,x2:10,z1:-42,z2:-36,face:{x:0,z:-28}}
   }:{
-    bounds:{x1:-59.4,x2:59.4,z1:-51.4,z2:51.4},spawn:{red:{x1:-16,x2:16,z1:43,z2:49},blue:{x1:-18,x2:18,z1:-49,z2:-43}},
-    sites:{A:{x1:30,x2:56,z1:-38,z2:-23,y:0,name:'A 点'},B:{x1:-57,x2:-35,z1:-39,z2:-24,y:0,name:'B 点'}},
-    points:[['A',42,-30,3,3],['B',-45,-30,3,3],['ALONG',52,11,2,1.5],['BLANE',-48,21,2,1.5],['MID',1,0,2,2],['MIDN',0,-30,2,1],['MIDS',0,34,1,2],['MARKET',-27,-20,1.5,1.5],['SHORT',22,-8,1.5,1.5],['NE',40,-45,2,.5],['NW',-41,-45,2,.5],['SE',48,45,.5,2],['SW',-47,45,.5,2],['TUNNEL',-48,-4,1.5,1],['CROSS',22,33,1.5,1.5]],
-    zones:[[30,-38,56,-23,'A 点 · 日晷庭'],[-57,-39,-35,-24,'B 点 · 井院'],[-60,-22,-38,26,'西侧隧道'],[46,-23,60,40,'东长道'],[18,-30,28,34,'内侧短道'],[-7,-13,7,-5,'偏置中门'],[-8,-40,8,40,'中路斜街'],[-60,-52,60,-40,'北侧轮转街'],[-60,40,60,52,'南侧集结街'],[-38,-24,-8,-16,'井院连接道']],
-    rangePlayer:{x:0,y:0,z:41},rangeSpots:[{x:0,z:50},{x:-13,z:49},{x:22,z:49},{x:-34,z:49},{x:52,z:49}],menuCamera:{x:57,y:34,z:59,tx:0,ty:1,tz:-10},midHold:{x1:-5,x2:5,z1:-37,z2:-27,face:{x:1,z:-8}}
+    bounds:{x1:-58.4,x2:58.4,z1:-50.4,z2:50.4},spawn:{red:{x1:-14,x2:14,z1:43,z2:49},blue:{x1:-4,x2:18,z1:-49,z2:-44}},
+    sites:{A:{x1:30,x2:56,z1:-48,z2:-28,y:2,name:'A 点'},B:{x1:-56,x2:-30,z1:-43,z2:-22,y:0,name:'B 点'}},
+    points:[['A',42,-34,3,3],['B',-44,-30,3,3],['ALONG',52,6,2,1.5],['BLANE',-39,20,2,1.5],['MID',0,4,2,2],['MIDN',-6,-34,2,1],['MIDS',0,34,1,2],['MARKET',-20,2,1.5,1.5],['SHORT',8,-10,1.5,1.5],['NE',52,-46,2,.5],['NW',-54,-47,2,.5],['SE',52,42,.5,2],['SW',-39,43,.5,2],['TUNNEL',-39,-8,1.5,1],['CROSS',34,42,1.5,1.5]],
+    zones:[[28,-50,58,-24,'A 点 · 日晷庭'],[-58,-50,-26,-20,'B 点 · 井院'],[46,-24,58,-16,'A 长坡'],[20,-50,28,-42,'守方坡道'],[11,-24,28,-18,'A 小道'],[5,-24,11,14,'猫道'],[-5,-26,5,-24,'中门'],[-14,-42,5,-26,'守方中路'],[-14,-50,20,-42,'守方出生点'],[-26,-38,-14,-30,'B 门廊'],[-44,-20,-34,46,'B 上隧道'],[-34,0,-5,4,'下隧道'],[-34,40,-24,46,'隧道入口'],[-5,24,5,38,'中路拱门'],[-5,-24,5,24,'中路'],[46,-16,58,28,'A 长道'],[46,28,58,50,'长道门'],[24,38,46,46,'长道外廊'],[-24,38,24,50,'进攻方广场']],
+    rangePlayer:{x:0,y:0,z:44},rangeSpots:[{x:0,z:36},{x:-3,z:28},{x:3,z:22},{x:-2,z:10},{x:2,z:-6}],menuCamera:{x:44,y:30,z:56,tx:0,ty:0,tz:-12},midHold:{x1:-12,x2:4,z1:-40,z2:-32,face:{x:0,z:-22}}
   };
   for(const k of ['spawn','bounds','rangePlayer','menuCamera','midHold']) Object.assign(MAP[k],data[k]);
   MAP.menuCamera.pos=[data.menuCamera.x,data.menuCamera.y,data.menuCamera.z];MAP.menuCamera.target=[data.menuCamera.tx,data.menuCamera.ty,data.menuCamera.tz];
   for(const k of ['A','B']) Object.assign(MAP.sites[k],data.sites[k]);
   MAP.points.splice(0,MAP.points.length,...data.points.map(q=>Array.isArray(q)?{n:q[0],x:q[1],z:q[2],red:q[3],blue:q[4]}:q)); MAP.zones.splice(0,MAP.zones.length,...data.zones);
   MAP.rangeSpots.splice(0,MAP.rangeSpots.length,...data.rangeSpots.map(q=>({...q,d:q.d||Math.round(Math.hypot(q.x-MAP.rangePlayer.x,q.z-MAP.rangePlayer.z))})));
-  MAP.surfaces = paper?[]:wh?[[-44,-42,44,24,'tile']]:[[-59,-22,-38,26,'stone'],[-8,-39,8,39,'stone'],[-59,40,59,51,'stone'],[-59,-51,59,-40,'stone']];
+  MAP.surfaces = paper?[]:wh?[[21,-43,49,-11,'concrete'],[6,4,24,10,'wood'],[6,-24,20,-18,'metal']]:[[-44,-20,-5,46,'stone'],[5,-24,28,6,'wood'],[28,-50,58,-18,'stone']];
 }
 function buildMap(scene,id='papertown') {
   if(MAP.root){const mats=new Set(),geo=new Set(),tex=new Set();MAP.root.traverse(o=>{if(o.geometry)geo.add(o.geometry);for(const m of Array.isArray(o.material)?o.material:[o.material])if(m){mats.add(m);if(m.map)tex.add(m.map);}});MAP.root.removeFromParent();for(const m of MAP.lineMaterials||[])if(!mats.has(m)){const i=LINE_MATS.indexOf(m);if(i>=0)LINE_MATS.splice(i,1);m.dispose();}geo.forEach(g=>g.dispose());tex.forEach(t=>t.dispose());mats.forEach(m=>{const i=LINE_MATS.indexOf(m);if(i>=0)LINE_MATS.splice(i,1);m.dispose();});}
   configureMap(id);MAP.solids.length=0;MAP.ladders=[];MAP.buckets=[];_raySeq=0;_hit.s=null;Object.assign(_nav,{g:null,from:null,stamp:null,closed:null,n:0});
   const root=MAP.root=new THREE.Group(),lineStart=LINE_MATS.length;root.name='map-'+MAP.id;scene.add(root);
-  if(MAP.id==='papertown')buildPaperTown(root);else buildArena(root,MAP.id);MAP.lineMaterials=LINE_MATS.slice(lineStart);
+  buildWorld(root);MAP.lineMaterials=LINE_MATS.slice(lineStart);
   return MAP;
 }
-function buildArena(scene,id) {
-  const wh=id==='warehouse',main=new Sk('sun'),detail=new Sk('sun'),skyline=new Sk('sun'),sh=new Sk('none'),S=MAP.solids;
-  const wash=(x1,z1,x2,z2,tone,y=.008)=>main.quad([x1,y,z1],[x1,y,z2],[x2,y,z2],[x2,y,z1],-tone);
-  const solid=(x1,z1,x2,z2,y0,y1,o={})=>{S.push({x1,z1,x2,z2,y1:y0,y2:y1,thin:false});main.bx(x1,y0,z1,x2,y1,z2,o);if(y0===0){wash(x1-.16,z1-.16,x2+.16,z2+.16,.16,.006);const dx=SUN.x/-SUN.y*y1,dz=SUN.z/-SUN.y*y1;sh.quad([x1,.004,z1],[x2,.004,z1],[x2+dx,.004,z2+dz],[x1+dx,.004,z2+dz],.33);}return{x1,z1,x2,z2,y1};};
-  const label=(text,x,y,z,ry,w,h,o={})=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:textTex(text,{w:1024,h:256,bg:'#f5f2ea',border:5,font:'bold '+Math.min(154,Math.floor(940/[...text].reduce((n,c)=>n+(c.charCodeAt(0)>255?1:.6),0)))+'px sans-serif',...o}),transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}));m.position.set(x,y,z);m.rotation.y=ry;if(o.flat)m.rotation.x=-Math.PI/2;scene.add(m);};
-  function cargo(x1,z1,x2,z2,h=4){solid(x1,z1,x2,z2,0,h,{tint:WOOD,tone:.33});for(const z of [z1-.018,z2+.018]){for(let x=x1+2;x<x2;x+=3)detail.line([x,0,z,x,h,z]);for(let y=1;y<h;y+=1.5)detail.line([x1,y,z,x2,y,z]);detail.line([x1+.2,.3,z,x2-.2,h-.3,z]);}for(const x of [x1-.018,x2+.018]){detail.line([x,.3,z1+.2,x,h-.3,z2-.2]);for(let y=1;y<h;y+=1.5)detail.line([x,y,z1,x,y,z2]);}main.bx(x1-.05,h-.14,z1-.05,x2+.05,h,z2+.05,{tone:.66});}
-  function building(x1,z1,x2,z2,h=8){solid(x1,z1,x2,z2,0,h);main.bx(x1-.12,h-.35,z1-.12,x2+.12,h,z2+.12,{tint:WOOD,tone:.15});for(const z of [z1-.02,z2+.02]){detail.line([x1,.45,z,x2,.45,z]);for(let x=x1+2;x<x2-1;x+=4){detail.bx(x,3.7,z-.01,x+1.2,5.2,z+.01,{tint:GLASS,tone:.15});detail.line([x+.6,3.7,z+.02,x+.6,5.2,z+.02]);}for(let x=x1+1;x<x2;x+=8){main.bx(x-.15,0,z-.12,x+.15,h-.35,z+.12,{tone:.15});}for(const y of [1.1,2.4,h-1])detail.line([x1,y,z,x2,y,z]);}if(x2-x1>12){const x=(x1+x2)/2,z=(z1+z2)/2;skyline.cyl(2.2,2.5,1.5,12,x,h+.75,z,{tint:WOOD,tone:.15});skyline.sph(2.3,x,h+1.5,z,{ws:12,hs:8});}}
-  function gate(x1,x2,z,y=5){solid(x1,z,x2,z+2,y,y+2);main.bx(x1-.18,y-.2,z-.18,x2+.18,y+.12,z-.03,{tint:WOOD});for(const x of [x1,x2])main.bx(x-.12,0,z-.12,x+.12,y,z,{tone:.33});const p=[];for(let i=0;i<=16;i++){const a=i/16*Math.PI;p.push([(x1+x2)/2-Math.cos(a)*(x2-x1)/2,y-1+Math.sin(a),z-.03]);}detail.poly(p);}
-  main.quad([-400,0,-400],[-400,0,400],[400,0,400],[400,0,-400],0,PAPER);
-  if(wh){
-    wash(-44,-42,44,24,.065);wash(-44,26,44,42,.025);solid(-46,-44,-44,26,0,10);solid(44,-44,46,26,0,10);solid(-46,26,-44,44,0,5);solid(44,26,46,44,0,5);solid(-44,-44,44,-42,0,10);solid(-44,42,44,44,0,5);
-    for(const q of [[-44,24,-32,26],[-20,24,-6,26],[6,24,20,26],[32,24,44,26]])solid(...q,0,9);gate(-32,-20,24,5);gate(-6,6,24,5);gate(20,32,24,5);solid(-12,24,12,26,7,9);label('折页货场 · 装卸大厅',0,7.8,26.04,0,20,1.5);label('01 入库',-26,6.1,26.04,0,8,1.1);label('02 装运',26,6.1,26.04,0,8,1.1);
-    // A closed industrial shell with open skylights; every cargo face has matching collision.
-    for(const z of [-32,-16,0,16]){main.bx(-44,8,z-.18,44,8.5,z+.18,{tone:.66});detail.line([-44,8,z,0,10,z,0,10,z,44,8,z]);for(const x of [-41,40])solid(x,z-1,x+1,z+1,0,8,{tone:.33});}
-    solid(-44,-42,-35,24,9,10,{tone:.33});solid(35,-42,44,24,9,10,{tone:.33});
-    for(const q of [[-34,-21,-24,-11,5],[-34,0,-24,12,5],[24,-14,34,0,5],[24,10,34,22,5],[-16,-17,-8,-7,4],[8,0,16,10,4],[-3,-3,3,3,4],[-17,15,-11,21,4],[11,16,17,22,4]])cargo(...q);
-    for(const q of [[-44,-25,-34,-23],[-20,-25,-5,-23],[5,-25,20,-23],[34,-25,44,-23]])solid(...q,0,6,{tone:.33});gate(-5,5,-25,5);gate(-34,-20,-25,5);gate(20,34,-25,5);
-    cargo(-7,-34,7,-32,4);cargo(-34,-31,-31,-28,4);cargo(31,-31,34,-28,4);cargo(-7,-40,-3,-37,4);cargo(3,-40,7,-37,4);
-    for(const x of [-38,-20,20,38])detail.line([x,.016,-21,x,.016,22]);for(const z of [-34,29]){for(let x=-41;x<41;x+=4)main.bx(x,.012,z,x+2,.02,z+.10,{tint:AMBER,tone:0});}
-    label('A · 东装运台',27,4.6,-22.96,0,10,1.2);label('B · 西封签区',-27,4.6,-22.96,0,10,1.2);label('南装卸院  /  SOUTH YARD',0,3.5,41.95,Math.PI,20,2);label('中央分拣  03',0,6.2,-22.94,0,9,1.3);
-    for(const x of [-43.98,43.94])for(const z of [-30,-10,10,30])detail.bx(x,6,z-4,x+.04,7.5,z+4,{tint:GLASS,tone:.1});
-  }else{
-    solid(-64,-56,-60,56,0,10);solid(60,-56,64,56,0,10);solid(-60,-56,60,-52,0,10);solid(-60,52,60,56,0,10);
-    for(const q of [[-36,-16,-20,30,9],[-18,-10,-8,24,7],[8,6,16,32,8],[28,-16,44,32,9],[8,-34,16,-16,8],[-32,-40,-10,-24,8]])building(...q);
-    // West tunnel remains a genuine through-route, with cover interrupting its long axis.
-    solid(-60,-22,-38,26,6,8);solid(-60,12,-52,14,0,6);solid(-46,12,-38,14,0,6);gate(-52,-46,12,5);
-    cargo(-44,-3,-39,3,4);cargo(-58,-18,-53,-13,4);cargo(-54,25,-49,29,4);gate(-58,-40,-22,5);
-    // Offset middle doors create a readable peek duel, without a spawn-to-spawn shot.
-    solid(-8,-9,-2,-7,0,7);solid(5,-9,18,-7,0,7);gate(-2,5,-9,5);solid(-2,-9,-1,-7,0,4,{tint:WOOD,tone:.33});solid(4,-9,5,-7,0,4,{tint:WOOD,tone:.33});cargo(0,-22,4,-18,4);
-    cargo(-10,-40,10,-38,4);cargo(-5,18,-1,22,4);cargo(48,18,53,23,4);cargo(54,-7,59,-3,4);cargo(21,18,25,22,4);cargo(33,-35,38,-31,4);cargo(49,-28,53,-24,4);cargo(-54,-37,-49,-33,4);
-    // The wells are square collision volumes with matching masonry silhouettes.
-    for(const [x,z] of [[-39,-29],[44,-37]]){solid(x-2,z-2,x+2,z+2,0,1,{tint:WOOD,tone:.33});main.bx(x-2.1,1,z-2.1,x+2.1,1.18,z+2.1,{tone:.33});detail.line([x-1.6,1.20,z-1.6,x+1.6,1.20,z-1.6,x+1.6,1.20,z+1.6,x-1.6,1.20,z+1.6]);}
-    for(const q of [[-7,-39,7,39],[47,-23,59,40],[18,-24,27,36],[-59,-23,-38,30],[-59,42,59,50],[-59,-50,59,-42]])wash(...q,.045);
-    label('偏置门  /  CROSSING',1.5,6.05,-6.96,0,9,1.1);label('A · 日晷庭',43,4.8,-51.96,0,12,1.5);label('B · 井院',-45,4.8,-51.96,0,10,1.5);label('A 长道 ↑',44.05,3.2,27,Math.PI/2,5,1);label('← B  井院',-35.95,3.2,22,Math.PI/2,5,1);label('双井沙城  /  DUNE COURT',0,6,51.95,Math.PI,20,2);
-    for(const [x,z,h] of [[-70,-48,23],[70,-20,25],[-69,40,19],[68,47,22]]){skyline.box(12,h,12,x,h/2,z);skyline.cyl(3,3,4,10,x,h+2,z);skyline.cone(3.5,3,10,x,h+5.5,z);}
-  }
-  for(const n of ['A','B']){const q=MAP.sites[n],cx=(q.x1+q.x2)/2,cz=(q.z1+q.z2)/2;wash(q.x1,q.z1,q.x2,q.z2,.09,.011);label(n,cx,.025,cz,0,4,4,{w:256,h:256,bg:null,border:0,color:'#e9a520',flat:true});main.line([q.x1,.02,q.z1,q.x2,.02,q.z1,q.x2,.02,q.z1,q.x2,.02,q.z2,q.x2,.02,q.z2,q.x1,.02,q.z2,q.x1,.02,q.z2,q.x1,.02,q.z1]);}
-  const world=main.bake(fillMat(),lineMat({width:1.45})),trim=detail.bake(fillMat(),lineMat({width:1.05})),sky=skyline.bake(fillMat(),lineMat({color:GREY,width:1.05})),shadow=sh.bake(fillMat({offset:0}),lineMat());scene.add(world,trim,sky,shadow);
-  MAP.renderLayers={world,trim,sky,far:sky};MAP.setDetail=quality=>{trim.visible=quality!=='low';sky.visible=quality!=='low';};buildBuckets();buildNav();drawMini();
+/* ---------------- authored layouts: share Paper Town's facade / prop / shadow kit through buildWorld ---------------- */
+/* Structure coordinates stay on the 1m nav grid; heights use 0.25m steps so ramps read as stairs and remain walkable. */
+function layoutKit(K) {
+  const { sk, solid } = K, e = .014;
+  const frame = (x1, z1, x2, z2, y0, h, k = .12, diag = true) => { const a = [], y1 = y0 + k, y2 = y0 + h - k;
+    for (const z of [z1 - e, z2 + e]) { a.push(x1 + k, y1, z, x2 - k, y1, z, x2 - k, y1, z, x2 - k, y2, z, x2 - k, y2, z, x1 + k, y2, z, x1 + k, y2, z, x1 + k, y1, z); if (diag) a.push(x1 + k, y1, z, x2 - k, y2, z); }
+    for (const x of [x1 - e, x2 + e]) { a.push(x, y1, z1 + k, x, y1, z2 - k, x, y1, z2 - k, x, y2, z2 - k, x, y2, z2 - k, x, y2, z1 + k, x, y2, z1 + k, x, y1, z1 + k); if (diag) a.push(x, y2, z1 + k, x, y1, z2 - k); }
+    a.push(x1 + k, y0 + h + e, z1 + k, x2 - k, y0 + h + e, z2 - k, x1 + k, y0 + h + e, z2 - k, x2 - k, y0 + h + e, z1 + k); sk.line(a); };
+  const crateB = (x1, z1, x2, z2, y0 = 0, h = 1, tint = WOOD) => { solid(x1, z1, x2, z2, y0, y0 + h, { tint, shadow: y0 === 0 }); frame(x1, z1, x2, z2, y0, h); };
+  const ramp = (x1, z1, x2, z2, dir, y0, y1, o = {}) => { const n = Math.round((y1 - y0) / .25), a = [];   // dir = direction of ascent, one 1m tread per 0.25m rise
+    for (let i = 0; i < n; i++) { const t = y0 + .25 * (i + 1), q = dir === '+x' ? [x1 + i, z1, x1 + i + 1, z2] : dir === '-x' ? [x2 - i - 1, z1, x2 - i, z2] : dir === '+z' ? [x1, z1 + i, x2, z1 + i + 1] : [x1, z2 - i - 1, x2, z2 - i];
+      solid(q[0], q[1], q[2], q[3], 0, t, { shadow: false, tone: i % 2 ? .15 : undefined, ...o }); if (dir[1] === 'x') a.push(q[0], t + e, q[1] + .1, q[0], t + e, q[3] - .1); else a.push(q[0] + .1, t + e, q[1], q[2] - .1, t + e, q[1]); } sk.line(a); };
+  const wall = (x1, z1, x2, z2, h, o = {}) => { solid(x1, z1, x2, z2, o.y0 || 0, h, o); sk.bx(x1 - .08, h, z1 - .08, x2 + .08, h + .2, z2 + .08, { tint: o.tint, tone: .33 }); };
+  const leaf = (x, y, z, len, h, ang, o = {}) => { const M = new THREE.Matrix4().makeRotationY(ang).setPosition(x, y, z), a = []; sk.box(len, h, .1, len / 2, h / 2, 0, { m: M, tint: o.tint ?? WOOD, tone: o.tone ?? .33 });
+    for (let k = .3; k < len - .1; k += .3) a.push(k, .05, .06, k, h - .05, .06, k, .05, -.06, k, h - .05, -.06); a.push(.08, .3, .07, len - .08, h * .5, .07, .08, h * .5, .07, len - .08, h - .3, .07, .05, .4, .07, len - .05, .4, .07, .05, h - .4, .07, len - .05, h - .4, .07); sk.line(a, M); };
+  const arch = (a1, a2, b1, b2, y, alongZ, rise = .9) => { for (const b of [b1 - .02, b2 + .02]) { const p = []; for (let i = 0; i <= 14; i++) { const an = i / 14 * Math.PI, u = (a1 + a2) / 2 - Math.cos(an) * (a2 - a1) / 2, v = y - rise + Math.sin(an) * rise; p.push(alongZ ? [b, v, u] : [u, v, b]); } sk.poly(p);
+    const k = [], c = (a1 + a2) / 2, r = (a2 - a1) / 2; for (let i = 1; i < 14; i += 2) { const an = i / 14 * Math.PI, u = c - Math.cos(an) * r, v = y - rise + Math.sin(an) * rise, u2 = c - Math.cos(an) * (r + .45), v2 = y - rise + Math.sin(an) * (rise + .45); k.push(...(alongZ ? [b, v, u, b, v2, u2] : [u, v, b, u2, v2, b])); } sk.line(k); } };
+  const beams = (x1, z1, x2, z2, y, alongX, step = 4) => { if (alongX) for (let x = x1 + 1; x < x2; x += step) { sk.bx(x - .15, y - .35, z1, x + .15, y, z2, { tint: WOOD, tone: .66 }); } else for (let z = z1 + 1; z < z2; z += step) sk.bx(x1, y - .35, z - .15, x2, y, z + .15, { tint: WOOD, tone: .66 }); };
+  const hang = (x, y, z) => { sk.line([x, y, z, x, y - .7, z]); sk.cone(.28, .22, 6, x, y - .8, z, { tone: .66 }); sk.box(.16, .16, .16, x, y - .95, z, { tint: AMBER, tone: 0 }); };
+  return { frame, crateB, ramp, wall, leaf, arch, beams, hang };
+}
+const MAP_LAYOUTS = { dunes: layoutDunes, warehouse: layoutDepot };
+
+function layoutDunes(K) {   // desert bomb-defusal flow: T south, long / mid-catwalk / tunnels, raised A court, walled B well-yard
+  const { sk, solid, building, block, crate, barrel, sandbags, car, truck, palm, lamp, stall, bunting, sign, wash, rr, R } = K, { crateB, ramp, wall, leaf, arch, beams, hang } = layoutKit(K), SAND = { tint: WOOD };
+  const bld = (x1, z1, x2, z2, h, o = {}) => building(x1, z1, x2, z2, h, { tint: WOOD, ...o }), SG = { bg: '#f5f2ea', border: 5, color: '#e9a520', font: 'bold 66px sans-serif' };
+  // streets are sand-washed; roofed tunnels sit in a heavier shade wash so their mouths read from distance
+  for (const q of [[-24,38,24,50],[-5,-24,5,38],[-14,-50,20,-26],[24,38,46,46],[46,-16,58,50],[-58,-50,-26,-20],[-26,-38,-14,-30]]) wash(...q, .05);
+  for (const q of [[-44,-20,-34,46],[-34,40,-24,46],[-34,0,-5,4]]) wash(...q, .2);
+  wash(28, -50, 58, -24, .06, 2.006); wash(28, -24, 46, -18, .06, 2.006); wash(11, -24, 28, -18, .1, 2.006); wash(5, -24, 11, 6, .1, 2.006);
+  // perimeter streets of sand houses
+  block(-64, -56, -58, 56, 7, 11, SAND); block(58, -56, 64, 56, 7, 11, SAND); block(-58, -56, 58, -50, 7, 10, SAND); block(-58, 50, 58, 56, 6, 9, SAND);
+  // east quarter: catwalk shoulder, short link and the long wall
+  bld(11, -18, 28, -2, 8); bld(11, -2, 28, 14, 7); bld(5, 14, 28, 26, 7.5); bld(5, 26, 28, 38, 6.5); bld(28, -18, 46, 6, 9); bld(28, 6, 46, 28, 8); bld(28, 28, 46, 38, 7); bld(24, 46, 46, 50, 6); bld(5, -42, 28, -24, 9);
+  // west quarter: tunnel blocks and the B wall
+  bld(-24, 26, -5, 38, 7); bld(-34, 26, -24, 40, 6.5); bld(-44, 46, -24, 50, 6); bld(-34, 4, -20, 26, 8); bld(-20, 4, -5, 26, 7); bld(-26, -30, -14, 0, 8); bld(-14, -26, -5, 0, 7.5);
+  bld(-38, -20, -26, -6, 7); bld(-34, -6, -26, 0, 6); bld(-58, -20, -44, 8, 9); bld(-58, 8, -44, 30, 7.5); bld(-58, 30, -44, 50, 8); bld(-28, -50, -14, -38, 9);
+  for (const [x, z, r] of [[37, 17, 3.2], [-27, 15, 3], [16, -33, 2.6]]) { sk.sph(r, x, (x === 37 ? 8 : x < 0 ? 8 : 9), z, { tint: WOOD, ws: 12, hs: 6 }); sk.cyl(.12, .12, 1.6, 5, x, (x === 37 ? 8 : x < 0 ? 8 : 9) + r + .7, z); }
+  // T court: palms, market awnings, carts
+  for (const [x, z] of [[-20.5, 48.5], [-10.5, 39.5], [11.5, 39.5], [21.5, 48.5], [-2.5, 49.5]]) palm(x, z);
+  stall(-14, 49.5, 0); stall(14, 49.5, 0); crate(-22, 40, 2); crate(-22.5, 42.5, 1); crate(22, 40, 2); truck(3, 45, 1, WOOD); sandbags(-8, 44, -5, 45);
+  bunting(-24, 5.6, 38.2, 24, 5.8, 38.2); lamp(-5.4, 38.6, 1, 0); lamp(5.4, 38.6, -1, 0);
+  sign('↑ 中路', 0, 5.2, 38.07, 0, 3, .9, SG); sign('A 长道 →', 20, 3.4, 38.07, 0, 4.4, 1, SG); sign('← B 隧道', -20, 3.4, 38.07, 0, 4.4, 1, SG);
+  // top mid arch and mid street
+  solid(-5, 24, 5, 26, 4, 7, SAND); arch(-5, 5, 24, 26, 4, false, 1.2); sk.bx(-5.2, 7, 23.8, 5.2, 7.3, 26.2, { tint: WOOD, tone: .33 });
+  wall(-5, 30, -2, 31, 1.25, SAND); crateB(-4, 16, -2, 18, 0, 1.25); crateB(-4, 17, -3, 18, 1.25, 1); barrel(3.5, 20.5); barrel(4.5, 21.5, AMBER); crateB(2, -12, 4, -10, 0, 1.5); crate(-4.5, -20.5, 1);
+  lamp(-4.6, 12, 1, 0); lamp(4.6, -16, -1, 0); bunting(-5, 5.6, -8, 5, 5.2, -8);
+  // mid doors: offset leaves leave a deliberate crack; a CT screen behind denies spawn-to-spawn sight
+  solid(-5, -26, -1, -24, 0, 6, SAND); solid(2, -26, 5, -24, 0, 6, SAND); solid(-1, -26, 2, -24, 3.5, 6, SAND); arch(-1, 2, -26, -24, 3.5, false, .6);
+  leaf(-1, 0, -24, 1.5, 3.3, -1.9); leaf(2, 0, -24, 1.5, 3.3, Math.PI + .5); sign('中门', .5, 4.7, -23.93, 0, 2.4, .8, SG);
+  crateB(-2, -36, 1, -34, 0, 2); crateB(1, -36, 4, -35, 0, 2.25); crateB(-1, -36, 0, -35, 2, 1); sandbags(4, -36, 7, -35); barrel(-2.5, -33.5);
+  // catwalk: stairs from lower mid, raised walk overlooking mid, arch into the short link
+  ramp(5, 6, 11, 14, '-z', 0, 2, SAND); solid(5, -24, 11, 6, 0, 2, SAND); solid(11, -24, 28, -18, 0, 2, SAND);
+  wall(5, -22, 6, -12, 3, { ...SAND, y0: 2 }); wall(5, -6, 6, 2, 3, { ...SAND, y0: 2 }); crateB(19, -24, 21, -22, 2, 1); crateB(9, -24, 11, -22, 2, 1);
+  solid(26, -24, 28, -18, 5.5, 8, SAND); arch(-24, -18, 26, 28, 5.5, true); sign('A 小道', 26.93, 6.6, -21, Math.PI / 2, 3, .8, SG);
+  // A court (raised 2m): CT ramp, long ramp, sundial, stacked cover and the NE nook
+  solid(28, -50, 58, -24, 0, 2, SAND); solid(28, -24, 46, -18, 0, 2, SAND); ramp(20, -50, 28, -42, '+x', 0, 2, SAND); ramp(46, -24, 58, -16, '-z', 0, 2, SAND);
+  wall(20, -42, 28, -41, 3, SAND); wall(46, -17, 47, -16, 3, SAND);
+  solid(37, -41, 39, -39, 2, 3, { tint: WOOD, tone: .33 }); sk.cyl(1.25, 1.25, .12, 16, 38, 3.06, -40, { tint: PAPER, tone: 0 }); sk.poly([[38, 3.12, -40.9], [38, 4.7, -40.9], [38, 3.12, -39.1]], true);
+  { const a = []; for (let i = 0; i < 12; i++) { const an = i / 12 * 6.2832; a.push(38 + Math.cos(an) * .9, 3.13, -40 + Math.sin(an) * .9, 38 + Math.cos(an) * 1.18, 3.13, -40 + Math.sin(an) * 1.18); } sk.line(a); }
+  crateB(44, -38, 46, -36, 2, 2); crateB(44, -36, 45, -35, 2, 1); crateB(32, -32, 34, -30, 2, 1.25); crateB(50, -30, 52, -27, 2, 1.5); crateB(54, -50, 56, -48, 2, 2); crateB(52, -50, 54, -49, 2, 1); crateB(30, -48, 32, -46, 2, 1);
+  { const q = []; for (let x = 30; x < 58; x += 2) q.push(x, 2.012, -50, x, 2.012, -24); for (let z = -48; z < -24; z += 2) q.push(28, 2.012, z, 58, 2.012, z); for (let x = 30; x < 46; x += 2) q.push(x, 2.012, -24, x, 2.012, -18); for (let z = -22; z < -18; z += 2) q.push(28, 2.012, z, 46, 2.012, z); sk.line(q); }
+  sandbags(40, -28, 44, -27); barrel(56.5, -33.5); barrel(56.5, -34.5, AMBER);
+  sign('A · 日晷庭', 43, 6.4, -49.93, 0, 7, 1.3, SG); sign('A', 41, 2.03, -36, 0, 5, 5, { w: 256, h: 256, color: '#e9a520', flat: true, stencil: 40 }); sign('A', 46.06, 4.6, -10, Math.PI / 2, 2.4, 2.4, { w: 256, h: 256, color: '#e9a520', stencil: 40 });
+  // long: double doors, pit nook, car and barrels on the approach
+  solid(46, 28, 50, 30, 0, 6, SAND); solid(53, 28, 58, 30, 0, 6, SAND); solid(50, 28, 53, 30, 3.75, 6, SAND); arch(50, 53, 28, 30, 3.75, false, .7);
+  leaf(50, 0, 28, 1.5, 3.5, 1.2); leaf(53, 0, 28, 1.5, 3.5, Math.PI - 1.35); sign('长道门', 51.5, 4.9, 30.07, 0, 3, .8, SG);
+  crateB(54, 32, 56, 34, 0, 2); crateB(56, 32, 58, 33, 0, 1); wall(52, 36, 58, 37, 1.25, SAND); car(51, -4, 1); barrel(56.5, 20.5); barrel(56.5, 19.5, AMBER); crateB(47, 12, 49, 16, 0, 1.25);
+  bunting(46, 5.8, 10, 58, 5.4, 10); lamp(57.4, 0, -1, 0); lamp(46.6, 24, 1, 0); for (const [x, z] of [[56.5, 46.5], [47.5, 48.5]]) palm(x, z);
+  stall(34, 45.5, 2); crate(26, 40, 2); crate(26.5, 42.5, 1); bunting(24, 5.2, 42, 46, 5.6, 42); sign('长道 →', 45.93, 3.4, 42, -Math.PI / 2, 3.4, .9, SG);
+  // upper / lower tunnels: shaded roofs, timber frames, hanging lamps
+  solid(-44, -20, -34, 46, 4, 4.5, { ...SAND, shadow: false }); solid(-34, 40, -24, 46, 4, 4.5, { ...SAND, shadow: false }); solid(-34, 0, -5, 4, 4, 4.5, { ...SAND, shadow: false });
+  beams(-44, -20, -34, 46, 4, false, 5); beams(-34, 0, -5, 4, 4, true, 5); beams(-34, 40, -24, 46, 4, true, 5);
+  for (const z of [-14, -2, 10, 22, 34]) hang(-39, 3.6, z); hang(-20, 3.6, 2); hang(-29, 3.6, 43);
+  arch(0, 4, -5.02, -5, 4, true, .7); arch(40, 46, -24.02, -24, 4, true, .7); arch(-44, -38, -20.02, -20, 4, false, .7);
+  crateB(-43, 14, -41, 16, 0, 1.5); barrel(-35.5, 30.5); barrel(-35.5, 29.5); crateB(-42, -12, -40, -10, 0, 1.25); crateB(-16, 0, -14, 1, 0, 1); barrel(-9.5, 3.5);
+  sign('B 隧道', -34.07, 3.2, 43, -Math.PI / 2, 3, .8, SG); sign('下隧道', -5.07, 3.2, 2, -Math.PI / 2, 2.6, .8, SG);
+  // B well-yard: back platform, burnt cart, the well, doors and a window to CT
+  solid(-58, -50, -48, -44, 0, 1, SAND); ramp(-48, -50, -44, -44, '-x', 0, 1, SAND); crateB(-58, -44, -56, -42, 0, 2); crateB(-52, -50, -50, -48, 1, 1);
+  solid(-46, -40, -42, -36, 0, 1, { tint: WOOD, tone: .33 }); sk.cyl(1.55, 1.55, .12, 12, -44, 1.06, -38, { tint: GLASS, tone: 0 });
+  for (const [x, z] of [[-45.7, -39.7], [-42.3, -36.3]]) sk.cyl(.1, .1, 2.6, 6, x, 2.3, z, { tint: WOOD }); sk.line([-45.7, 3.6, -39.7, -42.3, 3.6, -36.3, -44, 3.6, -38, -44, 1.2, -38]); sk.cyl(.18, .18, .5, 8, -44, 3.6, -38, { ax: 'z', tint: WOOD });
+  car(-50, -26, 0); crateB(-38, -44, -36, -42, 0, 2); crateB(-36, -44, -35, -43, 0, 1); crateB(-40, -28, -38, -26, 0, 1.25); crateB(-32, -24, -30, -22, 0, 1.5); crateB(-56, -32, -54, -28, 0, 1.25); sandbags(-36, -30, -33, -29);
+  solid(-28, -38, -26, -37, 0, 6, SAND); solid(-28, -34, -26, -32, 0, 6, SAND); solid(-28, -37, -26, -34, 3.5, 6, SAND); solid(-28, -32, -26, -30, 0, 1.25, SAND); solid(-28, -32, -26, -30, 2.5, 6, SAND);
+  leaf(-26, 0, -37, 1.4, 3.3, -1.3); leaf(-26, 0, -34, 1.4, 3.3, 1.35); sk.bx(-28.1, 1.25, -32, -25.9, 1.4, -30, { tint: WOOD, tone: .66 }); arch(-37, -34, -28, -26, 3.5, true, .6);
+  crateB(-20, -38, -18, -36, 0, 1.5); crateB(-12, -34, -10, -32, 0, 1.25); crate(-6.5, -40.5, 1); truck(-2, -47, 0, WOOD); sandbags(6, -44, 10, -43); crateB(14, -50, 16, -48, 0, 2);
+  sign('B · 井院', -27.93, 5, -44, Math.PI / 2, 6, 1.2, SG); sign('B', -44, .03, -30, 0, 5, 5, { w: 256, h: 256, color: '#e9a520', flat: true, stencil: 40 }); sign('B', -44.07, 2.8, -12, -Math.PI / 2, 2.2, 2.2, { w: 256, h: 256, color: '#e9a520', stencil: 40 });
+  sign('← B 门', -14.07, 3.2, -35, -Math.PI / 2, 3, .8, SG); sign('A 坡 →', 19.93, 3.2, -46, Math.PI / 2, 3, .8, SG); lamp(-13.4, -45, -1, 0); lamp(4.6, -34, -1, 0);
+  sign('双井沙城 · DUNE COURT', 0, 6, 49.93, Math.PI, 16, 1.6, { bg: '#f5f2ea', border: 5 });
+  // wind-blown sand strokes on open ground
+  const a = []; for (let i = 0; i < 320; i++) { const x = rr(-58, 58), z = rr(-50, 50); if (K.inSolid(x, .2, z)) continue; const an = rr(-.4, .4), l = rr(.2, .9), y = K.inSolid(x, 1.9, z) ? 2.015 : .015; a.push(x, y, z, x + Math.cos(an) * l, y, z + Math.sin(an) * l * .3); } sk.line(a);
+}
+
+function layoutDepot(K) {   // industrial yard: A inside the loading hall, B in the container yard, mid with a Z-screen
+  const { sk, solid, building, block, crate, barrel, sandbags, truck, lamp, sign, wash, rr, R } = K, { frame, crateB, ramp, wall, leaf, arch, beams, hang } = layoutKit(K);
+  const SG = { bg: '#f5f2ea', border: 5, color: '#e9a520', font: 'bold 66px sans-serif' }, HALL = { tint: PAPER, tone: undefined };
+  let tag = 0; const TAGS = ['K-07', 'INK-24', 'S-13', 'P-02', 'K-31', 'D-19'];
+  const container = (x1, z1, x2, z2, y0 = 0, tint = WOOD) => { const h = 2.75, lx = x2 - x1 >= z2 - z1, a = []; solid(x1, z1, x2, z2, y0, y0 + h, { tint, shadow: y0 === 0 });
+    sk.bx(x1 - .04, y0 + h - .12, z1 - .04, x2 + .04, y0 + h, z2 + .04, { tint, tone: .33 }); sk.bx(x1 - .04, y0, z1 - .04, x2 + .04, y0 + .12, z2 + .04, { tint, tone: .33 });
+    if (lx) { for (let x = x1 + .35; x < x2 - .2; x += .38) for (const z of [z1 - e2, z2 + e2]) a.push(x, y0 + .15, z, x, y0 + h - .15, z); for (const x of [x1 - e2, x2 + e2]) { const m = (z1 + z2) / 2; a.push(x, y0 + .15, m, x, y0 + h - .15, m); for (const z of [z1 + .5, m - .4, m + .4, z2 - .5]) a.push(x, y0 + .2, z, x, y0 + h - .2, z); } }
+    else { for (let z = z1 + .35; z < z2 - .2; z += .38) for (const x of [x1 - e2, x2 + e2]) a.push(x, y0 + .15, z, x, y0 + h - .15, z); for (const z of [z1 - e2, z2 + e2]) { const m = (x1 + x2) / 2; a.push(m, y0 + .15, z, m, y0 + h - .15, z); for (const x of [x1 + .5, m - .4, m + .4, x2 - .5]) a.push(x, y0 + .2, z, x, y0 + h - .2, z); } }
+    sk.line(a); if (tag < TAGS.length && y0 === 0 && R() < .6) { const t = TAGS[tag++], o = { bg: null, border: 0, color: '#16161c', font: 'bold 150px sans-serif', w: 512, h: 256 }; lx ? sign(t, (x1 + x2) / 2, 1.9, z2 + .03, 0, 2.2, 1.1, o) : sign(t, x2 + .03, 1.9, (z1 + z2) / 2, Math.PI / 2, 2.2, 1.1, o); } }, e2 = .014;
+  const forklift = (x, z, rot = 0) => { const M = new THREE.Matrix4().makeRotationY(rot * Math.PI / 2).setPosition(x, 0, z); solid(x - (rot % 2 ? 1.5 : 1), z - (rot % 2 ? 1 : 1.5), x + (rot % 2 ? 1.5 : 1), z + (rot % 2 ? 1 : 1.5), 0, 2.2, { vis: false });
+    sk.box(1.3, .9, 1.9, 0, .75, .2, { m: M, tint: AMBER, tone: 0 }); sk.box(1.2, .5, .6, 0, 1.4, .8, { m: M, tone: .66 }); for (const px of [-.55, .55]) { sk.box(.08, 1.6, .08, px, 2.0, -.2, { m: M }); sk.box(.1, 2.3, .12, px, 1.15, -.85, { m: M, tone: .66 }); sk.box(.12, .06, 1.1, px * .6, .12, -1.35, { m: M, tone: .66 }); }
+    sk.box(1.3, .08, 1.3, 0, 2.8, .1, { m: M, tone: .33 }); for (const wx of [-.6, .6]) for (const wz of [-.5, .8]) sk.cyl(.3, .3, .22, 10, wx, .3, wz, { m: M, ax: 'x', tone: .66 }); sk.line([0, 1.5, .1, 0, 1.2, -.3], M); };
+  const pallets = (x1, z1, x2, z2, h = 1.25, y0 = 0) => { crateB(x1, z1, x2, z2, y0, h, WOOD); const a = []; for (let y = y0 + .14; y < y0 + h; y += .42) for (const z of [z1 - e2, z2 + e2]) a.push(x1, y, z, x2, y, z); sk.line(a); };
+  const shutter = (x1, x2, z, y0, y1, open) => { const a = [], yo = y1 - (y1 - y0) * (1 - open); sk.bx(x1, yo, z - .08, x2, y1, z + .08, { tone: .33 }); for (let y = yo + .18; y < y1; y += .18) a.push(x1, y, z - .09, x2, y, z - .09, x1, y, z + .09, x2, y, z + .09); sk.line(a);
+    for (const x of [x1, x2]) sk.bx(x - .12, y0, z - .15, x + .12, y1 + .3, z + .15, { tone: .66 }); sk.bx(x1 - .2, y1, z - .35, x2 + .2, y1 + .6, z + .35, { tone: .33 }); const h = []; for (let x = x1; x < x2; x += .9) h.push(x, y0 + .02, z - .5, x + .45, y0 + .02, z + .5); sk.line(h); };
+  const hazard = (x1, z1, x2, z2, y) => { const a = []; for (let x = x1; x < x2 - .3; x += .6) sk.bx(x, y, z1, x + .3, y + .012, z2, { tint: AMBER, tone: 0 }); };
+  const corrugate = (x1, z1, x2, z2, y0, y1, step = .5) => { const a = []; if (x2 - x1 > z2 - z1) { for (let x = x1 + step; x < x2; x += step) a.push(x, y0, z1 - e2, x, y1, z1 - e2, x, y0, z2 + e2, x, y1, z2 + e2); } else for (let z = z1 + step; z < z2; z += step) a.push(x1 - e2, y0, z, x1 - e2, y1, z, x2 + e2, y0, z, x2 + e2, y1, z); sk.line(a); };
+
+  // ground: asphalt yards, a darker hall floor with skylight patches, painted lanes
+  for (const q of [[-49,32,49,43],[-49,-14,-36,32],[24,-10,49,32],[-6,-28,6,32],[-20,-43,20,-32],[-49,-43,-20,-14],[-20,-26,-6,-20]]) wash(...q, .06);
+  for (let z = -43; z < -10; z += 7) { wash(21, z, 49, Math.min(-11, z + 4), .17); if (z + 7 < -10) wash(21, z + 4, 49, z + 7, .05); } wash(6, 4, 24, 10, .2); wash(6, -24, 20, -18, .2);
+  { const a = []; for (const x of [-45, -40]) a.push(x, .012, -12, x, .012, 30); for (const z of [-34, 36]) for (let x = -46; x < 46; x += 3) a.push(x, .012, z, x + 1.5, .012, z); for (let z = -8; z < 30; z += 3) a.push(0, .012, z, 0, .012, z + 1.5); sk.line(a); }
+  // perimeter depots
+  block(-56, -50, -49, 50, 8, 12); block(49, -8, 56, 50, 8, 11); solid(49, -50, 56, -8, 0, 12, HALL); block(-49, -50, 20, -43, 8, 11); solid(20, -50, 49, -43, 0, 12, HALL); block(-49, 43, 49, 50, 7, 10);
+  // interior blocks: sorting offices west of mid, packing sheds east
+  building(-36, -14, -20, 10, 8); building(-36, 10, -20, 32, 7); building(-20, -20, -6, 6, 7.5); building(-20, 6, -6, 32, 6.5); building(-20, -32, -6, -26, 7);
+  building(6, -32, 20, -24, 7); building(6, -18, 20, -10, 8); building(6, -10, 24, 4, 7); building(6, 10, 24, 32, 7.5);
+  // loading hall shell: west + south walls with doors, roof slats with skylight gaps, crane rail
+  solid(20, -43, 21, -41, 0, 10, HALL); solid(20, -37, 21, -23, 0, 10, HALL); solid(20, -19, 21, -11, 0, 10, HALL); solid(20, -41, 21, -37, 3.5, 10, HALL); solid(20, -23, 21, -19, 3.5, 10, HALL);
+  solid(20, -11, 32, -10, 0, 10, HALL); solid(40, -11, 49, -10, 0, 10, HALL); solid(32, -11, 40, -10, 5, 10, HALL); shutter(32, 40, -10.5, 0, 5, .45);
+  for (let z = -43; z < -10; z += 7) solid(20, z, 49, Math.min(-10, z + 4), 10, 10.5, { ...HALL, shadow: false }); for (let z = -39; z < -10; z += 7) { sk.bx(20, 10.3, z, 49, 10.35, Math.min(-10, z + 3), { tint: GLASS, tone: 0 }); }
+  corrugate(20, -43, 21, -11, .3, 9.6); corrugate(20, -11, 49, -10, .3, 9.6); for (const x of [26, 33, 40, 46]) { sk.bx(x - .2, 0, -10.6, x + .2, 10, -10.35, { tone: .66 }); sk.bx(x - .2, 9, -43, x + .2, 9.6, -11, { tone: .66 }); }
+  for (const z of [-40, -30, -20]) sk.bx(21, 7.8, z - .2, 49, 8.1, z + .2, { tone: .66 }); sk.bx(24, 7.6, -31, 25, 7.8, -29, { tint: AMBER, tone: 0 }); sk.line([24.5, 7.6, -30, 24.5, 5.4, -30]); sk.box(.5, .3, .3, 24.5, 5.3, -30, { tone: .66 });
+  for (const [x, z] of [[27, -36], [35, -26], [42, -18], [30, -16]]) { sk.box(2.2, .12, .3, x, 8.8, z, { tint: GLASS, tone: 0 }); sk.line([x - 1, 8.86, z, x - 1, 9.6, z, x + 1, 8.86, z, x + 1, 9.6, z]); }
+  sign('装运大厅 · 02', 36, 6.6, -9.93, 0, 8, 1.3, { bg: '#f5f2ea', border: 5 }); sign('A · 东装运台', 35, 6.2, -42.93, 0, 8, 1.4, SG);
+  // hall interior: raised dock with hazard edge, stacked containers, hanging load, pallet cover
+  solid(44, -43, 49, -16, 0, 1.25, { tint: PAPER, tone: .33 }); ramp(44, -16, 49, -11, '-z', 0, 1.25); hazard(44, -16.1, 49, -16, 1.25); for (let z = -42; z < -16; z += 1.2) sk.bx(43.9, .9, z, 44, 1.2, z + .6, { tint: AMBER, tone: 0 });
+  container(22, -42, 28, -39); container(22, -42, 28, -39, 2.75, PAPER); container(34, -31, 37, -25, 0, GLASS); container(24, -18, 30, -15, 0, PAPER); container(45, -42, 48, -36, 1.25, WOOD);
+  solid(38, -35, 44, -32, 5.5, 8.25, { tint: WOOD, shadow: false }); sk.line([38.5, 8.25, -33.5, 39, 9, -33.5, 43.5, 8.25, -33.5, 43, 9, -33.5, 41, 9, -33.5, 41, 7.8, -30]); corrugate(38, -35, 44, -32, 5.6, 8.1);
+  pallets(28, -31, 30, -29); pallets(28, -30, 29, -29, 1, 1.25); pallets(40, -24, 42, -22, 1.5); pallets(24, -26, 26, -24); crateB(30, -38, 32, -36, 0, 1.5); forklift(41, -38, 1); barrel(25.5, -34.5); barrel(25.5, -33.5, AMBER); barrel(47.5, -13.5);
+  sign('A', 33, .03, -33, 0, 5, 5, { w: 256, h: 256, color: '#e9a520', flat: true, stencil: 40 }); sign('A', 36, 3.2, -24.97, 0, 2.2, 2.2, { w: 256, h: 256, color: '#e9a520', stencil: 40 });
+  // A main yard: truck bay, container lanes, jersey barriers
+  truck(30, 18, 1, PAPER); container(38, 4, 44, 7); container(38, 4, 44, 7, 2.75, GLASS); container(44, 16, 47, 22, 0, PAPER); container(26, -2, 29, 4); pallets(34, 26, 36, 28); crateB(46, 28, 48, 30, 0, 2); crateB(25, 28, 27, 30, 0, 1.25);
+  for (const [x1, z1, x2, z2] of [[33, -4, 37, -3], [40, 12, 42, 13]]) { solid(x1, z1, x2, z2, 0, 1, { tint: PAPER, tone: .33 }); hazard(x1, z1 - .01, x2, z1, 1); }
+  sign('A 主道 ↑', 24.07, 3.4, 20, Math.PI / 2, 3.6, .9, SG); lamp(48.4, 10, -1, 0); lamp(24.6, -6, 1, 0);
+  // packing room and side corridor (roofed), with shutters marking their mouths
+  solid(6, 4, 24, 10, 4, 4.5, { tint: PAPER, shadow: false }); solid(6, -24, 20, -18, 4, 4.5, { tint: PAPER, shadow: false }); beams(6, 4, 24, 10, 4, true, 4); beams(6, -24, 20, -18, 4, true, 4);
+  for (const x of [10, 18]) hang(x, 3.6, 7); hang(13, 3.6, -21); pallets(12, 4, 14, 6); crateB(18, 8, 20, 10, 0, 1.25); barrel(8.5, -19.5); crateB(15, -24, 17, -23, 0, 1);
+  sign('装箱间', 6.07, 3.1, 7, Math.PI / 2, 2.6, .8, SG); sign('A 侧廊 →', 6.07, 3.1, -21, Math.PI / 2, 3, .8, SG);
+  // mid: Z-screen container splits the lane; gate to CT with a half-dropped shutter and a CT screen behind it
+  container(-3, 12, 3, 15, 0, PAPER); pallets(-6, -6, -4, -3); crateB(3, -2, 5, 0, 0, 1.5); forklift(3, -16, 0); barrel(-5.5, 24.5); barrel(-4.5, 24.5, AMBER); pallets(2, 24, 4, 26, 1);
+  solid(-6, -32, -2, -28, 0, 7, HALL); solid(2, -32, 6, -28, 0, 7, HALL); solid(-2, -32, 2, -28, 3, 7, HALL); shutter(-2, 2, -28.5, 0, 3, .75); crateB(-3, -35, 0, -33, 0, 2); crateB(0, -35, 3, -33, 0, 2);
+  sign('中路闸门', 0, 4.6, -27.93, 0, 3.6, .9, SG); lamp(-5.6, 0, 1, 0); lamp(5.6, 18, -1, 0);
+  // B container yard: gantry crane frame, stacked boxes in a U around the plant zone
+  for (const [x, z] of [[-47, -41], [-47, -16], [-23, -41], [-23, -16]]) solid(x, z, x + 1, z + 1, 0, 9, { tint: AMBER, tone: .33 });
+  for (const x of [-46.5, -22.5]) sk.bx(x - .4, 9, -41, x + .4, 9.6, -15, { tint: AMBER, tone: .33 }); sk.bx(-47, 9.6, -29.4, -22, 10.2, -28.6, { tint: AMBER, tone: .33 }); sk.box(2, 1.2, 1.6, -35, 9.4, -29, { tone: .66 }); sk.line([-35, 8.8, -29, -35, 5, -29]); sk.cone(.25, .5, 5, -35, 4.8, -29, { r: [Math.PI, 0, 0], tone: .66 });
+  container(-49, -43, -43, -40); container(-49, -43, -43, -40, 2.75, GLASS); container(-43, -43, -37, -40, 0, PAPER); container(-28, -40, -25, -34, 0, WOOD); container(-28, -40, -25, -34, 2.75, PAPER);
+  container(-40, -32, -34, -29, 0, GLASS); container(-49, -28, -46, -22, 0, PAPER); pallets(-32, -24, -30, -22); crateB(-44, -22, -42, -20, 0, 1.5); crateB(-44, -21, -43, -20, 1.5, 1); forklift(-26, -26, 1);
+  barrel(-20.5, -41.5); barrel(-21.5, -41.5, AMBER); sign('B · 西封签区', -34, 6, -42.93, 0, 8, 1.4, SG); sign('B', -36, .03, -36, 0, 5, 5, { w: 256, h: 256, color: '#e9a520', flat: true, stencil: 40 });
+  // B lane: containers pinch the approach, jersey barriers at the mouth
+  container(-49, 8, -46, 14); container(-39, -4, -36, 2, 0, PAPER); container(-49, 22, -46, 28, 0, GLASS); container(-49, 22, -46, 28, 2.75, WOOD);
+  for (const [x1, z1, x2, z2] of [[-46, -10, -42, -9], [-40, 16, -36, 17]]) { solid(x1, z1, x2, z2, 0, 1, { tint: PAPER, tone: .33 }); hazard(x1, z1 - .01, x2, z1, 1); }
+  sign('← B 主道', -35.93, 3.4, 26, -Math.PI / 2, 3.6, .9, SG); lamp(-48.4, 0, 1, 0); lamp(-36.6, 20, -1, 0); sign('B 连廊', -6.07, 3.1, -23, -Math.PI / 2, 2.6, .8, SG);
+  // CT yard and T yard
+  truck(-12, -38, 1, PAPER); container(8, -43, 14, -40, 0, WOOD); crateB(-18, -43, -16, -41, 0, 2); sandbags(4, -36, 8, -35); crateB(14, -36, 16, -34, 0, 1.25);
+  container(-30, 34, -24, 37, 0, WOOD); container(24, 34, 30, 37, 0, GLASS); container(38, 38, 44, 41); container(38, 38, 44, 41, 2.75, PAPER); container(-44, 37, -38, 40, 0, PAPER); truck(0, 41, 0, WOOD); pallets(-12, 34, -10, 36); pallets(16, 40, 18, 42, 1.5);
+  sign('折页货场 · STACK DEPOT', 0, 6, 42.93, Math.PI, 16, 1.6, { bg: '#f5f2ea', border: 5 }); sign('A →', 20, 3.4, 32.07, 0, 3, .9, SG); sign('← B', -18, 3.4, 32.07, 0, 3, .9, SG);
+  const a = []; for (let i = 0; i < 260; i++) { const x = rr(-49, 49), z = rr(-43, 43); if (K.inSolid(x, .2, z)) continue; const an = rr(0, 6.28), l = rr(.1, .5); a.push(x, .015, z, x + Math.cos(an) * l, .015, z + Math.sin(an) * l); } sk.line(a);
 }
 
 /* ---------------- collision ---------------- */
@@ -483,7 +608,10 @@ function drawMini() {
   const k = 4, c = MAP.mini = document.createElement('canvas'); c.width = 128 * k; c.height = 112 * k; const g = c.getContext('2d');
   g.fillStyle = '#f5f2ea'; g.fillRect(0, 0, c.width, c.height); g.lineWidth = 1;
   const S = MAP.solids.slice().sort((a, b) => a.y2 - b.y2);
+  // Raised floors (courts, catwalks, stair treads) are drawn as ground with a light rim, not as obstacles.
+  const walkTop = s => { if (s.y2 > 3.2) return false; let n = 0, ok = 0; for (let z = Math.floor(s.z1) + .5; z < s.z2; z++) for (let x = Math.floor(s.x1) + .5; x < s.x2; x++) { n++; const c = navIdx(x, z); if (MAP.reach[c] && Math.abs(MAP.fh[c] - s.y2) < .05) ok++; } return n && ok / n > .3; };
   for (const s of S) { if (s.y2 < .7 || s.y1 > 2.5) continue; const x = (s.x1 + 64) * k, y = (s.z1 + 56) * k, w = (s.x2 - s.x1) * k, h = (s.z2 - s.z1) * k;
+    if (walkTop(s)) { g.fillStyle = '#ede7d8'; g.fillRect(x, y, w, h); g.strokeStyle = '#b9b3a4'; g.strokeRect(x + .5, y + .5, w, h); continue; }
     g.fillStyle = s.y2 > 3.3 ? '#cfcabd' : '#e6e2d6'; g.fillRect(x, y, w, h); g.strokeStyle = '#16161c'; g.strokeRect(x + .5, y + .5, w, h); }
   g.fillStyle = '#e9a520'; g.font = 'bold 40px Arial'; g.textAlign = 'center'; for (const n of ['A','B']) { const q=MAP.sites[n]; g.fillText(n, ((q.x1+q.x2)/2+64)*k, ((q.z1+q.z2)/2+56)*k+13); }
 }

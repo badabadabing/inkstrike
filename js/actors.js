@@ -59,10 +59,25 @@ function setEntWeapon(e, key) { e.weapon = key; const w = WEAPONS[key]; e.mag = 
 function animSoldier(e, dt) {
   const m = e.model, c = e.crouchAmt; m.root.position.copy(e.pos); m.root.rotation.y = e.yaw;
   if (!e.alive) { m.fm.uniforms.uFlash.value = damp(m.fm.uniforms.uFlash.value, 0, 14, dt); e.deathT += dt; const k = 1 - Math.pow(1 - Math.min(1, e.deathT / .55), 2); m.root.rotation.x = k * 1.5 * e.fallDir; m.root.position.y = e.pos.y + k * .13; m.legL.rotation.x = k * .25; m.legR.rotation.x = -k * .3; m.upper.rotation.x = 0; actorContact(e); if (e.deathT > 14) m.root.visible = false; return; }
-  const sp = Math.hypot(e.vel.x, e.vel.z), stride = Math.min(1, sp / 3); m.phase += sp * dt * 2.4; const hip = .9 - .405 * c - .055 * stride, swing = Math.sin(m.phase) * .24 * stride * (1 - c * .4);
-  const pose = (leg, z, lift) => { const y = .09 + lift, dy = hip - y, d = Math.min(.8099, Math.hypot(dy, z)), bend = Math.acos(clamp(d / .81, 0, 1)), aim = Math.atan2(-z, dy); leg.position.y = hip; leg.scale.y = 1; leg.rotation.x = aim + bend; leg.shin.rotation.x = -2 * bend; leg.foot.rotation.x = -aim + bend; };
-  pose(m.legL, swing, Math.max(0, Math.cos(m.phase)) * .09 * stride); pose(m.legR, -swing, Math.max(0, -Math.cos(m.phase)) * .09 * stride);
-  m.upper.position.y = hip; m.upper.rotation.x = e.pitch * .7 + (e.flinch || 0) * .3; m.head.rotation.x = e.pitch * .25; if (e.flinch) e.flinch = damp(e.flinch, 0, 10, dt); actorContact(e); actorLineLOD(e);
+  // Gait from real ground displacement (never from wished velocity), in the model's local frame so strafes and backpedals step the right way.
+  const lp = m.lastP || (m.lastP = { x: e.pos.x, z: e.pos.z, yaw: e.yaw }), idt = dt > 1e-4 ? 1 / dt : 0; let vx = (e.pos.x - lp.x) * idt, vz = (e.pos.z - lp.z) * idt; if (vx * vx + vz * vz > 100) vx = vz = 0;
+  const yawRate = angDiff(e.yaw, lp.yaw) * idt; lp.x = e.pos.x; lp.z = e.pos.z; lp.yaw = e.yaw; m.vx = damp(m.vx || 0, vx, 12, dt); m.vz = damp(m.vz || 0, vz, 12, dt);
+  const cy = Math.cos(e.yaw), sy = Math.sin(e.yaw); let lx = cy * m.vx - sy * m.vz, lz = sy * m.vx + cy * m.vz, sp = Math.hypot(lx, lz);
+  if (sp < .35 && Math.abs(yawRate) > 1.6) { sp = Math.min(1.1, Math.abs(yawRate) * .35); lx = -Math.sign(yawRate) * sp; lz = 0; }   // turning on the spot shuffles the feet
+  // Stance foot travels exactly 2A while the body covers 2A: cadence = speed * duty / 2A, so planted feet never skate. Runs get a flight phase (lower duty).
+  const run = clamp((sp - 2.9) / 1.7, 0, 1), cr = 1 - c * .35, gw = clamp((sp - .12) / .55, 0, 1), A = clamp(.22 + sp * .03, .22, .37) * cr, duty = .62 - .3 * run, air = e.onGround === false;
+  if (!air && sp > .05) m.gait = ((m.gait || 0) + sp * duty / (2 * A) * dt) % 1; const g = m.gait || 0;
+  const hip = Math.min(.9 - .405 * c, Math.sqrt(.6561 - (A * gw) ** 2) + .075) - gw * (.018 + .028 * run) * (.5 + .5 * Math.cos((g - .12 * run) * 4 * Math.PI)) - (air ? .06 : 0);
+  const dX = sp > 1e-3 ? lx / sp : 0, dZ = sp > 1e-3 ? lz / sp : -1;
+  const step = (off, rest) => { const t = (g + off) % 1; let p, lift = 0, roll = 0;
+    if (t < duty) { const u = t / duty; p = A * (1 - 2 * u); if (u > .72) roll = -(u - .72) / .28 * .42; }
+    else { const u = (t - duty) / (1 - duty), k = u * u * (3 - 2 * u); p = -A + 2 * A * k; lift = Math.sin(Math.PI * u) * (.08 + .1 * run) * cr; roll = u < .35 ? -.42 * (1 - u / .35) : u > .72 ? (u - .72) / .28 * .28 : 0; }
+    if (air) return [0, rest - .04, .22 + rest, .15]; return [dX * p * gw, dZ * p * gw + rest * (1 - gw), lift * gw, roll * gw]; };
+  const pose = (leg, [ox, oz, lift, roll]) => { const dy = hip - .09 - lift, v = Math.hypot(dy, ox), d = Math.min(.8099, Math.hypot(v, oz)), bend = Math.acos(clamp(d / .81, 0, 1)), aim = Math.atan2(-oz, v), side = Math.atan2(ox, dy);
+    leg.position.y = hip; leg.scale.y = 1; leg.rotation.set(aim + bend, 0, side, 'ZXY'); leg.shin.rotation.x = -2 * bend; leg.foot.rotation.set(-aim + bend + roll, 0, -side, 'XZY'); };   // side swing outermost keeps full lateral reach
+  pose(m.legL, step(0, -.09)); pose(m.legR, step(.5, .06));
+  const fwd = sp > 1e-3 ? -lz / sp : 0, sw = Math.sin(g * 2 * Math.PI) * gw, lean = (.04 + .08 * run) * gw * fwd;
+  m.upper.position.y = hip; m.upper.rotation.set(e.pitch * .7 + (e.flinch || 0) * .3 - lean, sw * .045 * (1 - c * .5), -sw * .03); m.head.rotation.set(e.pitch * .25 + lean * .8, -sw * .035, sw * .02); if (e.flinch) e.flinch = damp(e.flinch, 0, 10, dt); actorContact(e); actorLineLOD(e);
   m.fm.uniforms.uFlash.value = damp(m.fm.uniforms.uFlash.value, 0, 14, dt);
 }
 
