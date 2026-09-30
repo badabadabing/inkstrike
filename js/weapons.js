@@ -1,11 +1,11 @@
 'use strict';
 /* ============ INK STRIKE · arsenal: stats, line-art gun models, first-person viewmodel ============ */
 const WEAPONS = {
-  knife:  { name: '刻刀', en: 'ETCHER', slot: 3, dmg: 40, dmg2: 65, rate: .42, rate2: .9, range: 2.0, speed: 1.0, draw: .35, reward: 1500, melee: true, price: 0 },
+  knife:  { name: '刻刀', en: 'ETCHER', slot: 3, dmg: 40, dmg2: 65, arm: .85, rate: .42, rate2: .9, range: 2.0, speed: 1.0, draw: .35, reward: 1500, melee: true, price: 0 },
   p9:     { name: 'P9 速写', en: 'P9 SKETCH', slot: 2, dmg: 30, arm: .52, rate: .14, auto: false, mag: 12, res: 48, reload: 1.9, spread: .0035, moveSp: .022, sprayInc: .004, up: .016, side: .004, vm: .05, speed: .98, draw: .4, reward: 300, price: 200, snd: 'pistol', fall: .82 },
   deagle: { name: '重墨 .50', en: 'HEAVY INK .50', slot: 2, dmg: 58, arm: .93, rate: .27, auto: false, mag: 7, res: 35, reload: 2.1, spread: .0025, moveSp: .04, sprayInc: .03, up: .05, side: .012, vm: .11, speed: .95, draw: .5, reward: 300, price: 700, snd: 'deagle', fall: .85 },
   viper:  { name: '飞白 冲锋枪', en: 'DRYBRUSH SMG', slot: 1, dmg: 25, arm: .6, rate: .072, auto: true, mag: 30, res: 120, reload: 2.2, spread: .008, moveSp: .012, sprayInc: .0012, up: .0085, side: .0055, vm: .035, speed: .97, draw: .5, reward: 600, price: 1250, snd: 'smg', fall: .75, optic: 'reflex', adsFov: 70 },
-  nova:   { name: '泼墨 霰弹枪', en: 'SPLASH SHOTGUN', slot: 1, dmg: 20, pellets: 9, arm: .5, rate: .85, auto: false, mag: 8, res: 32, reload: 2.6, spread: .045, moveSp: .01, sprayInc: 0, up: .07, side: .015, vm: .16, speed: .93, draw: .6, reward: 900, price: 1050, snd: 'shotgun', fall: .55, pump: true },
+  nova:   { name: '泼墨 霰弹枪', en: 'SPLASH SHOTGUN', slot: 1, dmg: 20, pellets: 9, arm: .5, rate: .85, auto: false, mag: 8, res: 32, reload: 2.6, spread: .045, moveSp: .01, sprayInc: 0, up: .07, side: .015, vm: .16, speed: .93, draw: .6, reward: 900, price: 1050, snd: 'shotgun', fall: .55, fallStart: 6, range: 24, headMult: 2, penetration: 0, pump: true },
   ak:     { name: 'AK 焦墨', en: 'AK CHARCOAL', slot: 1, dmg: 36, arm: .78, rate: .1, auto: true, mag: 30, res: 90, reload: 2.4, spread: .0022, moveSp: .05, sprayInc: .0011, up: .0135, side: .0085, vm: .06, speed: .9, draw: .6, reward: 300, price: 2700, snd: 'rifle', fall: .95 },
   m4:     { name: 'M4 工笔', en: 'M4 FINELINE', slot: 1, dmg: 31, arm: .7, rate: .092, auto: true, mag: 30, res: 90, reload: 2.7, spread: .0018, moveSp: .045, sprayInc: .0009, up: .0105, side: .006, vm: .045, speed: .92, draw: .6, reward: 300, price: 3100, snd: 'm4', fall: .95, optic: 'holo', adsFov: 64 },
   awp:    { name: '一笔 狙击枪', en: 'ONE STROKE', slot: 1, dmg: 115, arm: .97, rate: 1.65, auto: false, mag: 5, res: 25, reload: 3.3, spread: .0004, noScope: .08, moveSp: .16, sprayInc: 0, up: .06, side: .01, vm: .2, speed: .82, draw: .9, reward: 100, price: 4750, snd: 'awp', fall: 1, scope: true, bolt: true },
@@ -13,6 +13,8 @@ const WEAPONS = {
   flash:  { name: '曝光弹', en: 'OVEREXPOSE', slot: 4, speed: .98, draw: .4, price: 200, reward: 300, nade: true, rate: 1, fuse: 1.45 },
   smoke:  { name: '烟墨弹', en: 'SMOKE WASH', slot: 4, speed: .98, draw: .4, price: 300, reward: 300, nade: true, rate: 1, fuse: 2.3 }
 };
+/* A pellet keeps close-range power, then loses energy quadratically; other guns keep their existing distance curve. */
+function weaponFalloff(w, distance) { if (w.range && distance >= w.range) return 0; return w.fallStart === undefined ? Math.pow(w.fall, distance / 28) : Math.pow(Math.max(0, Math.min(1, (w.range - distance) / (w.range - w.fallStart))), 2); }
 /* fixed, learnable spray patterns: [pitchKick, yawKick] per shot (radians). Same every time — pull the opposite way to control it. */
 function mkPat(up, side, n, dir, q) { const a = []; for (let i = 0; i < n; i++) { let dy, dx; if (i < 8) { dy = up * (i ? 1 : .55); dx = side * .16 * Math.sin(i * 1.3 + q) * dir; } else if (i < 16) { dy = up * .24; dx = -side * (.55 + .4 * Math.sin((i - 8) * .5)) * dir; } else if (i < 24) { dy = up * .12; dx = side * (.75 + .35 * Math.sin((i - 16) * .6)) * dir; } else { dy = up * .08; dx = -side * .7 * dir; } a.push([dy, dx]); } return a; }
 WEAPONS.ak.pat = mkPat(.0142, .0098, 30, 1, .4); WEAPONS.m4.pat = mkPat(.0108, .0068, 30, -1, 1.2); WEAPONS.viper.pat = mkPat(.0088, .0062, 30, -1, 2.1);

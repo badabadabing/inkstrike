@@ -1,0 +1,2945 @@
+{
+  "method": "2000 seeded independent first shots per shooter/armor/distance. Actual playerFire or G.botShoot -> fireBullet -> rayEnt -> hurt; open lane and fixed chest aim; AI aim error, map occlusion and cosmetics excluded. Damage is full volley potential, not observed live-match kill rate.",
+  "samples": 2000,
+  "shotgun": [
+    {
+      "role": "player",
+      "armor": false,
+      "dist": 3,
+      "samples": 2000,
+      "meanDamage": 180.18,
+      "oneShotPercent": 100,
+      "pelletHitPercent": 99.87,
+      "meanAngularDegrees": 1.45,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 160,
+      "max": 200
+    },
+    {
+      "role": "player",
+      "armor": false,
+      "dist": 5,
+      "samples": 2000,
+      "meanDamage": 176.71,
+      "oneShotPercent": 100,
+      "pelletHitPercent": 95.87,
+      "meanAngularDegrees": 1.45,
+      "maxDirectionLengthError": 2.220446049250313e-16,
+      "min": 100,
+      "max": 245
+    },
+    {
+      "role": "player",
+      "armor": false,
+      "dist": 8,
+      "samples": 2000,
+      "meanDamage": 128.33,
+      "oneShotPercent": 89.35,
+      "pelletHitPercent": 83.56,
+      "meanAngularDegrees": 1.43,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 48,
+      "max": 196
+    },
+    {
+      "role": "player",
+      "armor": false,
+      "dist": 12,
+      "samples": 2000,
+      "meanDamage": 60.11,
+      "oneShotPercent": 0.3,
+      "pelletHitPercent": 67.38,
+      "meanAngularDegrees": 1.44,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 9,
+      "max": 105
+    },
+    {
+      "role": "player",
+      "armor": false,
+      "dist": 16,
+      "samples": 2000,
+      "meanDamage": 21.7,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 55.06,
+      "meanAngularDegrees": 1.44,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 0,
+      "max": 45
+    },
+    {
+      "role": "player",
+      "armor": false,
+      "dist": 20,
+      "samples": 2000,
+      "meanDamage": 4.54,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 46.34,
+      "meanAngularDegrees": 1.44,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 0,
+      "max": 11
+    },
+    {
+      "role": "player",
+      "armor": false,
+      "dist": 28,
+      "samples": 2000,
+      "meanDamage": 0,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 0,
+      "meanAngularDegrees": 1.43,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 0,
+      "max": 0
+    },
+    {
+      "role": "player",
+      "armor": false,
+      "dist": 40,
+      "samples": 2000,
+      "meanDamage": 0,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 0,
+      "meanAngularDegrees": 1.43,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 0,
+      "max": 0
+    },
+    {
+      "role": "player",
+      "armor": false,
+      "dist": 60,
+      "samples": 2000,
+      "meanDamage": 0,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 0,
+      "meanAngularDegrees": 1.43,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 0,
+      "max": 0
+    },
+    {
+      "role": "player",
+      "armor": true,
+      "dist": 3,
+      "samples": 2000,
+      "meanDamage": 90.09,
+      "oneShotPercent": 1.8,
+      "pelletHitPercent": 99.87,
+      "meanAngularDegrees": 1.45,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 80,
+      "max": 100
+    },
+    {
+      "role": "player",
+      "armor": true,
+      "dist": 5,
+      "samples": 2000,
+      "meanDamage": 88.55,
+      "oneShotPercent": 9.65,
+      "pelletHitPercent": 95.87,
+      "meanAngularDegrees": 1.45,
+      "maxDirectionLengthError": 2.220446049250313e-16,
+      "min": 50,
+      "max": 143
+    },
+    {
+      "role": "player",
+      "armor": true,
+      "dist": 8,
+      "samples": 2000,
+      "meanDamage": 64.41,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 83.56,
+      "meanAngularDegrees": 1.43,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 24,
+      "max": 98
+    },
+    {
+      "role": "player",
+      "armor": true,
+      "dist": 12,
+      "samples": 2000,
+      "meanDamage": 33.06,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 67.38,
+      "meanAngularDegrees": 1.44,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 5,
+      "max": 56
+    },
+    {
+      "role": "player",
+      "armor": true,
+      "dist": 16,
+      "samples": 2000,
+      "meanDamage": 11.55,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 55.06,
+      "meanAngularDegrees": 1.44,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 0,
+      "max": 24
+    },
+    {
+      "role": "player",
+      "armor": true,
+      "dist": 20,
+      "samples": 2000,
+      "meanDamage": 4.17,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 46.34,
+      "meanAngularDegrees": 1.44,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 0,
+      "max": 9
+    },
+    {
+      "role": "player",
+      "armor": true,
+      "dist": 28,
+      "samples": 2000,
+      "meanDamage": 0,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 0,
+      "meanAngularDegrees": 1.43,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 0,
+      "max": 0
+    },
+    {
+      "role": "player",
+      "armor": true,
+      "dist": 40,
+      "samples": 2000,
+      "meanDamage": 0,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 0,
+      "meanAngularDegrees": 1.43,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 0,
+      "max": 0
+    },
+    {
+      "role": "player",
+      "armor": true,
+      "dist": 60,
+      "samples": 2000,
+      "meanDamage": 0,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 0,
+      "meanAngularDegrees": 1.43,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 0,
+      "max": 0
+    },
+    {
+      "role": "bot",
+      "armor": false,
+      "dist": 3,
+      "samples": 2000,
+      "meanDamage": 180.12,
+      "oneShotPercent": 100,
+      "pelletHitPercent": 99.86,
+      "meanAngularDegrees": 1.44,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 160,
+      "max": 200
+    },
+    {
+      "role": "bot",
+      "armor": false,
+      "dist": 5,
+      "samples": 2000,
+      "meanDamage": 177.14,
+      "oneShotPercent": 100,
+      "pelletHitPercent": 95.99,
+      "meanAngularDegrees": 1.45,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 120,
+      "max": 240
+    },
+    {
+      "role": "bot",
+      "armor": false,
+      "dist": 8,
+      "samples": 2000,
+      "meanDamage": 127.69,
+      "oneShotPercent": 89.45,
+      "pelletHitPercent": 83.34,
+      "meanAngularDegrees": 1.44,
+      "maxDirectionLengthError": 2.220446049250313e-16,
+      "min": 52,
+      "max": 192
+    },
+    {
+      "role": "bot",
+      "armor": false,
+      "dist": 12,
+      "samples": 2000,
+      "meanDamage": 60.16,
+      "oneShotPercent": 0.4,
+      "pelletHitPercent": 67.19,
+      "meanAngularDegrees": 1.45,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 9,
+      "max": 114
+    },
+    {
+      "role": "bot",
+      "armor": false,
+      "dist": 16,
+      "samples": 2000,
+      "meanDamage": 21.87,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 55.15,
+      "meanAngularDegrees": 1.44,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 0,
+      "max": 47
+    },
+    {
+      "role": "bot",
+      "armor": false,
+      "dist": 20,
+      "samples": 2000,
+      "meanDamage": 4.56,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 46.65,
+      "meanAngularDegrees": 1.44,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 0,
+      "max": 11
+    },
+    {
+      "role": "bot",
+      "armor": false,
+      "dist": 28,
+      "samples": 2000,
+      "meanDamage": 0,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 0,
+      "meanAngularDegrees": 1.43,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 0,
+      "max": 0
+    },
+    {
+      "role": "bot",
+      "armor": false,
+      "dist": 40,
+      "samples": 2000,
+      "meanDamage": 0,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 0,
+      "meanAngularDegrees": 1.43,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 0,
+      "max": 0
+    },
+    {
+      "role": "bot",
+      "armor": false,
+      "dist": 60,
+      "samples": 2000,
+      "meanDamage": 0,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 0,
+      "meanAngularDegrees": 1.43,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 0,
+      "max": 0
+    },
+    {
+      "role": "bot",
+      "armor": true,
+      "dist": 3,
+      "samples": 2000,
+      "meanDamage": 90.06,
+      "oneShotPercent": 1.7,
+      "pelletHitPercent": 99.86,
+      "meanAngularDegrees": 1.44,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 80,
+      "max": 100
+    },
+    {
+      "role": "bot",
+      "armor": true,
+      "dist": 5,
+      "samples": 2000,
+      "meanDamage": 88.75,
+      "oneShotPercent": 11.35,
+      "pelletHitPercent": 95.99,
+      "meanAngularDegrees": 1.45,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 60,
+      "max": 140
+    },
+    {
+      "role": "bot",
+      "armor": true,
+      "dist": 8,
+      "samples": 2000,
+      "meanDamage": 64.13,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 83.34,
+      "meanAngularDegrees": 1.44,
+      "maxDirectionLengthError": 2.220446049250313e-16,
+      "min": 26,
+      "max": 96
+    },
+    {
+      "role": "bot",
+      "armor": true,
+      "dist": 12,
+      "samples": 2000,
+      "meanDamage": 33.06,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 67.19,
+      "meanAngularDegrees": 1.45,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 5,
+      "max": 59
+    },
+    {
+      "role": "bot",
+      "armor": true,
+      "dist": 16,
+      "samples": 2000,
+      "meanDamage": 11.65,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 55.15,
+      "meanAngularDegrees": 1.44,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 0,
+      "max": 25
+    },
+    {
+      "role": "bot",
+      "armor": true,
+      "dist": 20,
+      "samples": 2000,
+      "meanDamage": 4.2,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 46.65,
+      "meanAngularDegrees": 1.44,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 0,
+      "max": 9
+    },
+    {
+      "role": "bot",
+      "armor": true,
+      "dist": 28,
+      "samples": 2000,
+      "meanDamage": 0,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 0,
+      "meanAngularDegrees": 1.43,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 0,
+      "max": 0
+    },
+    {
+      "role": "bot",
+      "armor": true,
+      "dist": 40,
+      "samples": 2000,
+      "meanDamage": 0,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 0,
+      "meanAngularDegrees": 1.43,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 0,
+      "max": 0
+    },
+    {
+      "role": "bot",
+      "armor": true,
+      "dist": 60,
+      "samples": 2000,
+      "meanDamage": 0,
+      "oneShotPercent": 0,
+      "pelletHitPercent": 0,
+      "meanAngularDegrees": 1.43,
+      "maxDirectionLengthError": 3.3306690738754696e-16,
+      "min": 0,
+      "max": 0
+    }
+  ],
+  "direct": [
+    {
+      "key": "p9",
+      "armor": false,
+      "part": "chest",
+      "dist": 3,
+      "damage": 29,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": false,
+      "part": "chest",
+      "dist": 5,
+      "damage": 29,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": false,
+      "part": "chest",
+      "dist": 8,
+      "damage": 28,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": false,
+      "part": "chest",
+      "dist": 12,
+      "damage": 28,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": false,
+      "part": "chest",
+      "dist": 16,
+      "damage": 27,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": false,
+      "part": "chest",
+      "dist": 20,
+      "damage": 26,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": false,
+      "part": "chest",
+      "dist": 28,
+      "damage": 25,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": false,
+      "part": "chest",
+      "dist": 40,
+      "damage": 23,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": false,
+      "part": "chest",
+      "dist": 60,
+      "damage": 20,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": false,
+      "part": "head",
+      "dist": 3,
+      "damage": 118,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": false,
+      "part": "head",
+      "dist": 5,
+      "damage": 116,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": false,
+      "part": "head",
+      "dist": 8,
+      "damage": 114,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": false,
+      "part": "head",
+      "dist": 12,
+      "damage": 110,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": false,
+      "part": "head",
+      "dist": 16,
+      "damage": 107,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": false,
+      "part": "head",
+      "dist": 20,
+      "damage": 104,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": false,
+      "part": "head",
+      "dist": 28,
+      "damage": 99,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": false,
+      "part": "head",
+      "dist": 40,
+      "damage": 90,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": false,
+      "part": "head",
+      "dist": 60,
+      "damage": 79,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": true,
+      "part": "chest",
+      "dist": 3,
+      "damage": 15,
+      "armorLeft": 85.88,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": true,
+      "part": "chest",
+      "dist": 5,
+      "damage": 15,
+      "armorLeft": 86.07,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": true,
+      "part": "chest",
+      "dist": 8,
+      "damage": 15,
+      "armorLeft": 86.37,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": true,
+      "part": "chest",
+      "dist": 12,
+      "damage": 14,
+      "armorLeft": 86.75,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": true,
+      "part": "chest",
+      "dist": 16,
+      "damage": 14,
+      "armorLeft": 87.12,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": true,
+      "part": "chest",
+      "dist": 20,
+      "damage": 14,
+      "armorLeft": 87.48,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": true,
+      "part": "chest",
+      "dist": 28,
+      "damage": 13,
+      "armorLeft": 88.17,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": true,
+      "part": "chest",
+      "dist": 40,
+      "damage": 12,
+      "armorLeft": 89.13,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": true,
+      "part": "chest",
+      "dist": 60,
+      "damage": 10,
+      "armorLeft": 90.57,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": true,
+      "part": "head",
+      "dist": 3,
+      "damage": 61,
+      "armorLeft": 43.54,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": true,
+      "part": "head",
+      "dist": 5,
+      "damage": 60,
+      "armorLeft": 44.34,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": true,
+      "part": "head",
+      "dist": 8,
+      "damage": 59,
+      "armorLeft": 45.51,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": true,
+      "part": "head",
+      "dist": 12,
+      "damage": 57,
+      "armorLeft": 47.03,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": true,
+      "part": "head",
+      "dist": 16,
+      "damage": 56,
+      "armorLeft": 48.51,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": true,
+      "part": "head",
+      "dist": 20,
+      "damage": 54,
+      "armorLeft": 49.95,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": true,
+      "part": "head",
+      "dist": 28,
+      "damage": 51,
+      "armorLeft": 52.71,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": true,
+      "part": "head",
+      "dist": 40,
+      "damage": 47,
+      "armorLeft": 56.57,
+      "rounds": 1
+    },
+    {
+      "key": "p9",
+      "armor": true,
+      "part": "head",
+      "dist": 60,
+      "damage": 41,
+      "armorLeft": 62.31,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": false,
+      "part": "chest",
+      "dist": 3,
+      "damage": 57,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": false,
+      "part": "chest",
+      "dist": 5,
+      "damage": 56,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": false,
+      "part": "chest",
+      "dist": 8,
+      "damage": 55,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": false,
+      "part": "chest",
+      "dist": 12,
+      "damage": 54,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": false,
+      "part": "chest",
+      "dist": 16,
+      "damage": 53,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": false,
+      "part": "chest",
+      "dist": 20,
+      "damage": 52,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": false,
+      "part": "chest",
+      "dist": 28,
+      "damage": 49,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": false,
+      "part": "chest",
+      "dist": 40,
+      "damage": 46,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": false,
+      "part": "chest",
+      "dist": 60,
+      "damage": 41,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": false,
+      "part": "head",
+      "dist": 3,
+      "damage": 228,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": false,
+      "part": "head",
+      "dist": 5,
+      "damage": 226,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": false,
+      "part": "head",
+      "dist": 8,
+      "damage": 222,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": false,
+      "part": "head",
+      "dist": 12,
+      "damage": 217,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": false,
+      "part": "head",
+      "dist": 16,
+      "damage": 212,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": false,
+      "part": "head",
+      "dist": 20,
+      "damage": 207,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": false,
+      "part": "head",
+      "dist": 28,
+      "damage": 197,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": false,
+      "part": "head",
+      "dist": 40,
+      "damage": 184,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": false,
+      "part": "head",
+      "dist": 60,
+      "damage": 164,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": true,
+      "part": "chest",
+      "dist": 3,
+      "damage": 53,
+      "armorLeft": 96,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": true,
+      "part": "chest",
+      "dist": 5,
+      "damage": 52,
+      "armorLeft": 96.05,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": true,
+      "part": "chest",
+      "dist": 8,
+      "damage": 52,
+      "armorLeft": 96.12,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": true,
+      "part": "chest",
+      "dist": 12,
+      "damage": 50,
+      "armorLeft": 96.21,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": true,
+      "part": "chest",
+      "dist": 16,
+      "damage": 49,
+      "armorLeft": 96.29,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": true,
+      "part": "chest",
+      "dist": 20,
+      "damage": 48,
+      "armorLeft": 96.38,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": true,
+      "part": "chest",
+      "dist": 28,
+      "damage": 46,
+      "armorLeft": 96.54,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": true,
+      "part": "chest",
+      "dist": 40,
+      "damage": 43,
+      "armorLeft": 96.78,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": true,
+      "part": "chest",
+      "dist": 60,
+      "damage": 38,
+      "armorLeft": 97.13,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": true,
+      "part": "head",
+      "dist": 3,
+      "damage": 212,
+      "armorLeft": 84.02,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": true,
+      "part": "head",
+      "dist": 5,
+      "damage": 210,
+      "armorLeft": 84.21,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": true,
+      "part": "head",
+      "dist": 8,
+      "damage": 206,
+      "armorLeft": 84.48,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": true,
+      "part": "head",
+      "dist": 12,
+      "damage": 201,
+      "armorLeft": 84.84,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": true,
+      "part": "head",
+      "dist": 16,
+      "damage": 197,
+      "armorLeft": 85.19,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": true,
+      "part": "head",
+      "dist": 20,
+      "damage": 192,
+      "armorLeft": 85.53,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": true,
+      "part": "head",
+      "dist": 28,
+      "damage": 184,
+      "armorLeft": 86.18,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": true,
+      "part": "head",
+      "dist": 40,
+      "damage": 171,
+      "armorLeft": 87.11,
+      "rounds": 1
+    },
+    {
+      "key": "deagle",
+      "armor": true,
+      "part": "head",
+      "dist": 60,
+      "damage": 152,
+      "armorLeft": 88.52,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": false,
+      "part": "chest",
+      "dist": 3,
+      "damage": 24,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": false,
+      "part": "chest",
+      "dist": 5,
+      "damage": 24,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": false,
+      "part": "chest",
+      "dist": 8,
+      "damage": 23,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": false,
+      "part": "chest",
+      "dist": 12,
+      "damage": 22,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": false,
+      "part": "chest",
+      "dist": 16,
+      "damage": 21,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": false,
+      "part": "chest",
+      "dist": 20,
+      "damage": 20,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": false,
+      "part": "chest",
+      "dist": 28,
+      "damage": 19,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": false,
+      "part": "chest",
+      "dist": 40,
+      "damage": 17,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": false,
+      "part": "chest",
+      "dist": 60,
+      "damage": 14,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": false,
+      "part": "head",
+      "dist": 3,
+      "damage": 97,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": false,
+      "part": "head",
+      "dist": 5,
+      "damage": 95,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": false,
+      "part": "head",
+      "dist": 8,
+      "damage": 92,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": false,
+      "part": "head",
+      "dist": 12,
+      "damage": 89,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": false,
+      "part": "head",
+      "dist": 16,
+      "damage": 85,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": false,
+      "part": "head",
+      "dist": 20,
+      "damage": 82,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": false,
+      "part": "head",
+      "dist": 28,
+      "damage": 75,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": false,
+      "part": "head",
+      "dist": 40,
+      "damage": 66,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": false,
+      "part": "head",
+      "dist": 60,
+      "damage": 54,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": true,
+      "part": "chest",
+      "dist": 3,
+      "damage": 15,
+      "armorLeft": 90.28,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": true,
+      "part": "chest",
+      "dist": 5,
+      "damage": 14,
+      "armorLeft": 90.47,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": true,
+      "part": "chest",
+      "dist": 8,
+      "damage": 14,
+      "armorLeft": 90.76,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": true,
+      "part": "chest",
+      "dist": 12,
+      "damage": 13,
+      "armorLeft": 91.14,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": true,
+      "part": "chest",
+      "dist": 16,
+      "damage": 13,
+      "armorLeft": 91.49,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": true,
+      "part": "chest",
+      "dist": 20,
+      "damage": 12,
+      "armorLeft": 91.83,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": true,
+      "part": "chest",
+      "dist": 28,
+      "damage": 11,
+      "armorLeft": 92.48,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": true,
+      "part": "chest",
+      "dist": 40,
+      "damage": 10,
+      "armorLeft": 93.35,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": true,
+      "part": "chest",
+      "dist": 60,
+      "damage": 8,
+      "armorLeft": 94.59,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": true,
+      "part": "head",
+      "dist": 3,
+      "damage": 58,
+      "armorLeft": 61.15,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": true,
+      "part": "head",
+      "dist": 5,
+      "damage": 57,
+      "armorLeft": 61.94,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": true,
+      "part": "head",
+      "dist": 8,
+      "damage": 55,
+      "armorLeft": 63.09,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": true,
+      "part": "head",
+      "dist": 12,
+      "damage": 53,
+      "armorLeft": 64.58,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": true,
+      "part": "head",
+      "dist": 16,
+      "damage": 51,
+      "armorLeft": 66,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": true,
+      "part": "head",
+      "dist": 20,
+      "damage": 49,
+      "armorLeft": 67.37,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": true,
+      "part": "head",
+      "dist": 28,
+      "damage": 45,
+      "armorLeft": 69.95,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": true,
+      "part": "head",
+      "dist": 40,
+      "damage": 40,
+      "armorLeft": 73.43,
+      "rounds": 1
+    },
+    {
+      "key": "viper",
+      "armor": true,
+      "part": "head",
+      "dist": 60,
+      "damage": 32,
+      "armorLeft": 78.37,
+      "rounds": 1
+    },
+    {
+      "key": "nova",
+      "armor": false,
+      "part": "chest",
+      "dist": 3,
+      "damage": 180,
+      "armorLeft": 0,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": false,
+      "part": "chest",
+      "dist": 5,
+      "damage": 180,
+      "armorLeft": 0,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": false,
+      "part": "chest",
+      "dist": 8,
+      "damage": 144,
+      "armorLeft": 0,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": false,
+      "part": "chest",
+      "dist": 12,
+      "damage": 81,
+      "armorLeft": 0,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": false,
+      "part": "chest",
+      "dist": 16,
+      "damage": 36,
+      "armorLeft": 0,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": false,
+      "part": "chest",
+      "dist": 20,
+      "damage": 9,
+      "armorLeft": 0,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": false,
+      "part": "chest",
+      "dist": 28,
+      "damage": 0,
+      "armorLeft": 0,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": false,
+      "part": "chest",
+      "dist": 40,
+      "damage": 0,
+      "armorLeft": 0,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": false,
+      "part": "chest",
+      "dist": 60,
+      "damage": 0,
+      "armorLeft": 0,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": false,
+      "part": "head",
+      "dist": 3,
+      "damage": 360,
+      "armorLeft": 0,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": false,
+      "part": "head",
+      "dist": 5,
+      "damage": 360,
+      "armorLeft": 0,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": false,
+      "part": "head",
+      "dist": 8,
+      "damage": 288,
+      "armorLeft": 0,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": false,
+      "part": "head",
+      "dist": 12,
+      "damage": 162,
+      "armorLeft": 0,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": false,
+      "part": "head",
+      "dist": 16,
+      "damage": 72,
+      "armorLeft": 0,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": false,
+      "part": "head",
+      "dist": 20,
+      "damage": 18,
+      "armorLeft": 0,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": false,
+      "part": "head",
+      "dist": 28,
+      "damage": 0,
+      "armorLeft": 0,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": false,
+      "part": "head",
+      "dist": 40,
+      "damage": 0,
+      "armorLeft": 0,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": false,
+      "part": "head",
+      "dist": 60,
+      "damage": 0,
+      "armorLeft": 0,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": true,
+      "part": "chest",
+      "dist": 3,
+      "damage": 90,
+      "armorLeft": 10,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": true,
+      "part": "chest",
+      "dist": 5,
+      "damage": 90,
+      "armorLeft": 10,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": true,
+      "part": "chest",
+      "dist": 8,
+      "damage": 72,
+      "armorLeft": 26.47,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": true,
+      "part": "chest",
+      "dist": 12,
+      "damage": 45,
+      "armorLeft": 58.18,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": true,
+      "part": "chest",
+      "dist": 16,
+      "damage": 18,
+      "armorLeft": 81,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": true,
+      "part": "chest",
+      "dist": 20,
+      "damage": 9,
+      "armorLeft": 82,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": true,
+      "part": "chest",
+      "dist": 28,
+      "damage": 0,
+      "armorLeft": 100,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": true,
+      "part": "chest",
+      "dist": 40,
+      "damage": 0,
+      "armorLeft": 100,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": true,
+      "part": "chest",
+      "dist": 60,
+      "damage": 0,
+      "armorLeft": 100,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": true,
+      "part": "head",
+      "dist": 3,
+      "damage": 260,
+      "armorLeft": 0,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": true,
+      "part": "head",
+      "dist": 5,
+      "damage": 260,
+      "armorLeft": 0,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": true,
+      "part": "head",
+      "dist": 8,
+      "damage": 176,
+      "armorLeft": 0,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": true,
+      "part": "head",
+      "dist": 12,
+      "damage": 81,
+      "armorLeft": 17.72,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": true,
+      "part": "head",
+      "dist": 16,
+      "damage": 36,
+      "armorLeft": 62.92,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": true,
+      "part": "head",
+      "dist": 20,
+      "damage": 9,
+      "armorLeft": 82,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": true,
+      "part": "head",
+      "dist": 28,
+      "damage": 0,
+      "armorLeft": 100,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": true,
+      "part": "head",
+      "dist": 40,
+      "damage": 0,
+      "armorLeft": 100,
+      "rounds": 9
+    },
+    {
+      "key": "nova",
+      "armor": true,
+      "part": "head",
+      "dist": 60,
+      "damage": 0,
+      "armorLeft": 100,
+      "rounds": 9
+    },
+    {
+      "key": "ak",
+      "armor": false,
+      "part": "chest",
+      "dist": 3,
+      "damage": 36,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": false,
+      "part": "chest",
+      "dist": 5,
+      "damage": 36,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": false,
+      "part": "chest",
+      "dist": 8,
+      "damage": 35,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": false,
+      "part": "chest",
+      "dist": 12,
+      "damage": 35,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": false,
+      "part": "chest",
+      "dist": 16,
+      "damage": 35,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": false,
+      "part": "chest",
+      "dist": 20,
+      "damage": 35,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": false,
+      "part": "chest",
+      "dist": 28,
+      "damage": 34,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": false,
+      "part": "chest",
+      "dist": 40,
+      "damage": 33,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": false,
+      "part": "chest",
+      "dist": 60,
+      "damage": 32,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": false,
+      "part": "head",
+      "dist": 3,
+      "damage": 143,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": false,
+      "part": "head",
+      "dist": 5,
+      "damage": 143,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": false,
+      "part": "head",
+      "dist": 8,
+      "damage": 142,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": false,
+      "part": "head",
+      "dist": 12,
+      "damage": 141,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": false,
+      "part": "head",
+      "dist": 16,
+      "damage": 140,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": false,
+      "part": "head",
+      "dist": 20,
+      "damage": 139,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": false,
+      "part": "head",
+      "dist": 28,
+      "damage": 137,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": false,
+      "part": "head",
+      "dist": 40,
+      "damage": 134,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": false,
+      "part": "head",
+      "dist": 60,
+      "damage": 129,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": true,
+      "part": "chest",
+      "dist": 3,
+      "damage": 28,
+      "armorLeft": 92.12,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": true,
+      "part": "chest",
+      "dist": 5,
+      "damage": 28,
+      "armorLeft": 92.15,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": true,
+      "part": "chest",
+      "dist": 8,
+      "damage": 28,
+      "armorLeft": 92.19,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": true,
+      "part": "chest",
+      "dist": 12,
+      "damage": 27,
+      "armorLeft": 92.25,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": true,
+      "part": "chest",
+      "dist": 16,
+      "damage": 27,
+      "armorLeft": 92.3,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": true,
+      "part": "chest",
+      "dist": 20,
+      "damage": 27,
+      "armorLeft": 92.36,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": true,
+      "part": "chest",
+      "dist": 28,
+      "damage": 27,
+      "armorLeft": 92.47,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": true,
+      "part": "chest",
+      "dist": 40,
+      "damage": 26,
+      "armorLeft": 92.64,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": true,
+      "part": "chest",
+      "dist": 60,
+      "damage": 25,
+      "armorLeft": 92.9,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": true,
+      "part": "head",
+      "dist": 3,
+      "damage": 112,
+      "armorLeft": 68.48,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": true,
+      "part": "head",
+      "dist": 5,
+      "damage": 111,
+      "armorLeft": 68.6,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": true,
+      "part": "head",
+      "dist": 8,
+      "damage": 111,
+      "armorLeft": 68.77,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": true,
+      "part": "head",
+      "dist": 12,
+      "damage": 110,
+      "armorLeft": 69,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": true,
+      "part": "head",
+      "dist": 16,
+      "damage": 109,
+      "armorLeft": 69.23,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": true,
+      "part": "head",
+      "dist": 20,
+      "damage": 108,
+      "armorLeft": 69.45,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": true,
+      "part": "head",
+      "dist": 28,
+      "damage": 107,
+      "armorLeft": 69.89,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": true,
+      "part": "head",
+      "dist": 40,
+      "damage": 104,
+      "armorLeft": 70.55,
+      "rounds": 1
+    },
+    {
+      "key": "ak",
+      "armor": true,
+      "part": "head",
+      "dist": 60,
+      "damage": 101,
+      "armorLeft": 71.61,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": false,
+      "part": "chest",
+      "dist": 3,
+      "damage": 31,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": false,
+      "part": "chest",
+      "dist": 5,
+      "damage": 31,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": false,
+      "part": "chest",
+      "dist": 8,
+      "damage": 31,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": false,
+      "part": "chest",
+      "dist": 12,
+      "damage": 30,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": false,
+      "part": "chest",
+      "dist": 16,
+      "damage": 30,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": false,
+      "part": "chest",
+      "dist": 20,
+      "damage": 30,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": false,
+      "part": "chest",
+      "dist": 28,
+      "damage": 29,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": false,
+      "part": "chest",
+      "dist": 40,
+      "damage": 29,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": false,
+      "part": "chest",
+      "dist": 60,
+      "damage": 28,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": false,
+      "part": "head",
+      "dist": 3,
+      "damage": 123,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": false,
+      "part": "head",
+      "dist": 5,
+      "damage": 123,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": false,
+      "part": "head",
+      "dist": 8,
+      "damage": 122,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": false,
+      "part": "head",
+      "dist": 12,
+      "damage": 121,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": false,
+      "part": "head",
+      "dist": 16,
+      "damage": 120,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": false,
+      "part": "head",
+      "dist": 20,
+      "damage": 120,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": false,
+      "part": "head",
+      "dist": 28,
+      "damage": 118,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": false,
+      "part": "head",
+      "dist": 40,
+      "damage": 115,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": false,
+      "part": "head",
+      "dist": 60,
+      "damage": 111,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": true,
+      "part": "chest",
+      "dist": 3,
+      "damage": 22,
+      "armorLeft": 90.75,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": true,
+      "part": "chest",
+      "dist": 5,
+      "damage": 22,
+      "armorLeft": 90.78,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": true,
+      "part": "chest",
+      "dist": 8,
+      "damage": 21,
+      "armorLeft": 90.83,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": true,
+      "part": "chest",
+      "dist": 12,
+      "damage": 21,
+      "armorLeft": 90.9,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": true,
+      "part": "chest",
+      "dist": 16,
+      "damage": 21,
+      "armorLeft": 90.96,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": true,
+      "part": "chest",
+      "dist": 20,
+      "damage": 21,
+      "armorLeft": 91.03,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": true,
+      "part": "chest",
+      "dist": 28,
+      "damage": 21,
+      "armorLeft": 91.16,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": true,
+      "part": "chest",
+      "dist": 40,
+      "damage": 20,
+      "armorLeft": 91.35,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": true,
+      "part": "chest",
+      "dist": 60,
+      "damage": 19,
+      "armorLeft": 91.66,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": true,
+      "part": "head",
+      "dist": 3,
+      "damage": 86,
+      "armorLeft": 62.99,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": true,
+      "part": "head",
+      "dist": 5,
+      "damage": 86,
+      "armorLeft": 63.13,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": true,
+      "part": "head",
+      "dist": 8,
+      "damage": 86,
+      "armorLeft": 63.33,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": true,
+      "part": "head",
+      "dist": 12,
+      "damage": 85,
+      "armorLeft": 63.6,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": true,
+      "part": "head",
+      "dist": 16,
+      "damage": 84,
+      "armorLeft": 63.86,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": true,
+      "part": "head",
+      "dist": 20,
+      "damage": 84,
+      "armorLeft": 64.13,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": true,
+      "part": "head",
+      "dist": 28,
+      "damage": 82,
+      "armorLeft": 64.65,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": true,
+      "part": "head",
+      "dist": 40,
+      "damage": 81,
+      "armorLeft": 65.42,
+      "rounds": 1
+    },
+    {
+      "key": "m4",
+      "armor": true,
+      "part": "head",
+      "dist": 60,
+      "damage": 78,
+      "armorLeft": 66.66,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": false,
+      "part": "chest",
+      "dist": 3,
+      "damage": 115,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": false,
+      "part": "chest",
+      "dist": 5,
+      "damage": 115,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": false,
+      "part": "chest",
+      "dist": 8,
+      "damage": 115,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": false,
+      "part": "chest",
+      "dist": 12,
+      "damage": 115,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": false,
+      "part": "chest",
+      "dist": 16,
+      "damage": 115,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": false,
+      "part": "chest",
+      "dist": 20,
+      "damage": 115,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": false,
+      "part": "chest",
+      "dist": 28,
+      "damage": 115,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": false,
+      "part": "chest",
+      "dist": 40,
+      "damage": 115,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": false,
+      "part": "chest",
+      "dist": 60,
+      "damage": 115,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": false,
+      "part": "head",
+      "dist": 3,
+      "damage": 460,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": false,
+      "part": "head",
+      "dist": 5,
+      "damage": 460,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": false,
+      "part": "head",
+      "dist": 8,
+      "damage": 460,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": false,
+      "part": "head",
+      "dist": 12,
+      "damage": 460,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": false,
+      "part": "head",
+      "dist": 16,
+      "damage": 460,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": false,
+      "part": "head",
+      "dist": 20,
+      "damage": 460,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": false,
+      "part": "head",
+      "dist": 28,
+      "damage": 460,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": false,
+      "part": "head",
+      "dist": 40,
+      "damage": 460,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": false,
+      "part": "head",
+      "dist": 60,
+      "damage": 460,
+      "armorLeft": 0,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": true,
+      "part": "chest",
+      "dist": 3,
+      "damage": 112,
+      "armorLeft": 96.55,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": true,
+      "part": "chest",
+      "dist": 5,
+      "damage": 112,
+      "armorLeft": 96.55,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": true,
+      "part": "chest",
+      "dist": 8,
+      "damage": 112,
+      "armorLeft": 96.55,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": true,
+      "part": "chest",
+      "dist": 12,
+      "damage": 112,
+      "armorLeft": 96.55,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": true,
+      "part": "chest",
+      "dist": 16,
+      "damage": 112,
+      "armorLeft": 96.55,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": true,
+      "part": "chest",
+      "dist": 20,
+      "damage": 112,
+      "armorLeft": 96.55,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": true,
+      "part": "chest",
+      "dist": 28,
+      "damage": 112,
+      "armorLeft": 96.55,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": true,
+      "part": "chest",
+      "dist": 40,
+      "damage": 112,
+      "armorLeft": 96.55,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": true,
+      "part": "chest",
+      "dist": 60,
+      "damage": 112,
+      "armorLeft": 96.55,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": true,
+      "part": "head",
+      "dist": 3,
+      "damage": 446,
+      "armorLeft": 86.2,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": true,
+      "part": "head",
+      "dist": 5,
+      "damage": 446,
+      "armorLeft": 86.2,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": true,
+      "part": "head",
+      "dist": 8,
+      "damage": 446,
+      "armorLeft": 86.2,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": true,
+      "part": "head",
+      "dist": 12,
+      "damage": 446,
+      "armorLeft": 86.2,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": true,
+      "part": "head",
+      "dist": 16,
+      "damage": 446,
+      "armorLeft": 86.2,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": true,
+      "part": "head",
+      "dist": 20,
+      "damage": 446,
+      "armorLeft": 86.2,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": true,
+      "part": "head",
+      "dist": 28,
+      "damage": 446,
+      "armorLeft": 86.2,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": true,
+      "part": "head",
+      "dist": 40,
+      "damage": 446,
+      "armorLeft": 86.2,
+      "rounds": 1
+    },
+    {
+      "key": "awp",
+      "armor": true,
+      "part": "head",
+      "dist": 60,
+      "damage": 446,
+      "armorLeft": 86.2,
+      "rounds": 1
+    }
+  ],
+  "spread": {
+    "p9": {
+      "standing": 0.0035,
+      "crouched": 0.0027300000000000002,
+      "forcedADS": 0.0035,
+      "moving": 0.0255,
+      "airborne": 0.0835
+    },
+    "deagle": {
+      "standing": 0.0025,
+      "crouched": 0.0019500000000000001,
+      "forcedADS": 0.0025,
+      "moving": 0.0425,
+      "airborne": 0.0825
+    },
+    "viper": {
+      "standing": 0.008,
+      "crouched": 0.006240000000000001,
+      "forcedADS": 0.008,
+      "moving": 0.02,
+      "airborne": 0.088
+    },
+    "nova": {
+      "standing": 0.045,
+      "crouched": 0.045,
+      "forcedADS": 0.045,
+      "moving": 0.055,
+      "airborne": 0.125
+    },
+    "ak": {
+      "standing": 0.0022,
+      "crouched": 0.001716,
+      "forcedADS": 0.0022,
+      "moving": 0.0522,
+      "airborne": 0.0822
+    },
+    "m4": {
+      "standing": 0.0018,
+      "crouched": 0.001404,
+      "forcedADS": 0.0018,
+      "moving": 0.0468,
+      "airborne": 0.0818
+    },
+    "awp": {
+      "standing": 0.0004,
+      "crouched": 0.00031200000000000005,
+      "forcedADS": 0.0004,
+      "moving": 0.2404,
+      "airborne": 0.1604
+    }
+  },
+  "occlusion": [
+    {
+      "key": "nova",
+      "thin": false,
+      "damage": 0
+    },
+    {
+      "key": "nova",
+      "thin": true,
+      "damage": 0
+    },
+    {
+      "key": "ak",
+      "thin": false,
+      "damage": 0
+    },
+    {
+      "key": "ak",
+      "thin": true,
+      "damage": 20
+    }
+  ],
+  "checks": [
+    {
+      "name": "shotgun keeps reliable close chest knockout against unarmored target",
+      "pass": true,
+      "detail": {
+        "role": "player",
+        "armor": false,
+        "dist": 5,
+        "samples": 2000,
+        "meanDamage": 176.71,
+        "oneShotPercent": 100,
+        "pelletHitPercent": 95.87,
+        "meanAngularDegrees": 1.45,
+        "maxDirectionLengthError": 2.220446049250313e-16,
+        "min": 100,
+        "max": 245
+      }
+    },
+    {
+      "name": "close shotgun still threatens armor without guaranteed body one-shot",
+      "pass": true,
+      "detail": {
+        "role": "player",
+        "armor": true,
+        "dist": 5,
+        "samples": 2000,
+        "meanDamage": 88.55,
+        "oneShotPercent": 9.65,
+        "pelletHitPercent": 95.87,
+        "meanAngularDegrees": 1.45,
+        "maxDirectionLengthError": 2.220446049250313e-16,
+        "min": 50,
+        "max": 143
+      }
+    },
+    {
+      "name": "16m chest-aligned shotgun cannot one-shot in deterministic sample",
+      "pass": true,
+      "detail": {
+        "role": "player",
+        "armor": false,
+        "dist": 16,
+        "samples": 2000,
+        "meanDamage": 21.7,
+        "oneShotPercent": 0,
+        "pelletHitPercent": 55.06,
+        "meanAngularDegrees": 1.44,
+        "maxDirectionLengthError": 3.3306690738754696e-16,
+        "min": 0,
+        "max": 45
+      }
+    },
+    {
+      "name": "20m shotgun average chip damage stays below 15",
+      "pass": true,
+      "detail": {
+        "role": "player",
+        "armor": false,
+        "dist": 20,
+        "samples": 2000,
+        "meanDamage": 4.54,
+        "oneShotPercent": 0,
+        "pelletHitPercent": 46.34,
+        "meanAngularDegrees": 1.44,
+        "maxDirectionLengthError": 3.3306690738754696e-16,
+        "min": 0,
+        "max": 11
+      }
+    },
+    {
+      "name": "both shooter paths cause no shotgun damage beyond range",
+      "pass": true
+    },
+    {
+      "name": "Bot outgoing bullet rays are unit directions",
+      "pass": true
+    },
+    {
+      "name": "crouching cannot focus shotgun pellet cone",
+      "pass": true
+    },
+    {
+      "name": "ADS state cannot focus shotgun pellet cone",
+      "pass": true
+    },
+    {
+      "name": "even nine head pellets at 20m cannot kill a fresh target",
+      "pass": true
+    },
+    {
+      "name": "armored midrange rifle roles remain effective",
+      "pass": true
+    },
+    {
+      "name": "SMG has lower midrange damage than rifle",
+      "pass": true
+    },
+    {
+      "name": "scoped bolt-action retains armored long-range body knockout",
+      "pass": true
+    },
+    {
+      "name": "shotgun point-blank base payload preserved",
+      "pass": true
+    },
+    {
+      "name": "shotgun cannot penetrate cover",
+      "pass": true
+    },
+    {
+      "name": "rifle retains thin-cover penetration",
+      "pass": true
+    },
+    {
+      "name": "solid cover blocks rifle and shotgun",
+      "pass": true
+    }
+  ],
+  "source": "/Users/bing/Projects/游戏/inkstrike-r06",
+  "mode": "candidate",
+  "generatedAt": "2026-09-30T12:14:03.040Z",
+  "sourceSha256": {
+    "weapons": "d46fd186aac74ce241de429ba133c2849d28d77dec1ea50af60aa0a719fea9ff",
+    "game": "c8cca3c732459419c3a3b99e0f1c81d2c6df9dc73791d9edfd237c3657204c81",
+    "actors": "0c56149dd9e7ab857b42bf03f842edec5455bc0afa5dc02aa573aeb97e8ab806"
+  },
+  "errors": [],
+  "passed": true
+}

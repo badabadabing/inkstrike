@@ -101,20 +101,22 @@ function updatePlayer(dt) {
   if (pl.ammo[pl.cur] && pl.ammo[pl.cur].mag === 0 && pl.ammo[pl.cur].res > 0 && pl.reloadEnd < 0 && now > pl.nextFire && ready) startReload();
   pl.spread = curSpread(pl, w);
 }
-function curSpread(pl, w) { if (w.melee || w.nade) return .004; const sf = Math.hypot(pl.vel.x, pl.vel.z) / (5.1 * w.speed), settle = w.scope && pl.scoped ? clamp((G.now - (pl.scopeSince ?? -9)) / .38, 0, 1) : 1; let s = w.spread + (w.scope && !pl.scoped ? w.noScope : 0) + (sf > (w.scope ? .12 : .36) ? sf * sf * w.moveSp : 0) + (1 - settle) * .032 + (pl.onGround ? 0 : .08) + Math.min(pl.shots, 14) * w.sprayInc; if (pl.crouchAmt > .5) s *= .78; return s; }
+function curSpread(pl, w) { if (w.melee || w.nade) return .004; const sf = Math.hypot(pl.vel.x, pl.vel.z) / (5.1 * w.speed), settle = w.scope && pl.scoped ? clamp((G.now - (pl.scopeSince ?? -9)) / .38, 0, 1) : 1; let s = w.spread + (w.scope && !pl.scoped ? w.noScope : 0) + (sf > (w.scope ? .12 : .36) ? sf * sf * w.moveSp : 0) + (1 - settle) * .032 + (pl.onGround ? 0 : .08) + Math.min(pl.shots, 14) * w.sprayInc; if (pl.crouchAmt > .5) s *= .78; return w.pellets ? Math.max(w.spread, s) : s; }
 const _cq = new THREE.Quaternion(), _ce = new THREE.Euler(0, 0, 0, 'YXZ'), _cv = new V3();
 function playerFire(pl, w, a) {
   const now = G.now; pl.spawnProtectedUntil = 0; TRAIN.onShot(); a.mag--; pl.nextFire = now + w.rate; pl.lastShot = now; const ey = pl.pos.y + eyeY(pl) + pl.stepSmooth, sp = curSpread(pl, w), py = pl.pitch + pl.recP, yw = pl.yaw + pl.recY;
   _ce.set(py, yw, 0); _cq.setFromEuler(_ce); const mz = _cv.set(.12, -.09, -.75).applyQuaternion(_cq); const mx = pl.pos.x + mz.x, my = ey + mz.y, mzz = pl.pos.z + mz.z;
-  for (let i = 0; i < (w.pellets || 1); i++) { const r = Math.abs(gauss()) * sp * .7, an = rand(6.2832), p2 = py + Math.sin(an) * r, y2 = yw + Math.cos(an) * r, cp = Math.cos(p2); fireBullet(pl, pl.pos.x, ey, pl.pos.z, -Math.sin(y2) * cp, Math.sin(p2), -Math.cos(y2) * cp, w, mx, my, mzz, pl.scoped > 0); }
+  fireWeaponVolley(pl, pl.pos.x, ey, pl.pos.z, py, yw, sp, w, mx, my, mzz, pl.scoped > 0);
   const n = ++pl.shots, c = pl.crouchAmt > .5 ? .8 : 1; const pt = w.pat[Math.min(n - 1, w.pat.length - 1)]; pl.recTP += pt[0] * c; pl.recTY += (pt[1] + gauss() * w.side * .05) * c; pl.recTP = Math.min(pl.recTP, .24);
   VM.fire(w); G.shake = Math.min(1, G.shake + w.vm * 1.6); SFX.shot(w.snd, null, isIndoor(pl)); if (w.scope) pl.scoped = 0; if (w.bolt) SFX.bolt(.32); else if (w.pump) SFX.pump(.28); if (!w.bolt && !w.pellets && (!w.auto || Math.random() < .35)) SFX.shellDrop(1);
   _cv.set(1.6 + rand(.8), 1.6 + rand(.8), -.3).applyQuaternion(_cq); if (!w.bolt) FX.shell(mx - mz.x * .5, my, mzz - mz.z * .5, _cv.x + pl.vel.x, _cv.y, _cv.z + pl.vel.z);
   botHear(pl.pos, pl.team, w.snd === 'm4' ? 22 : 55);
 }
 function melee(pl, dmg) { pl.spawnProtectedUntil = 0; const cp = Math.cos(pl.pitch), dx = -Math.sin(pl.yaw) * cp, dy = Math.sin(pl.pitch), dz = -Math.cos(pl.yaw) * cp, ey = pl.pos.y + eyeY(pl); let best = null, be = null;
-  for (const e of G.ents) if (e.alive && e.team !== pl.team) { const r = rayEnt(pl.pos.x, ey, pl.pos.z, dx, dy, dz, e); if (r && r.t < 2.1 && (!best || r.t < best.t)) { best = r; be = e; } }
-  const h = rayWorld(pl.pos.x, ey, pl.pos.z, dx, dy, dz, 2.0); if (be && (!h || h.t > best.t)) { const back = (-Math.sin(be.yaw) * dx - Math.cos(be.yaw) * dz) > .5; hurt(be, dmg * (back ? 2.4 : 1), pl, 'knife', 'chest', { x: dx, y: dy, z: dz }, { x: pl.pos.x + dx * best.t, y: ey + dy * best.t, z: pl.pos.z + dz * best.t }); G.shake += .15; }
+  for (const e of G.ents) if (e.alive && e.team !== pl.team) { let r = rayEnt(pl.pos.x, ey, pl.pos.z, dx, dy, dz, e); if (r && r.t >= 2.1) r = null;
+    if (!r) { const tx = e.pos.x - pl.pos.x, ty = e.pos.y + eyeY(e) * .72 - ey, tz = e.pos.z - pl.pos.z, d = Math.hypot(tx, ty, tz); if (d < 2.2 && (tx * dx + ty * dy + tz * dz) / (d || 1) > .84) r = { t: Math.max(.3, d - .3), part: 'chest' }; }   // forgiving swing cone: a blade is not a bullet
+    if (r && (!best || r.t < best.t)) { best = r; be = e; } }
+  const h = rayWorld(pl.pos.x, ey, pl.pos.z, dx, dy, dz, 2.0); if (be && (!h || h.t > best.t)) { const back = (-Math.sin(be.yaw) * dx - Math.cos(be.yaw) * dz) > .5; hurt(be, dmg * (back ? 3 : 1), pl, 'knife', 'chest', { x: dx, y: dy, z: dz }, { x: pl.pos.x + dx * best.t, y: ey + dy * best.t, z: pl.pos.z + dz * best.t }); G.shake += .15; }
   else if (h) { FX.decal(pl.pos.x + dx * h.t, ey + dy * h.t, pl.pos.z + dz * h.t, h.nx, h.ny, h.nz, .12, INK); SFX.impact(null); } }
 function throwNade(e, kind = 'he') { e.spawnProtectedUntil = 0; const cp = Math.cos(e.pitch), dx = -Math.sin(e.yaw) * cp, dy = Math.sin(e.pitch), dz = -Math.cos(e.yaw) * cp; if (!G.nadeFm) { G.nadeFm = fillMat({ objSpace: true, freq: 60 }); }
   const m = worldGun(kind, G.nadeFm, ACTOR_LM); m.scale.setScalar(1.6); scene.add(m); G.nades.push({ owner: e, m, p: new V3(e.pos.x + dx * .5, e.pos.y + eyeY(e) - .05, e.pos.z + dz * .5), v: new V3(dx * 17 + e.vel.x * .6, dy * 17 + 3.2, dz * 17 + e.vel.z * .6), t: WEAPONS[kind].fuse, kind }); }
@@ -124,26 +126,28 @@ function updateNades(dt) { for (let i = G.nades.length - 1; i >= 0; i--) { const
     if (n.t <= 0 && n.kind !== 'he') { scene.remove(n.m); G.nades.splice(i, 1); n.kind === 'smoke' ? smokeSpawn(n.p.x, MAP.floorAt(n.p.x, n.p.z), n.p.z) : flashBang(n.p.x, n.p.y + .25, n.p.z); continue; }
     if (n.t <= 0) { scene.remove(n.m); G.nades.splice(i, 1); FX.explode(n.p.x, n.p.y, n.p.z); SFX.boom(n.p); const pd = G.player.pos.distanceTo(n.p); G.shake += clamp(1.4 - pd / 14, 0, 1.2);
       for (const e of G.ents) { if (!e.alive || (e.team === n.owner.team && e !== n.owner)) continue; const dd = Math.hypot(e.pos.x - n.p.x, e.pos.y + .9 - n.p.y, e.pos.z - n.p.z); if (dd > 7.5 || !segClear(n.p.x, n.p.y + .3, n.p.z, e.pos.x, e.pos.y + 1, e.pos.z)) continue;
-        const dir = { x: (e.pos.x - n.p.x) / (dd || 1), y: .3, z: (e.pos.z - n.p.z) / (dd || 1) }; hurt(e, Math.round(105 * Math.pow(1 - dd / 7.5, 1.3)) * (e.armor > 0 ? .6 : 1), n.owner, 'he', 'chest', dir, { x: e.pos.x, y: e.pos.y + 1, z: e.pos.z }); } } } }
+        const dir = { x: (e.pos.x - n.p.x) / (dd || 1), y: .3, z: (e.pos.z - n.p.z) / (dd || 1) }; hurt(e, Math.round(105 * Math.pow(1 - dd / 7.5, 1.3)), n.owner, 'he', 'chest', dir, { x: e.pos.x, y: e.pos.y + 1, z: e.pos.z }); } } } }
 
 const isIndoor = e => !!rayWorld(e.pos.x, e.pos.y + 1.7, e.pos.z, 1e-9, 1, 1e-9, 9);
 /* ---------------- combat ---------------- */
+function fireWeaponVolley(sh, ox, oy, oz, pitch, yaw, spread, w, mx, my, mz, noTracer) { for (let i = 0; i < (w.pellets || 1); i++) { const r = spread ? Math.abs(gauss()) * spread * .7 : 0, an = spread ? rand(6.2832) : 0, p = pitch + Math.sin(an) * r, y = yaw + Math.cos(an) * r, cp = Math.cos(p); fireBullet(sh, ox, oy, oz, -Math.sin(y) * cp, Math.sin(p), -Math.cos(y) * cp, w, mx, my, mz, noTracer); } }
 function fireBullet(sh, ox, oy, oz, dx, dy, dz, w, mx, my, mz, noTracer) {
+  const length = Math.hypot(dx, dy, dz), range = w.range || 260; if (length < 1e-8) return; dx /= length; dy /= length; dz /= length;
   if (w.bolt && typeof botOnShot === 'function') botOnShot(sh, sh.weapon, new V3(ox, oy, oz), new V3(dx, dy, dz));
   dx = dx || 1e-9; dy = dy || 1e-9; dz = dz || 1e-9; let best = null, be = null;
-  for (const e of G.ents) { if (!e.alive || e.team === sh.team) continue; const r = rayEnt(ox, oy, oz, dx, dy, dz, e); if (r && (!best || r.t < best.t)) { best = r; be = e; } }
-  let t0 = 0, mul = 1, endT = 260, hitEnt = false;
-  for (let pen = 0; pen < 2; pen++) { const h = rayWorld(ox + dx * t0, oy + dy * t0, oz + dz * t0, dx, dy, dz, 260); const wt = h ? t0 + h.t : 260;
+  for (const e of G.ents) { if (!e.alive || e.team === sh.team) continue; const r = rayEnt(ox, oy, oz, dx, dy, dz, e); if (r && r.t < range && (!best || r.t < best.t)) { best = r; be = e; } }
+  let t0 = 0, mul = 1, endT = range, hitEnt = false;
+  for (let pen = 0; pen < 2; pen++) { const h = rayWorld(ox + dx * t0, oy + dy * t0, oz + dz * t0, dx, dy, dz, range - t0); const wt = h ? t0 + h.t : range;
     if (best && best.t < wt && best.t >= t0) { hitEnt = true; endT = best.t; break; } endT = wt; if (!h) break;
     const ix = ox + dx * wt, iy = oy + dy * wt, iz = oz + dz * wt, nx = h.nx, ny = h.ny, nz = h.nz, thin = h.s && (h.tx - h.t) < .5, ex = t0 + h.tx;
     FX.decal(ix, iy, iz, nx, ny, nz, rand(.13, .24) * (w.dmg > 50 ? 1.5 : 1), INK); FX.burst(ix, iy, iz, nx, ny, nz, 4, INK, 2.5, .018); if (sh.isPlayer || Math.random() < .4) SFX.impact({ x: ix, y: iy, z: iz });
-    if (thin && pen === 0) { mul = .55; t0 = ex + .02; FX.decal(ox + dx * ex, oy + dy * ex, oz + dz * ex, -nx, -ny, -nz, .2, INK); FX.burst(ox + dx * ex, oy + dy * ex, oz + dz * ex, dx, dy, dz, 5, INK, 3, .02); continue; } break; }
+    if (thin && w.penetration !== 0 && pen === 0 && ex < range) { mul = w.penetration === undefined ? .55 : w.penetration; t0 = ex + .02; FX.decal(ox + dx * ex, oy + dy * ex, oz + dz * ex, -nx, -ny, -nz, .2, INK); FX.burst(ox + dx * ex, oy + dy * ex, oz + dz * ex, dx, dy, dz, 5, INK, 3, .02); continue; } break; }
   if (!noTracer || !sh.isPlayer) FX.tracer(mx, my, mz, ox + dx * endT, oy + dy * endT, oz + dz * endT);
-  if (hitEnt) { const dmg = w.dmg * best.mul * mul * Math.pow(w.fall, best.t / 28); hurt(be, dmg, sh, sh.weapon, best.part, { x: dx, y: dy, z: dz }, { x: ox + dx * best.t, y: oy + dy * best.t, z: oz + dz * best.t }); }
+  if (hitEnt) { const partMul = best.part === 'head' && w.headMult ? w.headMult : best.mul, dmg = w.dmg * partMul * mul * weaponFalloff(w, best.t); if (dmg > 0) hurt(be, dmg, sh, sh.weapon, best.part, { x: dx, y: dy, z: dz }, { x: ox + dx * best.t, y: oy + dy * best.t, z: oz + dz * best.t }); }
 }
 function hurt(e, dmg, by, wkey, part, dir, pt) {
   if (!e.alive || G.now < (e.spawnProtectedUntil || 0) || G.mode === 'comp' && G.state !== 'live' && by) return; const w = wkey ? WEAPONS[wkey] : null, head = part === 'head';
-  if (w && e.armor > 0 && part !== 'legs' && (!head || e.helmet)) { const d2 = dmg * (w.arm || .6); e.armor = Math.max(0, e.armor - (dmg - d2) * .5); dmg = d2; }
+  if (w && e.armor > 0 && part !== 'legs' && (!head || e.helmet)) { const d2 = dmg * (w.arm || .6); e.armor = Math.max(0, e.armor - Math.max(2, dmg - d2)); dmg = d2; }   // armour visibly wears: it loses what it absorbs (min 2 per hit)
   dmg = Math.max(1, Math.round(dmg)); e.hp -= dmg; PROG.onHurt(e, Math.min(dmg, e.hp + dmg), by, wkey); if (by && by.isPlayer && e !== by) TRAIN.onHit(Math.min(dmg, e.hp + dmg), head, wkey); if (e.act && e.act.type === 'defuse' && !e.isPlayer && Math.random() < .5) { e.act = null; if (BOMB.defuser === e) BOMB.defuser = null; }
   if (pt && dir) { FX.burst(pt.x, pt.y, pt.z, dir.x, dir.y, dir.z, 6 + Math.min(16, dmg / 5 | 0), RED, 4.5, .03, true); FX.burst(pt.x, pt.y, pt.z, -dir.x, .3, -dir.z, 3, RED, 2, .025, true); SFX.flesh(e.isPlayer ? null : pt);
     const h = rayWorld(pt.x + dir.x * .4, pt.y + dir.y * .4, pt.z + dir.z * .4, dir.x + rand(-.15, .15) || 1e-9, dir.y - .12, dir.z + rand(-.15, .15) || 1e-9, 4.5); if (h) FX.decal(pt.x + dir.x * (.4 + h.t), pt.y + (dir.y - .12) * (.4 + h.t), pt.z + dir.z * (.4 + h.t), h.nx, h.ny, h.nz, rand(.35, .8) * (head ? 1.4 : 1), RED); }
@@ -164,7 +168,7 @@ function kill(e, by, wkey, head, dir) {
   if (G.mode === 'dm' && G.state === 'live' && Math.max(G.score.red, G.score.blue) >= DM_KILLS) endMatch(G.score.red > G.score.blue ? 'red' : 'blue');
 }
 G.botShoot = (b, dx, dy, dz) => { b.spawnProtectedUntil = 0; const w = WEAPONS[b.weapon], ey = b.pos.y + eyeY(b), mx = b.pos.x + dx * .8 + Math.cos(b.yaw) * .13, my = ey - .12, mz = b.pos.z + dz * .8 - Math.sin(b.yaw) * .13;
-  for (let i = 0; i < (w.pellets || 1); i++) { const s = w.pellets ? w.spread * .6 : 0; fireBullet(b, b.pos.x, ey, b.pos.z, dx + gauss() * s, dy + gauss() * s, dz + gauss() * s, w, mx, my, mz); }
+  fireWeaponVolley(b, b.pos.x, ey, b.pos.z, Math.atan2(dy, Math.hypot(dx, dz)), Math.atan2(-dx, -dz), w.pellets ? w.spread : 0, w, mx, my, mz);
   FX.flash(mx, my, mz, .22); SFX.shot(w.snd, b.pos, isIndoor(b)); botHear(b.pos, b.team, 45); };
 
 /* ---------------- match flow ---------------- */
@@ -223,7 +227,7 @@ function canBuy() { const pl = G.player; if (!pl || !pl.alive) return false; if 
 function toggleBuy() { if (G.buyOpen) return closeBuy(); if (!canBuy()) { banner('无法采购', '仅限准备阶段或开局 20 秒内在出生区', 'lose'); SFX.deny(); return; } G.mapOpen = false; $('tactical').classList.remove('on'); G.buyOpen = true; unlockUI(); drawBuy(); $('buy').classList.add('on'); SFX.ui(); }
 function closeBuy() { const was = G.buyOpen; G.buyOpen = false; $('buy').classList.remove('on'); clearInput(); if (was && !G.paused && G.state !== 'menu' && G.state !== 'matchEnd') lock(); }
 function drawBuy() { const pl = G.player; $('buyMoney').textContent = '$' + pl.money; const bill = rebuyBill(), loss = 1400 + Math.min(4, G.lossStreak[pl.team] + 1) * 500; $('buyBudget').textContent = G.mode === 'comp' ? `当前 $${pl.money} · 若本局落败，回合补助 $${loss} · 先保枪甲，再选投掷物` : '训练与死斗免费换装'; $('rebuy').disabled = !bill.keys.length || !bill.cost || G.mode === 'comp' && bill.cost > pl.money; $('rebuy').textContent = !bill.keys.length ? '尚无上次配置' : !bill.cost ? '上次配置已齐备' : G.mode === 'comp' ? `复购上次配置 · $${bill.cost}${bill.cost > pl.money ? '（资金不足）' : ''}` : '领取上次配置'; $('buyGrid').innerHTML = BUY_LIST.map((k, i) => { const armor = k === 'armor', w = armor ? { name: '护甲 + 头盔', en: 'PLATE & HELM', price: 1000 } : WEAPONS[k], own = armor ? pl.armor >= 100 && pl.helmet : (WEAPONS[k].nade ? pl.nades[k] > 0 : pl.inv[w.slot] === k), poor = G.mode === 'comp' && pl.money < w.price;
-    return `<button type="button" data-k="${k}" class="card ${own ? 'own' : poor ? 'poor' : ''}"><b>${(i + 1) % 10}</b>${armor ? '<div class="ico armor">⛨</div>' : `<img class="ico" alt="" src="${G.icons[k]}">`}<div class="nm">${w.name}</div><div class="en">${w.en}</div><div class="spec">${armor ? '减伤防护 · 100 护甲' : w.nade ? '战术投掷 · 数量 1' : w.melee ? '近身行动' : `${w.mag} 发 · 基础伤害 ${w.dmg} · ${w.reload.toFixed(1)}s 换弹`}</div><div class="pr">${own ? '已装备' : G.mode !== 'comp' ? '免费领取' : '$' + w.price}</div></button>`; }).join(''); }
+    return `<button type="button" data-k="${k}" class="card ${own ? 'own' : poor ? 'poor' : ''}"><b>${(i + 1) % 10}</b>${armor ? '<div class="ico armor">⛨</div>' : `<img class="ico" alt="" src="${G.icons[k]}">`}<div class="nm">${w.name}</div><div class="en">${w.en}</div><div class="spec">${armor ? '减伤防护 · 100 护甲' : w.nade ? '战术投掷 · 数量 1' : w.melee ? '近身行动' : w.pellets ? `${w.mag} 发 · ${w.pellets} 弹丸 × ${w.dmg} · 近身爆发 / ${w.fallStart}m 后衰减` : `${w.mag} 发 · 基础伤害 ${w.dmg} · ${w.reload.toFixed(1)}s 换弹`}</div><div class="pr">${own ? '已装备' : G.mode !== 'comp' ? '免费领取' : '$' + w.price}</div></button>`; }).join(''); }
 function buy(k) { const pl = G.player; if (!canBuy()) return closeBuy(); const armor = k === 'armor', price = armor ? 1000 : WEAPONS[k].price; if (armor ? pl.armor >= 100 && pl.helmet : (WEAPONS[k].nade ? pl.nades[k] > 0 : pl.inv[WEAPONS[k].slot] === k)) return SFX.deny(); if (G.mode === 'comp' && pl.money < price) return SFX.deny();
   if (G.mode === 'comp') pl.money -= price; if (armor) { pl.armor = 100; pl.helmet = true; } else { giveWeapon(pl, k); if (!WEAPONS[k].nade) switchTo(k); } SFX.buy(); if (!G.rebuying) { G.set.lastBuy = [pl.inv[1], pl.inv[2] !== 'p9' ? pl.inv[2] : null, pl.armor > 0 ? 'armor' : null, ...nadeList(pl)].filter(Boolean); localStorage.setItem('inkstrike', JSON.stringify(G.set)); } drawBuy(); return true; }
 

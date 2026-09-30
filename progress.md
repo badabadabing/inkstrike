@@ -70,3 +70,21 @@ Revision 03 — simulated player/expert panel and independent Dream Loop
 2026-09-28 — Revision 06 (Claude independent review)
 - User: new dust-style and warehouse maps far from expectation; characters slide instead of walk. Reviewed Codex R04/R05 diff: arena maps were bare boxes outside the Paper Town kit; gait stance foot moved 3–6 m/s in world.
 - Rebuilt DUNE COURT (classic desert bomb flow) and STACK DEPOT (hall A / container-yard B) on the shared buildWorld kit; rewrote gait as stance/swing with cadence matched to ground speed. Details in HANDOFF §14. All checks pass; not committed or deployed.
+
+2026-09-29 — R06 → Xiaohongshu v1.0.2 / shotgun balance
+- Synced the current working tree's three authored maps and displacement-driven gait; retained low5v5/balanced8v8+12v12 and landscape controls.
+- Shared combat fix: normalized Bot rays, consistent angular pellet spread, shotgun full damage through6m then quadratic falloff to24m, head×2/no penetration, close-range Bot approach. Six other weapons preserve existing numerical roles.
+- Replaced export map navigation with in-page rebuilding and serialized storage; removed a success notice covering Quit and cleared old-map dynamic FX. Map-root atlases and batching preserve animated knees/feet; multi-effect rendering stays within budgets in measured stress cases.
+- Source and package SMOKE OK; final25-file hash verified across map/75interaction/weapon/runtime/60performance checks; official audit PASS, enhanced0errors/9reviewed warnings. Source/package72,000-shot controlled candidate matrices agree.
+- Delivered outputs/inkstrike-xhs-v1.0.2.zip (315671bytes, SHA2564267870fbe6f07555458c004e438876d85b362f7990807bb3fff2b3170e2729a). Validation and release manifest beside ZIP; prior ZIPs preserved.
+- Local diagnosis only: no deploy/push/upload/submission. Creator simulator, Android, iOS, Chrome61 and real-phone performance remain unverified. See HANDOFF §15 and v1.0.2-validation.md.
+
+
+2026-09-29 — Xiaohongshu v1.0.3 foldable toolbar repair
+- Reproduced user's outer-screen→inner-screen issue: second visible layoutApply overlaps all four toolbar buttons; Pause covers Buy/Map/Scoreboard. Re-entry only temporarily resets it.
+- Changed shared layoutApply to reset-all, measure-all, apply-all; preserved saved controls. Export differs from v1.0.2 only in touch.js and version text.
+- 104 local input checks across4 viewports, repeated fold dimensions, actual purchase/deduction and all4 entrances;6 CPU layout scenarios; source/export SMOKE OK; ES2017 and official ZIP audits pass.
+- outputs/inkstrike-xhs-v1.0.3.zip:315717bytes SHA256325b25c5b119b70235ea6ad268ffca5379c3de08e6e038bdb56b20cf922ad065. No upload/deploy; same new ZIP needs actual folding-device/platform verification. See HANDOFF §16.
+
+2026-09-30 — BALANCE 02 armour / melee feedback
+- Player reports: armour never drops, knife cannot kill. Armour now loses what it absorbs (min 2/hit); knife arm .85 with a forgiving swing cone, backstab lethal; HE no longer double-reduced. Merged the 09-29 shared shotgun and foldable-toolbar fixes into main. See HANDOFF §17.

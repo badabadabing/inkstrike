@@ -195,12 +195,12 @@ function updateBot(b, dt, now) {
     wantYaw = Math.atan2(-dx, -dz); wantPitch = Math.atan2(dy, dist); b.aimErr = damp(b.aimErr, .02, 1.5, dt);
     if (now > b.strafeT) { b.strafeT = now + rand(.65, 1.35); b.strafeDir = dist > 30 && !(b.threat && b.threat.kind === 'sniper' && now < b.threat.until) && Math.random() < .5 ? 0 : pick([-1, 1]); if (Math.random() < .15 && dist > 12) wantCrouch = 1; b.crouchHold = wantCrouch ? now + rand(.6, 1.4) : 0; }
     if (b.threat && b.threat.kind === 'sniper' && now < b.threat.until && !b.strafeDir) b.strafeDir = (b.slot || 0) % 2 ? 1 : -1;
-    const rx = Math.cos(b.yaw), rz = -Math.sin(b.yaw), fx = -Math.sin(b.yaw), fz = -Math.cos(b.yaw); let f = dist > 38 ? .7 : dist < 5 ? -.6 : 0; if (w.scope) f = dist < 14 ? -.7 : 0; if ((b.hp < 35 || b.reloadT > 0) && dist < 18) f = -.7; if (!b.fireClear) b.strafeDir = b.lane >= 0 ? 1 : -1;
-    wx = rx * b.strafeDir + fx * f; wz = rz * b.strafeDir + fz * f; if (now < b.burstPause - .05 || b.burstN > 0) { if ((dist > 16 || w.scope) && !(b.threat && b.threat.kind === 'sniper' && now < b.threat.until)) { wx *= .15; wz *= .15; } }
+    const rx = Math.cos(b.yaw), rz = -Math.sin(b.yaw), fx = -Math.sin(b.yaw), fz = -Math.cos(b.yaw); let f = dist > 38 ? .7 : dist < 5 ? -.6 : 0; if (w.scope) f = dist < 14 ? -.7 : 0; if (w.pellets) f = dist > 8 ? .85 : dist < 3 ? -.5 : 0; if ((b.hp < 35 || b.reloadT > 0) && dist < 18) f = -.7; if (!b.fireClear) b.strafeDir = b.lane >= 0 ? 1 : -1;
+    wx = rx * b.strafeDir + fx * f; wz = rz * b.strafeDir + fz * f; if (now < b.burstPause - .05 || b.burstN > 0) { if ((dist > 16 && !w.pellets || w.scope) && !(b.threat && b.threat.kind === 'sniper' && now < b.threat.until)) { wx *= .15; wz *= .15; } }
     if (now < (b.crouchHold || 0)) wantCrouch = 1;
     if (Math.abs(b.strafeDir) > 0 && !navLine(b.pos.x, b.pos.z, b.pos.x + rx * b.strafeDir * .9, b.pos.z + rz * b.strafeDir * .9)) { wx -= rx * b.strafeDir; wz -= rz * b.strafeDir; b.strafeDir *= -1; }
     // fire control
-    if (!frozen && !b.act && b.targetVis && b.fireClear && now > b.reactT && Math.abs(angDiff(wantYaw, b.yaw)) < .12 && b.reloadT <= 0) {
+    if (!frozen && !b.act && b.targetVis && b.fireClear && (!w.range || Math.hypot(dist, dy) < w.range) && now > b.reactT && Math.abs(angDiff(wantYaw, b.yaw)) < .12 && b.reloadT <= 0) {
       if (b.mag <= 0) b.reloadT = w.reload;
       else if (now >= b.nextFire && now >= b.burstPause) {
         const sig = (b.aimErr + dist * .00045 + b.burstN * (w.auto ? .0035 : .002) + Math.hypot(t.vel.x, t.vel.z) * .0028 + Math.hypot(b.vel.x, b.vel.z) * .004) * D.err * (w.scope ? .45 : 1) * (t.isPlayer && t.crouchAmt > .5 ? 1.2 : 1);
