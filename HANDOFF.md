@@ -329,3 +329,10 @@
 - 修复（`js/game.js` `hurt` / `melee`，`js/weapons.js`）：护甲损耗 = 被吸收的伤害（每次至少 2）；刻刀 `arm: .85`，满甲轻击 3 刀、重击 2 刀、背刺一击；近战在射线未命中时用 2.2m / 约 33° 的挥砍锥补判，仍受墙体遮挡；墨爆弹不再对护甲目标重复减伤（原来先乘 0.6 再进 `hurt` 乘一次）。
 - 本提交同时把 §15（霰弹平衡）与 §16（折叠屏入口重叠）这两项此前只存在于工作区和小工具包里的共享修复并入 `main`，网站与小工具从此同源。小工具构建脚本 `tools/build-xhs.js`、`tools/xhs-*` 与 `tools/weapon-balance-check.js` 一并入库。
 - 本机 Playwright 自带的 Chromium 缓存已被清理；本轮测试用已安装的 Chrome（`channel: 'chrome'`）通过外部垫片运行，工具脚本未改。
+
+## 18. 小工具 v1.0.4 — 护甲/近战修复同步与四向安全区声明（2026-09-30）
+- 内容：与网站 BALANCE 02（提交 `ea6775c`）同源。相对 v1.0.3 运行包只有 5 个文件不同：`index.html` 版本文字、`js/game.js`、`js/weapons.js`（护甲/刻刀/墨爆弹修复），以及 `xhs.css`、`xhs-viewport.js`（安全区声明位置）。
+- `xhs-mini-tool` 的增强审计在 09-30 更新后要求样式中出现四向 `safe-area-inset-*`；旧包（含 v1.0.3）是用脚本给隐藏测量元素设置内边距，静态扫描看不到，会报 `SAFE_AREA` 错误。现在改为 `tools/xhs-safe.css` 声明 `#xhsSafeMeasure`（先取宿主 `--safe-area-inset-*`，`@supports` 成立时再用 `env()`），脚本只读回数值。该文件在 `compatCSS` 之后原样追加，因为兼容转换会把 `env()` 改写掉。三种视口下与 v1.0.3 的画面框几何逐项一致（`safe-area-check.json`）。
+- 产物：`outputs/inkstrike-xhs-v1.0.4.zip`，315,880 字节，SHA-256 `bfeec6b61fcd3270bb4bd6b3334fccafe65e087ca41059998bbf4d522b2a28bc`，25 个文件。增强审计 0 错误 / 1 条 three-local 复核提示；官方 1.7.0 审计目录与 ZIP 均 PASS；17 个脚本 ES2017 经典脚本解析通过；导出包 SMOKE OK；无外部请求。
+- 本机 Playwright 自带 Chromium 已被清理，回归改用已安装的 Chrome：触控/输入脚本 88 项通过，竖屏「继续」一项在 v1.0.3 原包上同样失败（浏览器差异，非本次回归）；v1.0.3 当时用专用 Chromium 为 104 项全过。
+- 未上传、未提交审核。创服模拟器、Android / iOS 真机扫码仍待验证。

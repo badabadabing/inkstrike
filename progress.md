@@ -88,3 +88,4 @@ Revision 03 — simulated player/expert panel and independent Dream Loop
 
 2026-09-30 — BALANCE 02 armour / melee feedback
 - Player reports: armour never drops, knife cannot kill. Armour now loses what it absorbs (min 2/hit); knife arm .85 with a forgiving swing cone, backstab lethal; HE no longer double-reduced. Merged the 09-29 shared shotgun and foldable-toolbar fixes into main. See HANDOFF §17.
+- Released BALANCE 02 to GitHub Pages, Cloudflare Pages (773fd5b3) and banmabox.com; all three verified live. Built Xiaohongshu v1.0.4 (315880 bytes, SHA256 bfeec6b6…2a28bc): same fix plus CSS-declared four-side safe area required by the updated audit. Not uploaded. See HANDOFF §18.

@@ -3,7 +3,7 @@
 // Export the current working tree; the website and its saved data remain independent.
 const fs = require('fs'), path = require('path'), os = require('os'), { execFileSync } = require('child_process');
 const crypto = require('crypto');
-const REPO = path.resolve(__dirname, '..'); let OUT = path.join(REPO, 'outputs/inkstrike-xhs-v1.0.3'), ROOT = REPO, snapshot = null, version = '1.0.3';
+const REPO = path.resolve(__dirname, '..'); let OUT = path.join(REPO, 'outputs/inkstrike-xhs-v1.0.4'), ROOT = REPO, snapshot = null, version = '1.0.4';
 const { compatCSS } = require('./xhs-css-build');
 const { eventBindings } = require('./xhs-event-build');
 const helpers = ['xhs-errors.js', 'xhs-viewport.js', 'xhs-storage.js', 'xhs-input.js', 'xhs-performance.js', 'xhs-quality.js', 'xhs-runtime.js'];
@@ -81,10 +81,10 @@ async function main() {
   html = html.replace(/<style>([\s\S]*?)<\/style>/, (_, css) => '<style>' + compatCSS(css) + '</style>');
   html = replace(html, '<body>', '<body><div id="xhsFrame"><div id="xhsApp">'); html = replace(html, '</body>', '</div></div></body>');
   fs.writeFileSync(path.join(OUT, 'index.html'), html);
-  fs.writeFileSync(path.join(OUT, 'xhs.css'), compatCSS(fs.readFileSync(path.join(__dirname, 'xhs.css'), 'utf8') + '\n' + fs.readFileSync(path.join(__dirname, 'xhs-feedback.css'), 'utf8')));
+  fs.writeFileSync(path.join(OUT, 'xhs.css'), compatCSS(fs.readFileSync(path.join(__dirname, 'xhs.css'), 'utf8') + '\n' + fs.readFileSync(path.join(__dirname, 'xhs-feedback.css'), 'utf8')) + '\n' + fs.readFileSync(path.join(__dirname, 'xhs-safe.css'), 'utf8'));
   for (const name of helpers) fs.writeFileSync(path.join(OUT, name), (await bundler().transform(helperSources[name], { target, loader: 'js', legalComments: 'none' })).code);
   fs.copyFileSync(path.join(__dirname, 'xhs-icon.png'), path.join(OUT, 'icon.png'));
-  fs.writeFileSync(OUT + '-source.json', JSON.stringify({ version, target, source: ref ? execFileSync('git', ['rev-parse', ref], { cwd: REPO, encoding: 'utf8' }).trim() : 'working-tree', builtAt: new Date().toISOString(), modules: files, sourceFiles: Object.fromEntries(['index.html', ...files.map(f => 'js/' + f + '.js'), ...helpers.map(f => 'tools/' + f), 'tools/build-xhs.js', 'tools/xhs-css-build.js', 'tools/xhs-event-build.js', 'tools/xhs.css', 'tools/xhs-feedback.css'].map(f => [f, crypto.createHash('sha256').update(fs.readFileSync(path.join(f.startsWith('tools/') ? REPO : ROOT, f))).digest('hex')])) }, null, 2));
+  fs.writeFileSync(OUT + '-source.json', JSON.stringify({ version, target, source: ref ? execFileSync('git', ['rev-parse', ref], { cwd: REPO, encoding: 'utf8' }).trim() : 'working-tree', builtAt: new Date().toISOString(), modules: files, sourceFiles: Object.fromEntries(['index.html', ...files.map(f => 'js/' + f + '.js'), ...helpers.map(f => 'tools/' + f), 'tools/build-xhs.js', 'tools/xhs-css-build.js', 'tools/xhs-event-build.js', 'tools/xhs.css', 'tools/xhs-feedback.css', 'tools/xhs-safe.css'].map(f => [f, crypto.createHash('sha256').update(fs.readFileSync(path.join(f.startsWith('tools/') ? REPO : ROOT, f))).digest('hex')])) }, null, 2));
   console.log('XHS build: ' + OUT + '\nSource modules: ' + files.join(', ') + '\nTHREE exports: ' + names.length);
 }
 main().catch(e => { console.error(e); process.exitCode = 1; }).finally(() => { if (snapshot) fs.rmSync(snapshot, { recursive: true, force: true }); });
