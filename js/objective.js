@@ -24,7 +24,7 @@ const canDefuse = e => BOMB.state === 'planted' && e.team === 'blue' && G.state 
 function entInteract(e, want, dt) {
   const type = canPlant(e) ? 'plant' : canDefuse(e) ? 'defuse' : null;
   if (!want || !type) { if (e.act) { if (BOMB.defuser === e) BOMB.defuser = null; e.act = null; } return; }
-  if (!e.act || e.act.type !== type) { if (type === 'defuse' && BOMB.defuser && BOMB.defuser !== e && BOMB.defuser.alive && BOMB.defuser.act) return; e.act = { type, t: 0 }; if (type === 'defuse') BOMB.defuser = e; SFX.click(1300, .4); }
+  if (!e.act || e.act.type !== type) { if (type === 'defuse' && BOMB.defuser && BOMB.defuser !== e && BOMB.defuser.alive && BOMB.defuser.act) return; e.act = { type, t: 0 }; if (type === 'defuse') BOMB.defuser = e; SFX.click(1300, .4); if (e.team === G.team && !e.isPlayer) RADIO.say('cover', e.name, true); }
   e.act.t += dt; e.vel.x *= .6; e.vel.z *= .6; if (((e.act.t * 3) | 0) !== (((e.act.t - dt) * 3) | 0)) SFX.tick(e.isPlayer ? null : e.pos);
   if (e.act.t >= (type === 'plant' ? PLANT_T : DEFUSE_T)) { e.act = null; type === 'plant' ? bombPlant(e) : bombDefuse(e); }
 }
