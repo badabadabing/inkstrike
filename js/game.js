@@ -14,7 +14,7 @@ function boot() {
   renderer.autoClear = false; renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setClearColor(PAPER);
   scene = new THREE.Scene(); scene.fog = new THREE.FogExp2(PAPER, FOG_D); camera = new THREE.PerspectiveCamera(G.set.fov, 1, .06, 1400); camera.rotation.order = 'YXZ';
   fxc = $('fx'); fxg = fxc.getContext('2d'); radar = $('radar'); rg = radar.getContext('2d');
-  G.set.map = new URLSearchParams(location.search).get('map') || G.set.map; buildMap(scene, G.set.map); FX.init(scene); bombInit(scene); VM.init(1); bindInput(); bindUI(); PROG.bind(); if ((('ontouchstart' in window || navigator.maxTouchPoints > 0) && matchMedia('(pointer: coarse)').matches) || location.search.includes('touch')) initTouch();
+  G.set.map = new URLSearchParams(location.search).get('map') || G.set.map; buildMap(scene, G.set.map); FX.init(scene); bombInit(scene); VM.init(1); bindInput(); bindUI(); PROG.bind(); RADIO.preload(); if ((('ontouchstart' in window || navigator.maxTouchPoints > 0) && matchMedia('(pointer: coarse)').matches) || location.search.includes('touch')) initTouch();
   makeIcons(); if (typeof makeActorPreviews === 'function') G.actorPreviews = makeActorPreviews(renderer); updateActorPreview(); applyQuality(); updateBrief(); onResize(); addEventListener('resize', onResize);
   camera.position.set(-20, 26, 62); camera.lookAt(6, 0, -6);
   $('loading').style.display = 'none'; $('menu').classList.add('on');
