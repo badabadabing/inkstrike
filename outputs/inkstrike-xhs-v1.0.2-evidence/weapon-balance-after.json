@@ -2934,11 +2934,11 @@
   ],
   "source": "/Users/bing/Projects/游戏/inkstrike-r06",
   "mode": "candidate",
-  "generatedAt": "2026-09-30T12:14:03.040Z",
+  "generatedAt": "2026-10-02T08:20:46.702Z",
   "sourceSha256": {
     "weapons": "d46fd186aac74ce241de429ba133c2849d28d77dec1ea50af60aa0a719fea9ff",
     "game": "c8cca3c732459419c3a3b99e0f1c81d2c6df9dc73791d9edfd237c3657204c81",
-    "actors": "0c56149dd9e7ab857b42bf03f842edec5455bc0afa5dc02aa573aeb97e8ab806"
+    "actors": "4911dc4bdcac31125935b41c30c71bcb292edd509ff7a4ad87ad3f423bc2be9c"
   },
   "errors": [],
   "passed": true

@@ -226,7 +226,7 @@ body.touch #training{left:calc(10px + env(safe-area-inset-left));right:auto;top:
 @media(max-height:560px){.tactical-grid{grid-template-columns:1fr;gap:0}.map-notes{display:none}.tactical-head{padding-bottom:6px}#tacticalMap{max-height:46vh}.map-foot{padding-top:6px;font-size:9px}#squadControls button,#rangeControls button{padding:6px 8px}.buy-tools{margin-bottom:8px}#tacticalMap{max-height:48vh}#training{top:205px}.sl{margin-bottom:7px}}
 
 /* Revision 04 feedback controls */
-#sMap{width:100%;font:inherit;font-size:12px;padding:9px;background:var(--paper);color:var(--ink);border:1px solid var(--ink)}#looksBtn{font-size:11px;letter-spacing:1px;padding:9px;margin-top:8px;background:transparent;color:var(--ink);box-shadow:none}#looks{z-index:9;background:rgba(22,22,28,.6)}.looks-panel{width:min(400px,92vw);max-height:94vh;overflow:auto;padding:22px;text-align:center}.looks-panel h2{font-size:22px}.looks-panel img{display:block;width:100%;height:240px;object-fit:contain;margin:6px 0}.looks-panel select{width:100%;font:inherit;padding:10px;background:var(--paper);border:1px solid var(--ink)}.looks-panel p{font-size:11px;line-height:1.7;margin:12px 0}.looks-panel button{padding:10px 30px;background:var(--ink);color:var(--paper);font:inherit;border:0;cursor:pointer}
+#sMap{width:100%;font:inherit;font-size:12px;padding:9px;background:var(--paper);color:var(--ink);border:1px solid var(--ink)}#looksBtn{font-size:11px;letter-spacing:1px;padding:9px;margin-top:8px;background:transparent;color:var(--ink);box-shadow:none}#looks{z-index:9;background:rgba(22,22,28,.6)}#armory{z-index:8}.looks-panel{width:min(400px,92vw);max-height:94vh;overflow:auto;padding:22px;text-align:center}.looks-panel h2{font-size:22px}.looks-panel img{display:block;width:100%;height:240px;object-fit:contain;margin:6px 0}.looks-panel select{width:100%;font:inherit;padding:10px;background:var(--paper);border:1px solid var(--ink)}.looks-panel p{font-size:11px;line-height:1.7;margin:12px 0}.looks-panel button{padding:10px 30px;background:var(--ink);color:var(--paper);font:inherit;border:0;cursor:pointer}
 #captureMouse{position:fixed;z-index:8;left:50%;bottom:16%;transform:translateX(-50%);padding:12px 20px;border:1px solid var(--ink);background:var(--paper);color:var(--ink);font:inherit;font-size:14px;cursor:pointer}#captureMouse[hidden]{display:none}
 @media(max-width:740px){body.touch #ammoBox{left:41%}}
 #specControls{position:fixed;z-index:8;bottom:7%;left:50%;transform:translateX(-50%);display:flex;gap:12px;align-items:center;max-width:96vw;padding:10px;background:var(--paper);border:1px solid var(--ink);pointer-events:auto}#specControls[hidden]{display:none}#specControls button{font:inherit;font-size:12px;white-space:nowrap;padding:9px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}#specLabel{font-size:12px;min-width:110px;text-align:center}
@@ -283,7 +283,7 @@ body.touch #training{left:calc(10px + env(safe-area-inset-left));right:auto;top:
 
 <div id="menu" class="ov">
   <div id="menuIn">
-    <div class="edition">INK BATTLEGROUNDS / REVISION 06 · BALANCE 02</div>
+    <div class="edition">INK BATTLEGROUNDS / REVISION 06 · BALANCE 03</div>
     <h1>INK<br><em>STRIKE</em></h1>
     <h2>墨 线 突 击</h2>
     <div class="tag">纸上有街巷，落笔即交锋。<br>穿过折页门，守住刻度台。下一道墨迹，由你留下。</div>
@@ -335,7 +335,7 @@ import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 Object.assign(window, { THREE, LineSegments2, LineSegmentsGeometry, LineMaterial });
 const files = ['core', 'map', 'weapons', 'actors', 'fx', 'objective', 'progress', 'touch', 'game'];
-for (const f of files) await new Promise((ok, err) => { const s = document.createElement('script'); s.src = `js/${f}.js?v=revision-06-balance-02`; s.onload = ok; s.onerror = err; document.body.appendChild(s); });
+for (const f of files) await new Promise((ok, err) => { const s = document.createElement('script'); s.src = `js/${f}.js?v=revision-06-balance-03`; s.onload = ok; s.onerror = err; document.body.appendChild(s); });
 try { boot(); } catch (e) { document.getElementById('loadTxt').textContent = '启动失败: ' + e.message; console.error(e); }
 </script>
 </body>

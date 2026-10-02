@@ -5,7 +5,8 @@ const STREAK = ['', '', '双杀 · 连笔', '三杀 · 行云', '四杀 · 泼�
 const streakTitle = n => STREAK[n] || `超神 · ${n} 连杀`;
 const PROG = {
   data: Object.assign({ kills: {}, skin: {}, mvp: 0 }, JSON.parse(localStorage.getItem('inkstrike_prog') || '{}')), dmg: {}, rs: new Map(), streakN: 0, streakT: -9, streakEpoch: 0, streakTimer: 0,
-  save() { localStorage.setItem('inkstrike_prog', JSON.stringify(this.data)); },
+  save() { try { localStorage.setItem('inkstrike_prog', JSON.stringify(this.data)); this.savedAt = Date.now(); } catch (e) { this.savedAt = 0; } },
+  saveNote() { const t = this.savedAt; return t ? `已存档 ${new Date(t).toTimeString().slice(0, 5)} · 本机` : '击倒后自动存档到本机'; },
   tier(k) { const n = this.data.kills[k] || 0; let t = 0; SKINS.forEach((s, i) => { if (n >= s.need) t = i; }); return t; },
   skin(k) { const t = this.tier(k), s = this.data.skin[k]; return s === undefined ? t : Math.min(s, t); },
   rstat(e) { let r = this.rs.get(e); if (!r) this.rs.set(e, r = { k: 0, dmg: 0, plant: 0, defuse: 0 }); return r; },
@@ -28,7 +29,7 @@ const PROG = {
     const keys = Object.keys(WEAPONS).filter(k => !WEAPONS[k].nade);
     $('armoryGrid').innerHTML = keys.map(k => { const n = this.data.kills[k] || 0, t = this.tier(k), s = this.skin(k), next = SKINS[t + 1], pct = next ? Math.min(100, (n - SKINS[t].need) / (next.need - SKINS[t].need) * 100) : 100;
       return `<div class="card" data-k="${k}"><img class="ico" src="${G.icons[k]}"><div class="nm">${WEAPONS[k].name}</div><div class="en">${n} 击倒 · ${next ? `距「${next.n}」还差 ${next.need - n}` : '已满级'}</div><div class="bar"><i class="hatch" style="width:${pct}%"></i></div><div class="sk">${SKINS.map((q, i) => `<span class="${i === s ? 'cur' : ''} ${i > t ? 'lock' : ''}" style="--c:#${q.ink.toString(16).padStart(6, '0')}">${q.n}</span>`).join('')}</div></div>`; }).join('');
-    $('armoryMvp').textContent = `生涯 MVP ×${this.data.mvp}`;
+    $('armoryMvp').textContent = `生涯 MVP ×${this.data.mvp} · ${this.saveNote()}`;
   },
   bind() { $('armoryGrid').addEventListener('click', e => { const c = e.target.closest('.card'); if (!c) return; const k = c.dataset.k, t = this.tier(k); this.data.skin[k] = (this.skin(k) + 1) % (t + 1); this.save(); this.drawArmory(); SFX.init(); SFX.ui(); });
     $('armoryBtn').onclick = () => { this.drawArmory(); $('armory').classList.add('on'); }; $('armoryClose').onclick = () => $('armory').classList.remove('on'); }

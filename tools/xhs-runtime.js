@@ -31,7 +31,7 @@ function xhsChangeMap(id) {
 }
 async function xhsBoot() {
   try {
-    await xhsStorageInit(); Object.assign(G.set, xhsStorageRead('inkstrike_xhs', {})); PROG.data = Object.assign({ kills: {}, skin: {}, mvp: 0 }, xhsStorageRead('inkstrike_xhs_prog', {}));
+    await xhsStorageInit(); Object.assign(G.set, xhsStorageRead('inkstrike_xhs', {})); PROG.data = Object.assign({ kills: {}, skin: {}, mvp: 0 }, xhsStorageRead('inkstrike_xhs_prog', {})); PROG.saveNote = function () { const st = window.xhsStorageState || {}, t = st.savedAt; return (t ? '已存档 ' + new Date(t).toTimeString().slice(0, 5) : '击倒后自动存档') + (st.mode === 'native' ? ' · 小红书本机存储' : ' · 兼容存储（旧版客户端可能被清理）'); };
     if (G.set.quality !== 'low') G.set.quality = 'balanced';
     boot(); xhsBindQuality(); (window.xhsStorageNotices || []).splice(0).forEach(xhsNotice);
     var resumeAudio = function () { if (SFX.ctx && SFX.ctx.state === 'suspended' && !document.hidden) SFX.ctx.resume().catch(function () {}); };

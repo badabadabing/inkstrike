@@ -1,6 +1,6 @@
 'use strict';
 /* ============ INK STRIKE · actors: soldier models, hitboxes, bot AI ============ */
-const DIFFS = [{ n: '新兵', react: .95, err: 3.4, turn: .7, head: .03, see: 45 }, { n: '老兵', react: .58, err: 2.1, turn: .9, head: .12, see: 60 }, { n: '精英', react: .34, err: 1.25, turn: 1.2, head: .3, see: 75 }];
+const DIFFS = [{ n: '新兵', react: .85, err: 2.9, turn: .75, head: .05, see: 48 }, { n: '老兵', react: .5, err: 1.75, turn: .95, head: .16, see: 64 }, { n: '精英', react: .3, err: 1.05, turn: 1.25, head: .34, see: 78 }];
 const BOT_NAMES = ['墨鸦', '砚台', '宣纸', '狼毫', '朱砂', '飞白', '留白', '皴法', '勾线', '泼墨', '篆刻', '淡彩', '枯笔', '浓墨', '拓片', '镇纸', '印泥', '走笔'];
 const ACTOR_STYLES = [{ id: 'scribe', name: '折锋', desc: '分片护盔 · 通讯耳机 · 轻装胸挂' }, { id: 'scout', name: '巡纸', desc: '折沿软帽 · 双镜护目 · 短围巾' }, { id: 'warden', name: '守砚', desc: '封面护盔 · 窄缝面罩 · 加宽护肩' }];
 let ACTOR_LM = null; const _skGeo = {}, TEAM_INK = { red: 0x9e1c1c, blue: 0x1e4f8c };
@@ -196,7 +196,7 @@ function updateBot(b, dt, now) {
     if (now > b.strafeT) { b.strafeT = now + rand(.65, 1.35); b.strafeDir = dist > 30 && !(b.threat && b.threat.kind === 'sniper' && now < b.threat.until) && Math.random() < .5 ? 0 : pick([-1, 1]); if (Math.random() < .15 && dist > 12) wantCrouch = 1; b.crouchHold = wantCrouch ? now + rand(.6, 1.4) : 0; }
     if (b.threat && b.threat.kind === 'sniper' && now < b.threat.until && !b.strafeDir) b.strafeDir = (b.slot || 0) % 2 ? 1 : -1;
     const rx = Math.cos(b.yaw), rz = -Math.sin(b.yaw), fx = -Math.sin(b.yaw), fz = -Math.cos(b.yaw); let f = dist > 38 ? .7 : dist < 5 ? -.6 : 0; if (w.scope) f = dist < 14 ? -.7 : 0; if (w.pellets) f = dist > 8 ? .85 : dist < 3 ? -.5 : 0; if ((b.hp < 35 || b.reloadT > 0) && dist < 18) f = -.7; if (!b.fireClear) b.strafeDir = b.lane >= 0 ? 1 : -1;
-    wx = rx * b.strafeDir + fx * f; wz = rz * b.strafeDir + fz * f; if (now < b.burstPause - .05 || b.burstN > 0) { if ((dist > 16 && !w.pellets || w.scope) && !(b.threat && b.threat.kind === 'sniper' && now < b.threat.until)) { wx *= .15; wz *= .15; } }
+    wx = rx * b.strafeDir + fx * f; wz = rz * b.strafeDir + fz * f; if (now < b.burstPause - .05 || b.burstN > 0 || (b.targetVis && b.fireClear && now > b.reactT - .12 && b.hp >= 35)) { if ((dist > 11 && !w.pellets || w.scope) && !(b.threat && b.threat.kind === 'sniper' && now < b.threat.until)) { wx *= .15; wz *= .15; } }
     if (now < (b.crouchHold || 0)) wantCrouch = 1;
     if (Math.abs(b.strafeDir) > 0 && !navLine(b.pos.x, b.pos.z, b.pos.x + rx * b.strafeDir * .9, b.pos.z + rz * b.strafeDir * .9)) { wx -= rx * b.strafeDir; wz -= rz * b.strafeDir; b.strafeDir *= -1; }
     // fire control
@@ -212,7 +212,7 @@ function updateBot(b, dt, now) {
   } else if (!frozen) {
     if (!b.coverPlan && !b.path && now > b.waitT) botGoal(b, now);
     if (b.path) { let n = b.path[b.pi]; if (!n) { b.path = null; b.lookT = 0; if (b.holdGoal) { b.waitT = now + (BOMB.state === 'planted' ? rand(3, 6) : rand(6, 11)); b.holdYaw = botHoldYaw(b, b.holdGoal.face); b.holdCrouch = Math.random() < .35; } else { b.waitT = now + rand(.8, 3.5) * (G.huntAll ? .2 : 1); b.holdYaw = null; } }
-      else { const dx = n.x - b.pos.x, dz = n.z - b.pos.z, d = Math.hypot(dx, dz); if (d < .55) b.pi++; else { wx = dx / d; wz = dz / d; wantYaw = Math.atan2(-dx, -dz); } if (now > b.repathT) b.path = null; } }
+      else { const dx = n.x - b.pos.x, dz = n.z - b.pos.z, d = Math.hypot(dx, dz); if (d < .55) b.pi++; else { wx = dx / d; wz = dz / d; wantYaw = Math.atan2(-dx, -dz); const ahead = b.path[Math.min(b.path.length - 1, b.pi + 2)], hd = b.heard && now - b.heard.t < 4 ? b.heard : null, it = G.intel && G.intel[b.team], intel = !hd && it && now - it.t < 3 && Math.hypot(it.x - b.pos.x, it.z - b.pos.z) < 35 ? it : null, look = hd || intel || (ahead && Math.hypot(ahead.x - b.pos.x, ahead.z - b.pos.z) > 1.2 ? ahead : null); if (look) { const ly = Math.atan2(-(look.x - b.pos.x), -(look.z - b.pos.z)); if (Math.abs(angDiff(ly, wantYaw)) < (hd || intel ? 2.2 : 1.3)) wantYaw = ly; } } if (now > b.repathT) b.path = null; } }
     else if (now > b.lookT) { b.lookT = now + rand(.7, 1.6); b.lookYaw = b.yaw + rand(-1.6, 1.6); }
     if (!b.path) { wantYaw = b.lookYaw; if (b.holdYaw !== null && b.holdYaw !== undefined) { wantYaw = b.holdYaw + Math.sin(now * .7 + b.rot * 9) * .35; if (b.holdCrouch) wantCrouch = 1; const it = G.intel && G.intel[b.team]; if (it && now - it.t < 1.5 && b.rot < .5 && BOMB.state !== 'planted' && Math.hypot(it.x - b.pos.x, it.z - b.pos.z) > 20) b.waitT = 0; } } if (now < b.alertT && !b.path) wantYaw = b.alertYaw;
     if (blind) { wantYaw = b.yaw + Math.sin(now * 5 + b.rot * 7) * .8; wx = wz = 0; }

@@ -47,16 +47,24 @@
     native = Math.floor(build / 1000) >= 9460 && mini && typeof mini.getStorage === 'function' && typeof mini.setStorage === 'function' ? mini : null; state.mode = native ? 'native' : 'local';
   }
   async function nativeWrite(key, raw) { const result = await bounded(() => native.setStorage({ key: key, data: raw })); if (result && result.errMsg && result.errMsg !== 'setStorage:ok') throw new Error('invalid storage response'); }
+  const missingMsg = /not.?found|not.?exist|no.?data|empty|不存在|未找到/i;
+  async function nativeRead(key) { try { const result = await bounded(() => native.getStorage({ key: key })); if (result && result.errMsg && result.errMsg !== 'getStorage:ok') return { error: result }; return { raw: result && typeof result.data === 'string' && result.data !== '' ? result.data : null }; } catch (error) { return { error: error || {} }; } }
+  async function nativeHas(key) { if (typeof native.getStorageInfo !== 'function') return null; try { const info = await bounded(() => native.getStorageInfo()); return info && Array.isArray(info.keys) ? info.keys.indexOf(key) !== -1 : null; } catch (error) { return null; } }
+  // Kill counts and MVP only ever grow: merging two copies by maximum can never lose progress.
+  function mergeProg(a, b) { const out = { kills: {}, skin: {}, mvp: Math.max(a.mvp || 0, b.mvp || 0) }; for (const src of [b, a]) { for (const k of Object.keys(src.kills || {})) out.kills[k] = Math.max(out.kills[k] || 0, src.kills[k]); for (const k of Object.keys(src.skin || {})) out.skin[k] = src.skin[k]; } return out; }
   async function load(key) {
-    const revision = revisions[key] || 0; let raw = null;
+    const revision = revisions[key] || 0; let raw = null, rewrite = false;
+    const backup = localRead(key), backupValue = backup.ok && backup.raw !== null ? clean(key, backup.raw) : null;
     if (native) {
-      try { const result = await bounded(() => native.getStorage({ key: key })); if (!result || !Object.prototype.hasOwnProperty.call(result, 'data') || (result.errMsg && result.errMsg !== 'getStorage:ok')) throw new Error('invalid storage response'); raw = result.data; }
-      catch (error) { temporary(key); return; }
-      if (raw === null) {
-        const old = localRead(key); if (old.ok && old.raw !== null) { const parsed = clean(key, old.raw); if (parsed.valid) { raw = JSON.stringify(parsed.value); if ((revisions[key] || 0) === revision) { try { await nativeWrite(key, raw); state.migrated.push(key); } catch (error) { temporary(key); } } } else if ((revisions[key] || 0) === revision) cache[key] = JSON.stringify(parsed.value); }
-      }
-    } else { const item = localRead(key); if (!item.ok) { temporary(key); return; } raw = item.raw; }
-    if (raw !== null && (revisions[key] || 0) === revision) cache[key] = JSON.stringify(clean(key, raw).value);
+      let read = await nativeRead(key);
+      if (read.error) { const has = await nativeHas(key); if (has !== false && !missingMsg.test(String(read.error.errMsg || read.error.message || ''))) read = await nativeRead(key);
+        if (read.error && has === true) { temporary(key); return; } }   // the record exists but cannot be read: never overwrite it this session
+      raw = read.error ? null : read.raw;
+      if (backupValue && backupValue.valid) { if (raw === null) { raw = JSON.stringify(backupValue.value); rewrite = true; state.migrated.push(key); } else if (key === keys[1]) { const merged = JSON.stringify(mergeProg(clean(key, raw).value, backupValue.value)); if (merged !== JSON.stringify(clean(key, raw).value)) { raw = merged; rewrite = true; } } }
+    } else { if (!backup.ok) { temporary(key); return; } raw = backup.raw; }
+    if ((revisions[key] || 0) !== revision) return;
+    if (raw !== null) cache[key] = JSON.stringify(clean(key, raw).value);
+    if (rewrite) { try { await nativeWrite(key, cache[key]); } catch (error) { notice('本机存档同步失败，将在下次保存时重试。'); } }
   }
   win.xhsStorageInit = function () { if (!initPromise) initPromise = (async function () { try { await chooseBackend(); await Promise.all(keys.map(load)); } catch (error) { keys.forEach(temporary); } state.ready = true; })(); return initPromise; };
   win.xhsStorageRead = function (key, fallback) { if (!supported(key) || !state.ready || !Object.prototype.hasOwnProperty.call(cache, key)) return record(fallback) ? fallback : {}; return JSON.parse(cache[key]); };
@@ -64,7 +72,10 @@
     if (!supported(key)) { notice('存储键无效，本次保存未执行。'); return Promise.resolve(false); }
     const parsed = clean(key, raw); if (!parsed.valid) { notice('待保存数据格式异常，未覆盖已有存档。'); return Promise.resolve(false); }
     const serialized = JSON.stringify(parsed.value); cache[key] = serialized; revisions[key] = (revisions[key] || 0) + 1;
-    const task = (pending[key] || Promise.resolve()).then(async function () { await win.xhsStorageInit(); if (failed[key]) return false; try { if (native) await nativeWrite(key, serialized); else win.localStorage.setItem(key, serialized); return true; } catch (error) { temporary(key); return false; } });
+    const task = (pending[key] || Promise.resolve()).then(async function () { await win.xhsStorageInit(); if (failed[key]) return false; let saved = false;
+      if (native) { try { await nativeWrite(key, serialized); saved = true; } catch (error) { notice('本机存档写入失败，下次保存时会自动重试。'); } }
+      try { win.localStorage.setItem(key, serialized); saved = saved || !native; } catch (error) { if (!native) notice('本地保存暂时不可用；设置和熟练度仅保留在本次会话，关闭后可能丢失。'); }
+      if (saved) state.savedAt = Date.now(); return saved; });
     pending[key] = task; return task;
   };
 })(window);
