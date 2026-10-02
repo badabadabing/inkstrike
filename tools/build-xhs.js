@@ -3,7 +3,7 @@
 // Export the current working tree; the website and its saved data remain independent.
 const fs = require('fs'), path = require('path'), os = require('os'), { execFileSync } = require('child_process');
 const crypto = require('crypto');
-const REPO = path.resolve(__dirname, '..'); let OUT = path.join(REPO, 'outputs/inkstrike-xhs-v1.0.4'), ROOT = REPO, snapshot = null, version = '1.0.4';
+const REPO = path.resolve(__dirname, '..'); let OUT = path.join(REPO, 'outputs/inkstrike-xhs-v1.0.5'), ROOT = REPO, snapshot = null, version = '1.0.5';
 const { compatCSS } = require('./xhs-css-build');
 const { eventBindings } = require('./xhs-event-build');
 const helpers = ['xhs-errors.js', 'xhs-viewport.js', 'xhs-storage.js', 'xhs-input.js', 'xhs-performance.js', 'xhs-quality.js', 'xhs-runtime.js'];
