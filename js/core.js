@@ -268,6 +268,16 @@ const SFX = {
   flesh(pos) { if (!this.ctx) return; const o = this.out(pos, 0.4); this.noise(0.08, 700, 200, 1, o); },
   swish() { if (!this.ctx) return; const o = this.out(null, 0.35); this.noise(0.16, 900, 3800, 0.8, o, 'bandpass', 1.2); },
   boom(pos) { if (!this.ctx) return; const o = this.out(pos, 1.3, .8); this.noise(0.9, 1400, 60, 1, o); this.tone(90, 25, 0.7, 1, o); this.noise(1.6, 500, 80, 0.35, o); },
+  radio(len = 1.3) { if (!this.ctx) return; const o = this.out(null, 0.32); this.noise(.07, 2600, 2100, .5, o, 'bandpass', 1.4); this.tone(1800, 1450, .03, .22, o, 'square'); this.noise(.13, 2400, 1700, .32, o, 'bandpass', 1.2, len); this.tone(1350, 1050, .04, .18, o, 'square', len); },   // team-radio squelch open / close
+  // Radio chatter (adult male: 92-118 Hz glottal saw, vowel formants ~12% below neutral): wordless voice-like syllables, telephone band, light clipping and hiss. Meaning lives in the subtitle.
+  chatter(syl, delay = .1) { if (!this.ctx) return 0; const C = this.ctx, o = this.out(null, 0.42), t0 = C.currentTime + (this.dly || 0) + delay, hp = C.createBiquadFilter(), lp = C.createBiquadFilter(), ws = C.createWaveShaper(), cv = new Float32Array(256);
+    for (let i = 0; i < 256; i++) { const x = i / 127.5 - 1; cv[i] = Math.tanh(x * 2.2); } ws.curve = cv; hp.type = 'highpass'; hp.frequency.value = 420; lp.type = 'lowpass'; lp.frequency.value = 2900; hp.connect(lp); lp.connect(ws); ws.connect(o);
+    const V = [[640, 960], [470, 1620], [250, 2020], [500, 740], [390, 900], [580, 1510]], base = 92 + Math.random() * 26; let t = t0;
+    for (let i = 0; i < syl; i++) { const d = .085 + Math.random() * .07, v = V[Math.random() * V.length | 0], f0 = base * (1 + (Math.random() - .5) * .12) * (i === syl - 1 ? .9 : 1), s = C.createOscillator(), g = C.createGain(); s.type = 'sawtooth'; s.frequency.setValueAtTime(f0 * 1.04, t); s.frequency.linearRampToValueAtTime(f0 * .96, t + d);
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(.55, t + .018); g.gain.setValueAtTime(.5, t + d * .7); g.gain.exponentialRampToValueAtTime(0.0005, t + d); s.connect(g);
+      for (const [f, q, a] of [[v[0], 6, 1], [v[1], 9, .55]]) { const b = C.createBiquadFilter(), k = C.createGain(); b.type = 'bandpass'; b.frequency.value = f; b.Q.value = q; k.gain.value = a * 2.2; g.connect(b); b.connect(k); k.connect(hp); }
+      s.start(t); s.stop(t + d + .02); t += d + .025 + (Math.random() < .18 ? .07 : 0); }
+    this.noise(t - t0 + .05, 2600, 2400, .045, o, 'bandpass', .6, delay); return t - t0; },
   ui(f = 900) { if (!this.ctx) return; const o = this.out(null, 0.2); this.tone(f, f * 1.25, 0.06, 0.6, o, 'triangle'); },
   buy() { if (!this.ctx) return; const o = this.out(null, 0.3); this.tone(660, 660, 0.06, 0.6, o, 'square'); this.tone(990, 990, 0.1, 0.6, o, 'square', 0.06); },
   deny() { if (!this.ctx) return; const o = this.out(null, 0.25); this.tone(200, 150, 0.14, 0.7, o, 'square'); },

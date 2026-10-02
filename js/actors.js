@@ -152,7 +152,7 @@ function botThink(b, now) {
   let best = null, bs = 1e9; const D = DIFFS[G.diff];
   for (const e of G.ents) { if (!e.alive || e.team === b.team || now < (e.spawnProtectedUntil || 0)) continue; const dx = e.pos.x - b.pos.x, dz = e.pos.z - b.pos.z, d = Math.hypot(dx, dz); if (d > D.see * (WEAPONS[b.weapon].scope ? 1.5 : 1)) continue;
     const ang = Math.abs(angDiff(Math.atan2(-dx, -dz), b.yaw)); if (!(d < 3.5 || ang < 1.0 || (now < b.alertT && ang < 1.9))) continue;
-    if (!botSee(b, e)) continue; markSpotted(e, b.team, now); const s = d * (e === b.target ? .6 : 1); if (s < bs) { bs = s; best = e; } }
+    if (!botSee(b, e)) continue; { const was = e.spottedBy && e.spottedBy[b.team]; if (b.team === G.team && G.state === 'live' && (!was || now - was.t > 6)) RADIO.say('spot', b.name); } markSpotted(e, b.team, now); const s = d * (e === b.target ? .6 : 1); if (s < bs) { bs = s; best = e; } }
   if (best) { if (b.target !== best || !b.targetVis) { b.target = best; b.reactT = now + D.react * rand(.8, 1.3) * (WEAPONS[b.weapon].scope ? 1.3 : 1); b.aimErr = .075; b.aimHead = Math.random() < D.head; b.burstN = 0; }
     b.targetVis = true; b.fireClear = botLineClear(b, best); b.lastSeen.copy(best.pos); b.lastSeenT = b.lastVisualT = now; b.lastAimY = best.pos.y + (b.aimHead ? eyeY(best) : 1.12 * (1 - .27 * best.crouchAmt)); b.path = null; b.intent = b.fireClear ? '压制目视目标' : '让开友军火线'; if (G.intel) G.intel[b.team] = { x: best.pos.x, z: best.pos.z, t: now }; }
   else if (b.target) { b.targetVis = false; b.intent = '预瞄最后目击点'; if (now - b.lastSeenT > .5 || !b.target.alive) { const alive = b.target.alive; b.target = null; if (alive) { b.state = 'hunt'; botGoal(b, now); } } }

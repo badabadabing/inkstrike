@@ -25,7 +25,7 @@
         const v = value[field]; if (!safeKey(field)) { damaged = true; continue; }
         if (ranges[field]) { if (finite(v) && v >= ranges[field][0] && v <= ranges[field][1]) out[field] = v; else damaged = true; }
         else if (enums[field]) { if (enums[field].indexOf(v) !== -1) out[field] = v; else damaged = true; }
-        else if (field === 'autoFire' || field === 'touchAccel') { if (typeof v === 'boolean') out[field] = v; else damaged = true; }
+        else if (field === 'autoFire' || field === 'touchAccel' || field === 'radio') { if (typeof v === 'boolean') out[field] = v; else damaged = true; }
         else if (field === 'xhStatic') { if (v === 0 || v === 1 || typeof v === 'boolean') out[field] = v ? 1 : 0; else damaged = true; }
         else if (field === 'autoTeamSize') { if (v === null || [5, 8, 12].indexOf(v) !== -1) out[field] = v; else damaged = true; }
         else if (field === 'map' || field === 'actorStyle') { if (typeof v === 'string' && /^[a-z][a-z0-9_-]{0,31}$/.test(v) && safeKey(v)) out[field] = v; else damaged = true; }

@@ -3,6 +3,13 @@
 const SKINS = [{ n: '素描', need: 0, ink: INK, w: 1.7 }, { n: '朱砂', need: 10, ink: 0xa81f1f, w: 1.8 }, { n: '靛青', need: 30, ink: 0x1f4f8f, w: 1.8 }, { n: '鎏金', need: 75, ink: 0x9a6a00, w: 2.1 }];
 const STREAK = ['', '', '双杀 · 连笔', '三杀 · 行云', '四杀 · 泼墨', '五杀 · 一气呵成', '六杀 · 破阵', '七杀 · 飞墨', '八杀 · 横扫', '九杀 · 狂澜'];
 const streakTitle = n => STREAK[n] || `超神 · ${n} 连杀`;
+/* Team radio: squelch + wordless radio chatter + subtitled original call-outs (no speech synthesis). */
+const RADIO_LINES = { start_red: ['行动！拿下点位。', '跟紧，按计划推进。'], start_blue: ['各就各位，守住点位。', '架好枪，等他们来。'], spot: ['发现敌人！', '前面有人！', '看到一个！'], he: ['墨爆弹，注意！'], flash: ['闪光，转头！'], smoke: ['烟墨封线。'], plant_red: ['墨核已安放，守住！'], plant_blue: ['墨核已安放，快回防！'], defused: ['墨核已拆除。'], down: ['倒了一个！', '我们少一人。'], last: ['只剩你了，稳住。'] };
+const RADIO = { t: -9, cd: {}, hideT: 0,
+  say(key, who, urgent) { if (G.set.radio === false || G.mode === 'range' || G.state === 'menu' || G.manualStep) return; const lines = RADIO_LINES[key], now = performance.now() / 1000; if (!lines || now < (this.cd[key] || 0) || (!urgent && now - this.t < 1.6)) return;
+    this.t = now; this.cd[key] = now + ({ spot: 7, down: 3, he: 3, flash: 3, smoke: 4 }[key] || 6); const text = lines[Math.random() * lines.length | 0]; const syl = text.replace(/[^\u4e00-\u9fff]/g, '').length, len = SFX.ctx ? SFX.chatter(syl) : 0; SFX.radio(.16 + len); this.show(who, text); },
+  show(who, text) { const el = $('radio'); if (!el) return; el.textContent = (who ? who + ' · ' : '') + text; el.className = 'on ' + (G.team || 'blue'); clearTimeout(this.hideT); this.hideT = setTimeout(() => { el.className = ''; }, 2800); },
+  stop() { clearTimeout(this.hideT); const el = $('radio'); if (el) el.className = ''; } };
 const PROG = {
   data: Object.assign({ kills: {}, skin: {}, mvp: 0 }, JSON.parse(localStorage.getItem('inkstrike_prog') || '{}')), dmg: {}, rs: new Map(), streakN: 0, streakT: -9, streakEpoch: 0, streakTimer: 0,
   save() { try { localStorage.setItem('inkstrike_prog', JSON.stringify(this.data)); this.savedAt = Date.now(); } catch (e) { this.savedAt = 0; } },

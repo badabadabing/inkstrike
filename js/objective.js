@@ -31,9 +31,9 @@ function entInteract(e, want, dt) {
 function bombPlant(e) {
   let fx = e.pos.x - Math.sin(e.yaw) * .45, fz = e.pos.z - Math.cos(e.yaw) * .45; const site = siteAt(e.pos), near = MAP.near(fx, fz), probe = { pos: new V3(fx, e.pos.y, fz), hw: .29, hgt: .38 }; if (siteAt(probe.pos) !== site || entOverlap(probe, fx, e.pos.y + .01, fz, near) || Math.abs(supportY(probe, near) - e.pos.y) > .08) { fx = e.pos.x; fz = e.pos.z; } BOMB.state = 'planted'; BOMB.site = site; BOMB.pos.set(fx, e.pos.y, fz); BOMB.t = BOMB_T; BOMB.carrier = null; BOMB.beepT = 0;
   BOMB.mesh.position.copy(BOMB.pos); BOMB.mesh.rotation.y = e.yaw; BOMB.mesh.visible = true; e.money = Math.min(16000, e.money + 300); PROG.rstat(e).plant = 1;
-  banner('墨核已安放', `${SITES[BOMB.site].name} · ${BOMB_T} 秒后引爆`, G.team === 'red' ? 'go' : 'lose'); SFX.plant(); for (const b of G.bots) { b.path = null; b.waitT = G.now + (b.slot || 0) * .02; b.holdYaw = null; }
+  banner('墨核已安放', `${SITES[BOMB.site].name} · ${BOMB_T} 秒后引爆`, G.team === 'red' ? 'go' : 'lose'); SFX.plant(); RADIO.say(G.team === 'red' ? 'plant_red' : 'plant_blue', '', true); for (const b of G.bots) { b.path = null; b.waitT = G.now + (b.slot || 0) * .02; b.holdYaw = null; }
 }
-function bombDefuse(e) { BOMB.state = 'defused'; BOMB.defuser = null; e.money = Math.min(16000, e.money + 300); PROG.rstat(e).defuse = 1; BOMB.light.visible = false; endRound('blue', `${e.name} 拆除了墨核`); }
+function bombDefuse(e) { if (e.team === G.team) RADIO.say('defused', e.isPlayer ? '你' : e.name, true); BOMB.state = 'defused'; BOMB.defuser = null; e.money = Math.min(16000, e.money + 300); PROG.rstat(e).defuse = 1; BOMB.light.visible = false; endRound('blue', `${e.name} 拆除了墨核`); }
 function bombUpdate(dt) {
   if (G.mode !== 'comp' || BOMB.state === 'none') return;
   if (BOMB.state === 'carried' && BOMB.carrier && !BOMB.carrier.alive) { const c = BOMB.carrier; BOMB.state = 'dropped'; BOMB.carrier = null; BOMB.pos.set(c.pos.x, MAP.floorAt(c.pos.x, c.pos.z), c.pos.z); BOMB.mesh.position.copy(BOMB.pos); BOMB.mesh.visible = true; if (G.team === 'red') banner('墨核掉落', '捡起它继续进攻', 'lose'); }
