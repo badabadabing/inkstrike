@@ -29,7 +29,7 @@ function initTouch() {
       if (b) { TOUCH.btns.set(t.identifier, b); press(b, true); if (G.player && G.player.alive && (b.dataset.b === 'fire' || b.dataset.b === 'alt')) TOUCH.looks.set(t.identifier, { x: t.clientX, y: t.clientY }); }
       else if (!TOUCH.joy && (t.clientX < innerWidth * .42 || (G.set.joyPos && Math.hypot(t.clientX - layoutJoyCenter().x, t.clientY - layoutJoyCenter().y) < 62 * layoutJoyScale()))) { const c = G.set.joyPos ? layoutJoyCenter() : { x: t.clientX, y: t.clientY }; TOUCH.joy = { id: t.identifier, x: c.x, y: c.y }; base.style.display = 'block'; base.style.left = c.x + 'px'; base.style.top = c.y + 'px'; knob.style.transform = 'translate(-50%,-50%)'; }
       else TOUCH.looks.set(t.identifier, { x: t.clientX, y: t.clientY }); } }, { passive: false });
-  L.addEventListener('touchmove', e => { e.preventDefault(); if (TOUCH.edit || G.paused || G.buyOpen || G.mapOpen) { touchReset(); return; } const pl = G.player;
+  L.addEventListener('touchmove', e => { e.preventDefault(); if (TOUCH.edit) return; if (G.paused || G.buyOpen || G.mapOpen) { touchReset(); return; } const pl = G.player;
     for (const t of e.changedTouches) {
       if (TOUCH.joy && t.identifier === TOUCH.joy.id) { const R = 58 * layoutJoyScale(); let dx = t.clientX - TOUCH.joy.x, dy = t.clientY - TOUCH.joy.y; const d = Math.hypot(dx, dy); if (d > R) { dx *= R / d; dy *= R / d; } TOUCH.move.x = d < R * .12 ? 0 : dx / R; TOUCH.move.y = d < R * .12 ? 0 : dy / R; knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`; }
       const lk = TOUCH.looks.get(t.identifier);
@@ -84,7 +84,7 @@ function layoutApply() {
   layoutSelect(TOUCH.layoutSelected || 'tFire');
 }
 function layoutEdit(on) {
-  touchReset(); TOUCH.edit = on; document.body.classList.toggle('layoutEdit', on); $('layoutBar').classList.toggle('on', on);
+  touchReset(); if (!on && TOUCH.edit) layoutSave(); TOUCH.edit = on; document.body.classList.toggle('layoutEdit', on); $('layoutBar').classList.toggle('on', on);
   if (on) { setPause(false); G.paused = true; $('pause').classList.remove('on'); $('hud').classList.add('on'); }
   else { $('pause').classList.add('on'); } layoutApply();
 }

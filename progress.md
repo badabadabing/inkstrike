@@ -91,3 +91,5 @@ Revision 03 — simulated player/expert panel and independent Dream Loop
 - Released BALANCE 02 to GitHub Pages, Cloudflare Pages (773fd5b3) and banmabox.com; all three verified live. Built Xiaohongshu v1.0.4 (315880 bytes, SHA256 bfeec6b6…2a28bc): same fix plus CSS-declared four-side safe area required by the updated audit. Not uploaded. See HANDOFF §18.
 
 2026-10-02 — BALANCE 03: Xiaohongshu progress lost overnight (missing-key read disabled saving), storage backup/merge, save status, moderate Bot upgrade, armory overlay hidden behind menu on desktop. See HANDOFF §19.
+
+2026-10-02 — BALANCE 04: mini-tool custom button layout could not be dragged or saved (duplicate native touchmove reset the drag); teammate names sharp at device pixel ratio. See HANDOFF §20.

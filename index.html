@@ -283,7 +283,7 @@ body.touch #training{left:calc(10px + env(safe-area-inset-left));right:auto;top:
 
 <div id="menu" class="ov">
   <div id="menuIn">
-    <div class="edition">INK BATTLEGROUNDS / REVISION 06 · BALANCE 03</div>
+    <div class="edition">INK BATTLEGROUNDS / REVISION 06 · BALANCE 04</div>
     <h1>INK<br><em>STRIKE</em></h1>
     <h2>墨 线 突 击</h2>
     <div class="tag">纸上有街巷，落笔即交锋。<br>穿过折页门，守住刻度台。下一道墨迹，由你留下。</div>
@@ -335,7 +335,7 @@ import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 Object.assign(window, { THREE, LineSegments2, LineSegmentsGeometry, LineMaterial });
 const files = ['core', 'map', 'weapons', 'actors', 'fx', 'objective', 'progress', 'touch', 'game'];
-for (const f of files) await new Promise((ok, err) => { const s = document.createElement('script'); s.src = `js/${f}.js?v=revision-06-balance-03`; s.onload = ok; s.onerror = err; document.body.appendChild(s); });
+for (const f of files) await new Promise((ok, err) => { const s = document.createElement('script'); s.src = `js/${f}.js?v=revision-06-balance-04`; s.onload = ok; s.onerror = err; document.body.appendChild(s); });
 try { boot(); } catch (e) { document.getElementById('loadTxt').textContent = '启动失败: ' + e.message; console.error(e); }
 </script>
 </body>
