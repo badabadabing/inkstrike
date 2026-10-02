@@ -93,3 +93,5 @@ Revision 03 — simulated player/expert panel and independent Dream Loop
 2026-10-02 — BALANCE 03: Xiaohongshu progress lost overnight (missing-key read disabled saving), storage backup/merge, save status, moderate Bot upgrade, armory overlay hidden behind menu on desktop. See HANDOFF §19.
 
 2026-10-02 — BALANCE 04: mini-tool custom button layout could not be dragged or saved (duplicate native touchmove reset the drag); teammate names sharp at device pixel ratio. See HANDOFF §20.
+
+2026-10-02 — BALANCE 05: team radio with local VoxCPM male voice lines (web), subtitles + synthesized chatter in the mini-tool (audio files not allowed there). See HANDOFF §21.

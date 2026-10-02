@@ -173,7 +173,7 @@ G.botShoot = (b, dx, dy, dz) => { b.spawnProtectedUntil = 0; const w = WEAPONS[b
   FX.flash(mx, my, mz, .22); SFX.shot(w.snd, b.pos, isIndoor(b)); botHear(b.pos, b.team, 45); };
 
 /* ---------------- match flow ---------------- */
-function startMatch() {
+function startMatch() { SFX.init(); RADIO.preload();
   if (G.mode !== 'range') G.rangeTeam = null; else if (!G.rangeTeam) G.rangeTeam = G.team; for (const b of G.bots) disposeBotModel(b); for (const n of G.nades) scene.remove(n.m); G.nades = []; G.ents = []; G.bots = []; G.score = { red: 0, blue: 0 }; G.round = 0; G.lossStreak = { red: 0, blue: 0 }; G.feed = []; drawFeed();
   const pl = G.player = makePlayer(G.team); pl.money = G.mode === 'dm' ? 16000 : 800; G.ents.push(pl); giveWeapon(pl, 'p9');
   G.teamSize = G.set.battleSize === 'auto' ? clamp(G.perf.pending || G.set.autoTeamSize || (TOUCH.on ? 5 : 8), 5, 12) : Number(G.set.battleSize); if (![5, 8, 12].includes(G.teamSize)) G.teamSize = 8; G.perf.samples = []; G.perf.cpu = []; G.perf.elapsed = 0; G.perf.pending = null; G.botSerial = 0;

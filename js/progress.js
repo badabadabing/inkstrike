@@ -3,13 +3,18 @@
 const SKINS = [{ n: '素描', need: 0, ink: INK, w: 1.7 }, { n: '朱砂', need: 10, ink: 0xa81f1f, w: 1.8 }, { n: '靛青', need: 30, ink: 0x1f4f8f, w: 1.8 }, { n: '鎏金', need: 75, ink: 0x9a6a00, w: 2.1 }];
 const STREAK = ['', '', '双杀 · 连笔', '三杀 · 行云', '四杀 · 泼墨', '五杀 · 一气呵成', '六杀 · 破阵', '七杀 · 飞墨', '八杀 · 横扫', '九杀 · 狂澜'];
 const streakTitle = n => STREAK[n] || `超神 · ${n} 连杀`;
-/* Team radio: squelch + wordless radio chatter + subtitled original call-outs (no speech synthesis). */
-const RADIO_LINES = { start_red: ['Go Go Go！'], start_blue: ['Go Go Go！'], cover: ['掩护我！'], spot: ['发现敌人！', '前面有人！', '看到一个！'], he: ['墨爆弹，注意！'], flash: ['闪光，转头！'], smoke: ['烟墨封线。'], plant_red: ['墨核已安放，守住！'], plant_blue: ['墨核已安放，快回防！'], defused: ['墨核已拆除。'], down: ['倒了一个！', '我们少一人。'], last: ['只剩你了，稳住。'] };
-const RADIO = { t: -9, cd: {}, hideT: 0,
+/* Team radio: squelch + recorded male call-outs (local VoxCPM, radio-processed, audio/radio/*.m4a) + subtitle. Builds without audio files fall back to wordless chatter. */
+const RADIO_AUDIO = 'audio/radio/';
+const RADIO_LINES = { start_red: [['Go Go Go！', 'start']], start_blue: [['Go Go Go！', 'start']], cover: [['掩护我！', 'cover']], spot: [['发现敌人！', 'spot1'], ['前面有人！', 'spot2'], ['看到一个！', 'spot3']], he: [['墨爆弹，注意！', 'he']], flash: [['闪光，转头！', 'flash']], smoke: [['烟墨封线。', 'smoke']], plant_red: [['墨核已安放，守住！', 'plant_red']], plant_blue: [['墨核已安放，快回防！', 'plant_blue']], defused: [['墨核已拆除。', 'defused']], down: [['倒了一个！', 'down']], last: [['只剩你了，稳住。', 'last']] };
+const RADIO_LEN = { start: 1.59, cover: 1.35, spot1: 1.04, spot2: 1.1, spot3: 1.23, he: 1.73, flash: 1.69, smoke: 1.55, plant_red: 2.83, plant_blue: 2.47, defused: 1.8, down: .84, last: 2.17 };
+const RADIO = { t: -9, cd: {}, hideT: 0, buf: {}, src: null, loading: false,
+  preload() { if (!RADIO_AUDIO || this.loading || !SFX.ctx || typeof fetch !== 'function') return; this.loading = true; for (const k in RADIO_LEN) fetch(RADIO_AUDIO + k + '.m4a').then(r => r.ok ? r.arrayBuffer() : null).then(b => b && new Promise((ok, no) => SFX.ctx.decodeAudioData(b, ok, no))).then(d => { if (d) this.buf[k] = d; }).catch(() => { }); },
   say(key, who, urgent) { if (G.set.radio === false || G.mode === 'range' || G.state === 'menu' || G.manualStep) return; const lines = RADIO_LINES[key], now = performance.now() / 1000; if (!lines || now < (this.cd[key] || 0) || (!urgent && now - this.t < 1.6)) return;
-    this.t = now; this.cd[key] = now + ({ spot: 7, down: 3, he: 3, flash: 3, smoke: 4, cover: 8 }[key] || 6); const text = lines[Math.random() * lines.length | 0]; const syl = (text.match(/[\u4e00-\u9fff]|[A-Za-z]+/g) || []).length, len = SFX.ctx ? SFX.chatter(syl) : 0; SFX.radio(.16 + len); this.show(who, text); },
+    this.t = now; this.cd[key] = now + ({ spot: 7, down: 3, he: 3, flash: 3, smoke: 4, cover: 8 }[key] || 6); const [text, name] = lines[Math.random() * lines.length | 0], d = SFX.ctx && this.buf[name];
+    if (d) { SFX.radio(.14 + d.duration); try { if (this.src) this.src.stop(); } catch (e) { } const n = this.src = SFX.ctx.createBufferSource(); n.buffer = d; n.connect(SFX.out(null, .95)); n.start(SFX.ctx.currentTime + .09); }
+    else { const syl = (text.match(/[\u4e00-\u9fff]|[A-Za-z]+/g) || []).length, len = SFX.ctx ? SFX.chatter(syl) : 0; SFX.radio(.16 + len); } this.show(who, text); },
   show(who, text) { const el = $('radio'); if (!el) return; el.textContent = (who ? who + ' · ' : '') + text; el.className = 'on ' + (G.team || 'blue'); clearTimeout(this.hideT); this.hideT = setTimeout(() => { el.className = ''; }, 2800); },
-  stop() { clearTimeout(this.hideT); const el = $('radio'); if (el) el.className = ''; } };
+  stop() { clearTimeout(this.hideT); const el = $('radio'); if (el) el.className = ''; try { if (this.src) this.src.stop(); } catch (e) { } } };
 const PROG = {
   data: Object.assign({ kills: {}, skin: {}, mvp: 0 }, JSON.parse(localStorage.getItem('inkstrike_prog') || '{}')), dmg: {}, rs: new Map(), streakN: 0, streakT: -9, streakEpoch: 0, streakTimer: 0,
   save() { try { localStorage.setItem('inkstrike_prog', JSON.stringify(this.data)); this.savedAt = Date.now(); } catch (e) { this.savedAt = 0; } },

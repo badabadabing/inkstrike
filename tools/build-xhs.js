@@ -3,7 +3,7 @@
 // Export the current working tree; the website and its saved data remain independent.
 const fs = require('fs'), path = require('path'), os = require('os'), { execFileSync } = require('child_process');
 const crypto = require('crypto');
-const REPO = path.resolve(__dirname, '..'); let OUT = path.join(REPO, 'outputs/inkstrike-xhs-v1.0.6'), ROOT = REPO, snapshot = null, version = '1.0.6';
+const REPO = path.resolve(__dirname, '..'); let OUT = path.join(REPO, 'outputs/inkstrike-xhs-v1.0.7'), ROOT = REPO, snapshot = null, version = '1.0.7';
 const { compatCSS } = require('./xhs-css-build');
 const { eventBindings } = require('./xhs-event-build');
 const helpers = ['xhs-errors.js', 'xhs-viewport.js', 'xhs-storage.js', 'xhs-input.js', 'xhs-performance.js', 'xhs-quality.js', 'xhs-runtime.js'];
@@ -56,6 +56,8 @@ async function main() {
   sources.touch = replace(sources.touch, 'if (r.width && (r.left < 8 || r.top < 8 || r.right > innerWidth - 8 || r.bottom > innerHeight - 8))', 'if (r.width)');
   sources.touch = sources.touch.replace(/(L|document)\.addEventListener\('(touchstart|touchmove|touchend|touchcancel)',/g, "xhsListen($1, '$2',");
   sources.touch = sources.touch.replace(/t\.client([XY])/g, (_, axis) => 'xhsPoint(t.clientX,t.clientY).' + axis.toLowerCase()).replaceAll('b.getBoundingClientRect()', 'xhsRect(b)').replaceAll('e.preventDefault();', 'if (e.cancelable) e.preventDefault();');
+  // The ZIP may only hold html/css/js/images/fonts/json: no radio clips and no fetch; the radio keeps its subtitle + synthesized chatter.
+  sources.progress = replace(sources.progress, "const RADIO_AUDIO = 'audio/radio/';", 'const RADIO_AUDIO = null;'); sources.progress = replacePattern(sources.progress, /  preload\(\) \{[^\n]*\n/, '  preload() { },\n');
   sources.game = sources.game.replace(/e\.movement([XY])/g, (_, axis) => 'xhsDelta(e.movementX,e.movementY).' + axis.toLowerCase());
   for (const f of files) sources[f] = sources[f].replace(/(['"])inkstrike(_prog)?\1/g, (_, q, suffix) => q + 'inkstrike_xhs' + (suffix || '') + q).replace(/\binnerWidth\b/g, 'xhsView.width').replace(/\binnerHeight\b/g, 'xhsView.height');
   for (const f of files) { for (const key of ['inkstrike_xhs', 'inkstrike_xhs_prog']) sources[f] = sources[f].replaceAll("JSON.parse(localStorage.getItem('" + key + "') || '{}')", "xhsStorageRead('" + key + "', {})"); sources[f] = sources[f].replaceAll('localStorage.setItem(', 'xhsStorageWrite('); }
